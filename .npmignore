@@ -1,0 +1,14 @@
+node_modules/
+src/
+test/
+.gitignore
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+Makefile
+buildspec.yml
+docker-compose*
+package-lock.json
+tsconfig.json
+tslint.json
+renovate.json

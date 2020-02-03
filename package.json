@@ -1,0 +1,43 @@
+{
+    "name": "@dintero/checkout-web-sdk",
+    "version": "0.0.1",
+    "description": "Dintero Checkout SDK for web frontends",
+    "source": "src/dintero-checkout-web-sdk.ts",
+    "main": "dist/dintero-checkout-web-sdk.js",
+    "module": "dist/dintero-checkout-web-sdk.js.mjs",
+    "unpkg": "dist/dintero-checkout-web-sdk.js.umd.js",
+    "types": "dist/dintero-checkout-web-sdk.d.ts",
+    "scripts": {
+        "build": "microbundle",
+        "dev": "microbundle watch",
+        "test": "karma start"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Dintero/Dintero.Checkout.Web.SDK.git"
+    },
+    "homepage": "https://github.com/Dintero/Dintero.Checkout.Web.SDK#readme",
+    "author": "Sven Nicolai Viig <sven@dintero.com> (http://dintero.com)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
+    },
+    "devDependencies": {
+        "chai": "^4.2.0",
+        "karma": "^4.4.1",
+        "karma-chai": "^0.1.0",
+        "karma-chrome-launcher": "^3.1.0",
+        "karma-mocha": "^1.3.0",
+        "karma-typescript": "^4.1.1",
+        "microbundle": "^0.11.0",
+        "mocha": "^7.0.1",
+        "prettier": "^1.19.1",
+        "puppeteer": "^2.1.0",
+        "rollup": "^1.30.1",
+        "sinon": "^8.1.1",
+        "typescript": "^3.7.5"
+    },
+    "dependencies": {
+        "native-promise-only": "^0.8.1"
+    }
+}

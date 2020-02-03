@@ -1,0 +1,16 @@
+version: 0.2
+
+env:
+    variables:
+        CI: "1"
+
+phases:
+    install:
+        runtime-versions:
+            nodejs: 12
+    build:
+        commands:
+            - npm install
+            - npm run lint
+            - npm run test
+            - npm run build
