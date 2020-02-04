@@ -173,7 +173,9 @@ const redirect = (options: DinteroCheckoutOptions) => {
     windowLocationAssign(getSessionUrl({ iid, sid, endpoint, language }));
 };
 
-export const dintero = {
+const dintero = {
     embedded,
     redirect,
 };
+
+export default dintero;
