@@ -1,12 +1,15 @@
 {
     "name": "@dintero/checkout-web-sdk",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Dintero Checkout SDK for web frontends",
     "source": "src/dintero-checkout-web-sdk.ts",
-    "main": "dist/dintero-checkout-web-sdk.js",
+    "browser": "dist/dintero-checkout-web-sdk.js",
     "module": "dist/dintero-checkout-web-sdk.js.mjs",
     "unpkg": "dist/dintero-checkout-web-sdk.js.umd.js",
-    "types": "dist/dintero-checkout-web-sdk.d.ts",
+    "types": "dist/src/dintero-checkout-web-sdk.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "microbundle",
         "dev": "microbundle watch",
