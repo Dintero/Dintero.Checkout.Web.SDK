@@ -62,7 +62,7 @@ const followHref: SubscriptionHandler = (event: any): void => {
 /**
  * Create a unique instance id.
  */
-export const getInstanceId = () => {
+const getInstanceId = () => {
     return (
         new Date().valueOf() +
         Math.random()
@@ -74,7 +74,7 @@ export const getInstanceId = () => {
 /**
  * Show a dintero payment session in an embedded iframe.
  */
-const embedded = async (
+export const embed = async (
     options: DinteroEmbedCheckoutOptions
 ): Promise<DinteroCheckoutInstance> => {
     const {
@@ -161,7 +161,7 @@ const embedded = async (
     return checkout;
 };
 
-const redirect = (options: DinteroCheckoutOptions) => {
+export const redirect = (options: DinteroCheckoutOptions) => {
     const {
         sid,
         language,
@@ -172,10 +172,3 @@ const redirect = (options: DinteroCheckoutOptions) => {
     // Redirect the current browser window to the checkout session url.
     windowLocationAssign(getSessionUrl({ iid, sid, endpoint, language }));
 };
-
-const dintero = {
-    embedded,
-    redirect,
-};
-
-export default dintero;

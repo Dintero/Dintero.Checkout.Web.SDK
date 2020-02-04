@@ -1,6 +1,6 @@
 {
     "name": "@dintero/checkout-web-sdk",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Dintero Checkout SDK for web frontends",
     "source": "src/dintero-checkout-web-sdk.ts",
     "browser": "dist/checkout-web-sdk.js",
@@ -11,7 +11,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "microbundle",
+        "build": "microbundle --name dintero",
         "dev": "microbundle watch",
         "test": "karma start"
     },

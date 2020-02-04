@@ -1,9 +1,7 @@
 import { describe, it, beforeEach, afterEach } from "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import dintero, {
-    DinteroCheckoutInstance,
-} from "../src/dintero-checkout-web-sdk";
+import * as dintero from "../src/dintero-checkout-web-sdk";
 import * as url from "../src/url";
 
 import {
@@ -76,7 +74,7 @@ describe("dintero.redirect", () => {
     });
 });
 
-describe("dintero.embedded", () => {
+describe("dintero.embed", () => {
     it("creates iframe added to container", async () => {
         let iframeSrc: string | undefined;
         const getSessionUrlStub = sinon
@@ -88,7 +86,7 @@ describe("dintero.embedded", () => {
 
         const container = document.createElement("div");
         document.body.appendChild(container);
-        const checkout = await dintero.embedded({
+        const checkout = await dintero.embed({
             sid: "<session_id>",
             container,
         });
@@ -114,11 +112,11 @@ describe("dintero.embedded", () => {
 
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
-            checkout: DinteroCheckoutInstance;
+            checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -149,11 +147,11 @@ describe("dintero.embedded", () => {
 
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
-            checkout: DinteroCheckoutInstance;
+            checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -184,11 +182,11 @@ describe("dintero.embedded", () => {
 
         const onSessionResult: {
             event: SessionNotFound;
-            checkout: DinteroCheckoutInstance;
+            checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -219,11 +217,11 @@ describe("dintero.embedded", () => {
 
         const onSessionResult: {
             event: SessionCancel;
-            checkout: DinteroCheckoutInstance;
+            checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -264,7 +262,7 @@ describe("dintero.embedded", () => {
             });
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -303,7 +301,7 @@ describe("dintero.embedded", () => {
             });
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -336,7 +334,7 @@ describe("dintero.embedded", () => {
         await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -365,7 +363,7 @@ describe("dintero.embedded", () => {
         await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
@@ -399,7 +397,7 @@ describe("dintero.embedded", () => {
         await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embedded({
+            dintero.embed({
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
