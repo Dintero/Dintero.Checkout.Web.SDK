@@ -17,6 +17,14 @@ For payments on devices with the Vipps app installed, after payment is completed
 
 If no custom handler are added for `onPaymentError`, `onPaymentAuthorized` and `onPaymentCanceled` the SDK will redirect the user to the `return_url` in the payment session.
 
+## Installation
+
+**Install from npm**
+
+```
+npm install @dintero/checkout-web-sdk
+```
+
 ## Using the SDK for an embedded checkout
 
 The Dintero Checkout will be added to the `<div id="checkout-container"></div>` DOM-node.
@@ -32,7 +40,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
     dintero
         .embed({
             container,
-            session_id: "T11223344.<short-uuid>",
+            sid: "T11223344.<short-uuid>",
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
@@ -72,7 +80,7 @@ const container = document.getElementById("#checkout-container");
 
 const checkout = await dintero.embed({
     container,
-    session_id: "T11223344.<short-uuid>",
+    sid: "T11223344.<short-uuid>",
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
@@ -100,7 +108,7 @@ The user is redirected to the Dintero Checkout to complete payment.
 import { dintero, SessionPaymentAuthorized } from "dintero-checkout-web-sdk";
 
 const checkout = dintero.redirect({
-    session_id: "T11223344.<short-uuid>",
+    sid: "T11223344.<short-uuid>",
 });
 ```
 
