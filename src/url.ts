@@ -10,24 +10,21 @@ export const windowLocationAssign = (url: string) => {
 .DS_Store
  */
 export interface SessionUrlOptions {
-    iid: string | undefined;
     sid: string;
     endpoint: string;
     language: string | undefined;
+    ui?: "fullscreen" | "inline";
 }
 
 export const getSessionUrl = (options: SessionUrlOptions): string => {
-    const { iid, sid, endpoint, language } = options;
-    if (!sid) {
-        throw new Error("Invalid sid");
-    }
+    const { sid, endpoint, language, ui } = options;
     if (!endpoint) {
         throw new Error("Invalid endpoint");
     }
 
     // Compose url for view session endpoint with optional language parameter.
     let languageParam = language ? `language=${language}` : "";
-    let iidParam = iid ? `iid=${iid}` : "";
-    const params = [iidParam, languageParam].filter(x => x).join("&");
+    let uiParam = ui ? `ui=${ui}` : "";
+    const params = [languageParam, uiParam].filter(x => x).join("&");
     return `${endpoint}/v1/view/${sid}${params ? "?" + params : ""}`;
 };

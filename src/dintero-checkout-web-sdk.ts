@@ -1,6 +1,7 @@
 import "native-promise-only";
 import {
     CheckoutEvents,
+    InternalCheckoutEvents,
     SessionNotFound,
     SessionLoaded,
     SessionUpdated,
@@ -60,15 +61,15 @@ const followHref: SubscriptionHandler = (event: any): void => {
 };
 
 /**
- * Create a unique instance id.
+ * An event handler that sets height of the iframe.
  */
-const getInstanceId = () => {
-    return (
-        new Date().valueOf() +
-        Math.random()
-            .toString(36)
-            .substring(7)
-    );
+const setIframeHeight: SubscriptionHandler = (event: any, checkout): void => {
+    if (event.height) {
+        checkout.iframe.setAttribute(
+            "style",
+            `width:100%; height:${event.height}px;`
+        );
+    }
 };
 
 /**
@@ -90,14 +91,11 @@ export const embed = async (
     } = options;
     const subscriptions: Subscription[] = [];
 
-    // A unique instance id, needed to filter messages so we know that we receive them from the right iframe instance.
-    const iid = getInstanceId();
-
     // Create iframe and add it to the container.
     const iframe = await createIframeAsync(
         container,
         endpoint,
-        getSessionUrl({ iid, sid, endpoint, language })
+        getSessionUrl({ sid, endpoint, language, ui: "inline" })
     );
 
     /**
@@ -106,7 +104,9 @@ export const embed = async (
     const destroy = () => {
         if (iframe) {
             subscriptions.forEach(sub => sub.unsubscribe());
-            container.removeChild(iframe);
+            if (iframe.parentElement) {
+                container.removeChild(iframe);
+            }
         }
     };
 
@@ -115,6 +115,10 @@ export const embed = async (
 
     // Add event handlers (or in some cases add a fallback href handler).
     [
+        {
+            handler: setIframeHeight,
+            eventTypes: [InternalCheckoutEvents.HeightChanged],
+        },
         {
             handler: onSession as SubscriptionHandler | undefined,
             eventTypes: [
@@ -146,7 +150,6 @@ export const embed = async (
         if (handler) {
             subscriptions.push(
                 subscribe({
-                    iid,
                     sid,
                     endpoint,
                     handler,
@@ -161,14 +164,15 @@ export const embed = async (
     return checkout;
 };
 
+/**
+ * Redirect the customer to a payment session in the Dintero Checkout.
+ */
 export const redirect = (options: DinteroCheckoutOptions) => {
     const {
         sid,
         language,
         endpoint = "https://checkout.dintero.com",
     } = options;
-    // Instance id not used for anything in the redirect scenario.
-    const iid = undefined;
     // Redirect the current browser window to the checkout session url.
-    windowLocationAssign(getSessionUrl({ iid, sid, endpoint, language }));
+    windowLocationAssign(getSessionUrl({ sid, endpoint, language }));
 };

@@ -31,12 +31,11 @@ const getHtmlBlobUrl = (
 ): string => {
     const html = `
 <script type="text/javascript">
-        const iid = "${options.iid}";
         const sid = "${options.sid}";
         const language =  "${options.language || "undefined"}";
 
         const emit = (msg) => {
-            window.parent.postMessage({iid, sid, ...msg}, "*");
+            window.parent.postMessage({sid, ...msg}, "*");
         };
         ${script}
 </script>`;
@@ -94,6 +93,49 @@ describe("dintero.embed", () => {
         expect(checkout.iframe).to.be.instanceOf(HTMLIFrameElement);
         expect(checkout.iframe.src).to.equal(iframeSrc);
         sinon.assert.calledOnce(getSessionUrlStub);
+        getSessionUrlStub.restore();
+    });
+
+    it("can be destroyed", async () => {
+        let iframeSrc: string | undefined;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake(options => {
+                iframeSrc = getHtmlBlobUrl(options, ``);
+                return iframeSrc;
+            });
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+        const checkout = await dintero.embed({
+            sid: "<session_id>",
+            container,
+        });
+        checkout.destroy();
+        expect(checkout.iframe.parentElement).to.equal(null);
+        expect(container.innerHTML).to.equal("");
+        getSessionUrlStub.restore();
+    });
+
+    it("multiple destroy calls do not throw exceptions", async () => {
+        let iframeSrc: string | undefined;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake(options => {
+                iframeSrc = getHtmlBlobUrl(options, ``);
+                return iframeSrc;
+            });
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+        const checkout = await dintero.embed({
+            sid: "<session_id>",
+            container,
+        });
+        checkout.destroy();
+        checkout.destroy();
+        expect(checkout.iframe.parentElement).to.equal(null);
+        expect(container.innerHTML).to.equal("");
         getSessionUrlStub.restore();
     });
 
@@ -316,14 +358,9 @@ describe("dintero.embed", () => {
         windowLocationAssignStub.restore();
     });
 
-    it("ignores messages with wrong iid", async () => {
-        const script = `
-            emit({
-                type: "SessionLoaded",
-                session: {},
-                iid: "overriding correct id from emit",
-            });
-        `;
+    it("ignores messages from wrong origin", async () => {
+        const script = ``;
+
         const getSessionUrlStub = sinon
             .stub(url, "getSessionUrl")
             .callsFake((options: url.SessionUrlOptions) =>
@@ -334,12 +371,25 @@ describe("dintero.embed", () => {
         await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-                onSession,
-            });
+            dintero
+                .embed({
+                    sid: "<session_id>",
+                    container,
+                    endpoint: "http://localhost:9999",
+                    onSession,
+                })
+                .then(() => {
+                    // post from wrong window
+                    window.postMessage(
+                        {
+                            type: "SessionLoaded",
+                            session: {},
+                            sid: "<session_id>",
+                        },
+                        "*"
+                    );
+                });
+
             sleep(100).then(resolve);
         });
         sinon.assert.notCalled(onSession);
@@ -406,6 +456,33 @@ describe("dintero.embed", () => {
             sleep(100).then(resolve);
         });
         sinon.assert.notCalled(onSession);
+        getSessionUrlStub.restore();
+    });
+
+    it("changes height when iframe changes height", async () => {
+        const script = `
+            emit({
+                type: "HeightChanged",
+                height: 3003,
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+
+        const checkout = await dintero.embed({
+            sid: "<session_id>",
+            container,
+            endpoint: "http://localhost:9999",
+        });
+
+        await sleep(10);
+        expect(checkout.iframe.style.height).to.equal("3003px");
         getSessionUrlStub.restore();
     });
 });

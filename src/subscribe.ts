@@ -1,4 +1,8 @@
-import { CheckoutEvents, SessionEvent } from "./checkout";
+import {
+    CheckoutEvents,
+    InternalCheckoutEvents,
+    SessionEvent,
+} from "./checkout";
 import { DinteroCheckoutInstance } from "./dintero-checkout-web-sdk";
 
 /**
@@ -10,11 +14,10 @@ export type SubscriptionHandler = (
 ) => void;
 
 interface SubscriptionOptions {
-    iid: string;
     sid: string;
     endpoint: string;
     handler: SubscriptionHandler;
-    eventTypes: CheckoutEvents[];
+    eventTypes: (CheckoutEvents | InternalCheckoutEvents)[];
     checkout: DinteroCheckoutInstance;
 }
 
@@ -30,16 +33,22 @@ export type Subscription = {
  * of event types.
  */
 export const subscribe = (options: SubscriptionOptions): Subscription => {
-    const { sid, iid, endpoint, handler, eventTypes, checkout } = options;
+    const { sid, endpoint, handler, eventTypes, checkout } = options;
 
     // Wrap event handler in a function that checks for correct origin and
     // filters on event type(s) in the event data.
     const wrappedHandler = (event: MessageEvent) => {
+        const correctOrigin = event.origin === endpoint;
+        const correctWindow = event.source === checkout.iframe.contentWindow;
         const correctSid = event.data && event.data.sid === sid;
-        const correctIid = event.data && event.data.iid === iid;
         const correctMessageType =
             eventTypes.indexOf(event.data && event.data.type) !== -1;
-        if (correctSid && correctIid && correctMessageType) {
+        if (
+            correctOrigin &&
+            correctWindow &&
+            correctSid &&
+            correctMessageType
+        ) {
             handler(event.data, checkout);
         }
     };

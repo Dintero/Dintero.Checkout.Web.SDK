@@ -15,10 +15,10 @@ export const createIframeAsync = (
         }
         const iframe = document.createElement("iframe");
 
-        // No border, transparent and stretch to 100% of the container.
+        // No border, transparent and stretch to 100% of the container width.
         iframe.setAttribute("frameborder", "0");
         iframe.setAttribute("allowTransparency", "true");
-        iframe.setAttribute("style", "width:100%; height:100%;");
+        iframe.setAttribute("style", "width:100%; height:0;");
 
         // TODO: Get this to work as expected, might be tricky with current
         // tests since they will require the csp to be "unsafe-inline".
@@ -30,7 +30,11 @@ export const createIframeAsync = (
         // iframe.setAttribute("csp", `default-src  ${endpoint}`);
 
         // Apply extra restrictions to the content in the iframe.
-        iframe.setAttribute("sandbox", "allow-scripts allow-forms");
+        // allow popups is needed to open terms in new window
+        iframe.setAttribute(
+            "sandbox",
+            "allow-scripts allow-forms allow-same-origin allow-popups"
+        );
 
         // The download priority of the resource in the <iframe>'s src attribute.
         iframe.setAttribute("importance", "high");

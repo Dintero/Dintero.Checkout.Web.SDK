@@ -8,6 +8,9 @@ export enum CheckoutEvents {
     SessionPaymentAuthorized = "SessionPaymentAuthorized",
     SessionPaymentError = "SessionPaymentError",
 }
+export enum InternalCheckoutEvents {
+    HeightChanged = "HeightChanged",
+}
 
 export type SessionNotFound = {
     type: CheckoutEvents.SessionNotFound;
