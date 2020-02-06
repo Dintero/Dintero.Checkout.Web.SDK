@@ -1,4 +1,5 @@
 import "native-promise-only";
+
 import {
     CheckoutEvents,
     InternalCheckoutEvents,
