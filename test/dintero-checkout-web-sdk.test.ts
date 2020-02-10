@@ -10,8 +10,8 @@ import {
     SessionLoaded,
     SessionUpdated,
     SessionCancel,
+    SessionPaymentAuthorized,
 } from "../src/checkout";
-import { lstat } from "fs";
 
 if (!process.env.CI) {
     // Listen to all events emitted, helpful during development
@@ -483,6 +483,57 @@ describe("dintero.embed", () => {
 
         await sleep(10);
         expect(checkout.iframe.style.height).to.equal("3003px");
+        getSessionUrlStub.restore();
+    });
+
+    it("posts ack for received messages", async () => {
+        const mid = Math.floor(Math.random() * 1000000000000000000);
+        const script = `
+            emit({
+                type: "SessionLoaded",
+                session: {},
+                mid: ${mid},
+            });
+
+            window.addEventListener("message", function(event){
+                // emit payment authorized when ack is received
+                emit({
+                    type: "SessionPaymentAuthorized",
+                    transaction_id: event.data.ack
+                });
+            }, "*");
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        const result: {
+            event: SessionPaymentAuthorized;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                onPaymentAuthorized: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+            sleep(100).then(reject);
+        });
+        expect(result.event.type).to.equal(
+            CheckoutEvents.SessionPaymentAuthorized
+        );
+        expect(result.event.transaction_id).to.equal(mid);
+        sinon.assert.calledOnce(onSessionHandler);
         getSessionUrlStub.restore();
     });
 });

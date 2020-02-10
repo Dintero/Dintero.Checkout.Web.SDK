@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.7/dist/checkout-web-sdk.umd.js" integrity="sha384-q67YG/IiFchyBE5FUcC22tab8sziMz/ilZbmxfLOoB8BObcpdp2ohBpVKBZGCwhA"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.8/dist/checkout-web-sdk.umd.js" integrity="sha384-Pum6UWrLeVO8MviAwvk6LNBgChlJBjPheE/NRbxFEYwXBMCA5Mq8g2LXGqFI8OJv"></script>
 ```
 
 ## Using the SDK for an embedded checkout
@@ -132,7 +132,7 @@ Contact us at [security@dintero.com](mailto:security@dintero.com)
 
 All major browsers above version `N - 1`, where `N` is the most recent version. For Internet Explorer, only version 11 is supported.
 
-The SDK includes a [polyfill for promises](https://github.com/getify/native-promise-only) that is added to the global scope if promises is not supported by the browser.
+The SDK includes a [polyfill for promises](https://github.com/getify/native-promise-only) that is added to the global scope if promises are not supported by the browser.
 
 ## Building from source
 
@@ -141,7 +141,7 @@ npm install
 npm run build
 ```
 
-The dintero-checkout-web-sdk is built with [microbundle](https://github.com/developit/microbundle).
+The Dintero Checkout SDK is built with [microbundle](https://github.com/developit/microbundle).
 
 ## Creating a new release checklist
 

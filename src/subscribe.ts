@@ -29,6 +29,18 @@ export type Subscription = {
 };
 
 /**
+ * Post a message acknowledgement to the checkout iframe.
+ */
+const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
+    if (event.data.mid && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { ack: event.data.mid },
+            event.origin || "*"
+        );
+    }
+};
+
+/**
  * Subscribe to events from an iframe given a handler and a set
  * of event types.
  */
@@ -49,6 +61,7 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
             correctSid &&
             correctMessageType
         ) {
+            postAck(checkout.iframe, event);
             handler(event.data, checkout);
         }
     };
