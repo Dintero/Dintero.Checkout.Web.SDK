@@ -1,3 +1,5 @@
+import pkg from "../package.json";
+
 /**
  * Wraps window.location.assign()
  */
@@ -25,6 +27,7 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     // Compose url for view session endpoint with optional language parameter.
     let languageParam = language ? `language=${language}` : "";
     let uiParam = ui ? `ui=${ui}` : "";
-    const params = [languageParam, uiParam].filter(x => x).join("&");
+    let sdk = `sdk=${pkg.version}`;
+    const params = [languageParam, uiParam, sdk].filter(x => x).join("&");
     return `${endpoint}/v1/view/${sid}${params ? "?" + params : ""}`;
 };

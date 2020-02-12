@@ -3,6 +3,7 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as dintero from "../src/dintero-checkout-web-sdk";
 import * as url from "../src/url";
+import pkg from "../package.json";
 
 import {
     CheckoutEvents,
@@ -54,7 +55,7 @@ describe("dintero.redirect", () => {
         dintero.redirect({ sid: "<session_id>" });
         sinon.assert.alwaysCalledWithExactly(
             windowLocationAssignStub,
-            "https://checkout.dintero.com/v1/view/<session_id>"
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
         );
         windowLocationAssignStub.restore();
     });
@@ -67,7 +68,7 @@ describe("dintero.redirect", () => {
         dintero.redirect({ sid: "<session_id>", language: "no" });
         sinon.assert.alwaysCalledWithExactly(
             windowLocationAssignStub,
-            "https://checkout.dintero.com/v1/view/<session_id>?language=no"
+            `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
         );
         windowLocationAssignStub.restore();
     });

@@ -17,5 +17,17 @@ module.exports = function(config) {
         singleRun: true,
         concurrency: Infinity,
         // logLevel: config.LOG_DEBUG,
+        karmaTypescriptConfig: {
+            tsconfig: "./tsconfig.json",
+            compilerOptions: {
+                emitDecoratorMetadata: true,
+                experimentalDecorators: true,
+                jsx: "react",
+                module: "commonjs",
+                sourceMap: true,
+                target: "ES5",
+            },
+            exclude: ["node_modules"],
+        },
     });
 };
