@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.9/dist/checkout-web-sdk.umd.js" integrity="sha384-t/QVkJYrl4Q22SEHdAbOvBvtNgdpYZ+jlgcnGnoOy+CKsuA5zXi+ptzfzQgJbrwR"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.10/dist/checkout-web-sdk.umd.js" integrity="sha384-CLElnOOZ/fM7hVafziXhnqW4bNUjEDLpqel4MZmFSKkYapCWv3gTWFKO32lQ7zLV"></script>
 ```
 
 ## Using the SDK for an embedded checkout
@@ -52,12 +52,12 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
-            onSessionPaymentAuthorized: function(event, checkout) {
+            onPaymentAuthorized: function(event, checkout) {
                 console.log("transaction_id", event.transaction_id);
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onSessionPaymentError: function(event, checkout) {
+            onPaymentError: function(event, checkout) {
                 console.log("href", event.href);
                 checkout.destroy();
             },
@@ -92,12 +92,12 @@ const checkout = await dintero.embed({
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
-    onSessionPaymentAuthorized: (event: SessionPaymentAuthorized) => {
+    onPaymentAuthorized: (event: SessionPaymentAuthorized) => {
         console.log("transaction_id", event.transaction_id);
         console.log("href", event.href);
         checkout.destroy();
     },
-    onSessionPaymentError: (event: SessionPaymentError) => {
+    onPaymentError: (event: SessionPaymentError) => {
         console.log("href", event.href);
         checkout.destroy();
     },
