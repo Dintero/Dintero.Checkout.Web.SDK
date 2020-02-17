@@ -1,5 +1,6 @@
 import "native-promise-only";
 
+import pkg from "../package.json";
 import {
     CheckoutEvents,
     InternalCheckoutEvents,
@@ -20,6 +21,7 @@ export interface DinteroCheckoutInstance {
      */
     destroy: () => void;
     iframe: HTMLIFrameElement;
+    language: string;
 }
 
 export interface DinteroCheckoutOptions {
@@ -65,12 +67,47 @@ const followHref: SubscriptionHandler = (event: any): void => {
  * An event handler that sets height of the iframe.
  */
 const setIframeHeight: SubscriptionHandler = (event: any, checkout): void => {
-    if (event.height) {
+    if (event.height || event.height === 0) {
         checkout.iframe.setAttribute(
             "style",
             `width:100%; height:${event.height}px;`
         );
     }
+};
+const setLanguage: SubscriptionHandler = (event: any, checkout): void => {
+    if (event.language) {
+        checkout.language = event.language;
+    }
+};
+
+const handleWithResult = (
+    sid: string,
+    endpoint: string,
+    handler: SubscriptionHandler
+): SubscriptionHandler => {
+    return (event: any, checkout: DinteroCheckoutInstance) => {
+        const eventKeys = [
+            "sid",
+            "merchant_reference",
+            "transaction_id",
+            "error",
+        ];
+        const pairs = eventKeys.map(key => [key, event[key]]);
+        if (event.type === CheckoutEvents.SessionCancel && !event.error) {
+            pairs.push(["error", "cancelled"]);
+        }
+        pairs.push(["language", checkout.language]);
+        pairs.push(["sdk", pkg.version]);
+        const urlQuery = pairs
+            .filter(([key, value]) => value)
+            .map(([key, value]) => `${key}=${value}`)
+            .join("&");
+        checkout.iframe.setAttribute(
+            "src",
+            `${endpoint}/embedResult/?${urlQuery}`
+        );
+        handler(event, checkout);
+    };
 };
 
 /**
@@ -92,8 +129,8 @@ export const embed = async (
     } = options;
     const subscriptions: Subscription[] = [];
 
-    // Create iframe and add it to the container.
-    const iframe = await createIframeAsync(
+    // Create iframe
+    const { iframe, initiate } = await createIframeAsync(
         container,
         endpoint,
         getSessionUrl({ sid, endpoint, language, ui: "inline" })
@@ -112,10 +149,14 @@ export const embed = async (
     };
 
     // Create checkout object that wraps the destroy function.
-    const checkout: DinteroCheckoutInstance = { destroy, iframe };
+    const checkout: DinteroCheckoutInstance = { destroy, iframe, language };
 
     // Add event handlers (or in some cases add a fallback href handler).
     [
+        {
+            handler: setLanguage,
+            eventTypes: [InternalCheckoutEvents.LanguageChanged],
+        },
         {
             handler: setIframeHeight,
             eventTypes: [InternalCheckoutEvents.HeightChanged],
@@ -129,18 +170,20 @@ export const embed = async (
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
-            handler: (onPaymentAuthorized || followHref) as SubscriptionHandler,
+            handler: onPaymentAuthorized
+                ? handleWithResult(sid, endpoint, onPaymentAuthorized)
+                : followHref,
         },
         {
-            handler: (onSessionCancel || followHref) as
-                | SubscriptionHandler
-                | undefined,
+            handler: onSessionCancel
+                ? handleWithResult(sid, endpoint, onSessionCancel)
+                : followHref,
             eventTypes: [CheckoutEvents.SessionCancel],
         },
         {
-            handler: (onPaymentError || followHref) as
-                | SubscriptionHandler
-                | undefined,
+            handler: onPaymentError
+                ? handleWithResult(sid, endpoint, onPaymentError)
+                : followHref,
             eventTypes: [CheckoutEvents.SessionPaymentError],
         },
         {
@@ -161,6 +204,8 @@ export const embed = async (
         }
     });
 
+    // Add iframe to DOM
+    await initiate();
     // Return object with function to destroy the checkout.
     return checkout;
 };

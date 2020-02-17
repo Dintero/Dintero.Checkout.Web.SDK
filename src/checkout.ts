@@ -10,6 +10,7 @@ export enum CheckoutEvents {
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",
+    LanguageChanged = "LanguageChanged",
 }
 
 export type SessionNotFound = {

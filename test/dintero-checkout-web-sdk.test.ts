@@ -487,6 +487,133 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+    it("changes language when iframe changes language", async () => {
+        const script = `
+            emit({
+                type: "LanguageChanged",
+                language: "no",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+
+        const checkout = await dintero.embed({
+            sid: "<session_id>",
+            container,
+            endpoint: "http://localhost:9999",
+        });
+
+        await sleep(10);
+        expect(checkout.language).to.equal("no");
+        getSessionUrlStub.restore();
+    });
+
+    it("shows embedResult onPaymentAuthorized message if handler is defined", async () => {
+        const script = `
+            emit({
+                type: "SessionPaymentAuthorized",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                transaction_id: "txn-id",
+                merchant_reference: "test-1",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const { event, checkout } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "session-id",
+                container,
+                endpoint: "http://localhost:9999",
+                onPaymentAuthorized: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+        expect(checkout.iframe.src).to.equal(
+            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`
+        );
+        getSessionUrlStub.restore();
+    });
+
+    it("shows embedResult onPaymentError message if handler is defined", async () => {
+        const script = `
+            emit({
+                type: "SessionPaymentError",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                merchant_reference: "test-1",
+                error: "failed"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const { event, checkout } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "session-id",
+                container,
+                language: "no",
+                endpoint: "http://localhost:9999",
+                onPaymentError: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+        expect(checkout.iframe.src).to.equal(
+            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&error=failed&language=no&sdk=${pkg.version}`
+        );
+        getSessionUrlStub.restore();
+    });
+
+    it("shows embedResult onSessionCancel message if handler is defined", async () => {
+        const script = `
+            emit({
+                type: "SessionCancel",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                merchant_reference: "test-1",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const { event, checkout } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "session-id",
+                container,
+                language: "no",
+                endpoint: "http://localhost:9999",
+                onSessionCancel: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+        expect(checkout.iframe.src).to.equal(
+            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&error=cancelled&language=no&sdk=${pkg.version}`
+        );
+        getSessionUrlStub.restore();
+    });
+
     it("posts ack for received messages", async () => {
         const mid = Math.floor(Math.random() * 1000000000000000000);
         const script = `

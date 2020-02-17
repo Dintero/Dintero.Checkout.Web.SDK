@@ -30,14 +30,29 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.10/dist/checkout-web-sdk.umd.js" integrity="sha384-CLElnOOZ/fM7hVafziXhnqW4bNUjEDLpqel4MZmFSKkYapCWv3gTWFKO32lQ7zLV"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js" integrity="sha384-iR6i8hSBx+w5PWbu83MaVqQ04MocLyDm6JadFxy93xrp0GKTQEXeSD8I90hLvyy+"></script>
 ```
 
 ## Using the SDK for an embedded checkout
 
 The Dintero Checkout will be added to the `<div id="checkout-container"></div>` DOM-node.
 
-### Inline HTML JavaScript example
+### Minimal example
+
+_When payment is completed, the SDK will redirect the end user to the `return_url` defined in the payment session._
+
+```html
+<script type="text/javascript">
+    const container = document.getElementById("#checkout-container");
+
+    dintero.embed({
+        container,
+        sid: "T11223344.<short-uuid>",
+    });
+</script>
+```
+
+### Full inline HTML JavaScript example
 
 _The checkout sdk will add a polyfill for promises if the browser does not support promises natively._
 
