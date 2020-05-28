@@ -5,6 +5,7 @@ export enum CheckoutEvents {
     SessionLoaded = "SessionLoaded",
     SessionUpdated = "SessionUpdated",
     SessionCancel = "SessionCancel",
+    SessionPaymentOnHold = "SessionPaymentOnHold",
     SessionPaymentAuthorized = "SessionPaymentAuthorized",
     SessionPaymentError = "SessionPaymentError",
 }
@@ -32,12 +33,21 @@ export type SessionCancel = {
     href: string;
 };
 
+export type SessionPaymentOnHold = {
+    type: CheckoutEvents.SessionPaymentOnHold;
+    transaction_id: string;
+    merchant_reference: string;
+    href: string;
+};
+
 export type SessionPaymentAuthorized = {
     type: CheckoutEvents.SessionPaymentAuthorized;
     transaction_id: string;
     merchant_reference: string;
     href: string;
 };
+
+export type SessionPayment = SessionPaymentAuthorized | SessionPaymentOnHold;
 
 export type SessionPaymentError = {
     type: CheckoutEvents.SessionPaymentError;
@@ -50,5 +60,6 @@ export type SessionEvent =
     | SessionLoaded
     | SessionUpdated
     | SessionCancel
+    | SessionPaymentOnHold
     | SessionPaymentAuthorized
     | SessionPaymentError;

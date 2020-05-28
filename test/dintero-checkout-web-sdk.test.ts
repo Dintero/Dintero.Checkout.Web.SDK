@@ -280,6 +280,47 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+    it("listens to onPayment messages", async () => {
+        const windowLocationAssignStub = sinon.stub(
+            url,
+            "windowLocationAssign"
+        );
+        const script = `
+            emit({
+                type: "SessionPaymentOnHold",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                transaction_id: "<transaction_id>",
+                merchant_reference: "test-1",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        await new Promise((resolve, reject) => {
+            windowLocationAssignStub.callsFake(() => {
+                resolve();
+            });
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            });
+        });
+
+        sinon.assert.alwaysCalledWithExactly(
+            windowLocationAssignStub,
+            "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>"
+        );
+        getSessionUrlStub.restore();
+        windowLocationAssignStub.restore();
+    });
+
+
     it("listens to onPaymentAuthorized messages", async () => {
         const windowLocationAssignStub = sinon.stub(
             url,
