@@ -555,6 +555,41 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+    ["SessionPaymentAuthorized", "SessionPaymentOnHold"].forEach((type) => {
+        it(`shows embedResult onPayment ${type} message if handler is defined`, async () => {
+            const script = `
+            emit({
+                type: "SessionPaymentAuthorized",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                    transaction_id: "txn-id",
+                merchant_reference: "test-1",
+            });
+            `;
+            const getSessionUrlStub = sinon
+                .stub(url, "getSessionUrl")
+                .callsFake((options: url.SessionUrlOptions) =>
+                    getHtmlBlobUrl(options, script),
+                );
+
+            const { event, checkout } = await new Promise((resolve, reject) => {
+                const container = document.createElement("div");
+                document.body.appendChild(container);
+                dintero.embed({
+                    sid: "session-id",
+                    container,
+                    endpoint: "http://localhost:9999",
+                    onPayment: (event, checkout) => {
+                        resolve({ event, checkout });
+                    },
+                });
+            });
+            expect(checkout.iframe.src).to.equal(
+                `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`,
+            );
+            getSessionUrlStub.restore();
+        });
+    });
+
     it("shows embedResult onPaymentAuthorized message if handler is defined", async () => {
         const script = `
             emit({

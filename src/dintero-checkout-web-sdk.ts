@@ -33,12 +33,12 @@ export interface DinteroCheckoutOptions {
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     container: HTMLDivElement;
-    onPaymentAuthorized?: (
-        event: SessionPaymentAuthorized,
-        checkout: DinteroCheckoutInstance
-    ) => void;
     onPayment?: (
         event: SessionPaymentAuthorized | SessionPaymentOnHold,
+        checkout: DinteroCheckoutInstance
+    ) => void;
+    onPaymentAuthorized?: (
+        event: SessionPaymentAuthorized,
         checkout: DinteroCheckoutInstance
     ) => void;
     onSession?: (
@@ -181,9 +181,9 @@ export const embed = async (
                 : followHref,
         },
         {
-            eventTypes: onPayment? []: [CheckoutEvents.SessionPaymentAuthorized],
-            handler: onPaymentAuthorized
-                ? handleWithResult(sid, endpoint, onPaymentAuthorized)
+            eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
+            handler: onPaymentAuthorized || onPayment
+                ? handleWithResult(sid, endpoint, onPaymentAuthorized || onPayment)
                 : followHref,
         },
         {
