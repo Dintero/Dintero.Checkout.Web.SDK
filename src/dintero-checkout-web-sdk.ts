@@ -37,6 +37,9 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
         event: SessionPaymentAuthorized | SessionPaymentOnHold,
         checkout: DinteroCheckoutInstance
     ) => void;
+    /**
+     * @deprecated Since version 0.0.1. Will be deleted in version 1.0.0. Use onPayment instead.
+     */
     onPaymentAuthorized?: (
         event: SessionPaymentAuthorized,
         checkout: DinteroCheckoutInstance
