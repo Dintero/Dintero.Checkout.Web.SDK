@@ -68,7 +68,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
-            onPaymentAuthorized: function(event, checkout) {
+            onPayment: function(event, checkout) {
                 console.log("transaction_id", event.transaction_id);
                 console.log("href", event.href);
                 checkout.destroy();
@@ -95,7 +95,7 @@ import {
     dintero,
     SessionLoaded,
     SessionUpdated,
-    SessionPaymentAuthorized,
+    SessionPayment,
     SessionPaymentError,
     SessionCancel,
 } from "@dintero/checkout-web-sdk";
@@ -109,7 +109,7 @@ const checkout = await dintero.embed({
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
-    onPaymentAuthorized: (event: SessionPaymentAuthorized) => {
+    onPayment: (event: SessionPayment) => {
         console.log("transaction_id", event.transaction_id);
         console.log("href", event.href);
         checkout.destroy();
@@ -130,7 +130,7 @@ const checkout = await dintero.embed({
 The user is redirected to the Dintero Checkout to complete payment.
 
 ```ts
-import { dintero, SessionPaymentAuthorized } from "dintero-checkout-web-sdk";
+import { dintero } from "dintero-checkout-web-sdk";
 
 const checkout = dintero.redirect({
     sid: "T11223344.<short-uuid>",

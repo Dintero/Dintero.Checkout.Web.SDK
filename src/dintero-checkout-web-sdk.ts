@@ -8,6 +8,7 @@ import {
     SessionLoaded,
     SessionUpdated,
     SessionCancel,
+    SessionPaymentOnHold,
     SessionPaymentAuthorized,
     SessionPaymentError,
 } from "./checkout";
@@ -32,6 +33,13 @@ export interface DinteroCheckoutOptions {
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     container: HTMLDivElement;
+    onPayment?: (
+        event: SessionPaymentAuthorized | SessionPaymentOnHold,
+        checkout: DinteroCheckoutInstance
+    ) => void;
+    /**
+     * @deprecated Since version 0.0.1. Will be deleted in version 1.0.0. Use onPayment instead.
+     */
     onPaymentAuthorized?: (
         event: SessionPaymentAuthorized,
         checkout: DinteroCheckoutInstance
@@ -123,6 +131,7 @@ export const embed = async (
         endpoint = "https://checkout.dintero.com",
         onSession,
         onSessionCancel,
+        onPayment,
         onPaymentAuthorized,
         onPaymentError,
         onSessionNotFound,
@@ -169,9 +178,15 @@ export const embed = async (
             ],
         },
         {
+            eventTypes: [CheckoutEvents.SessionPaymentOnHold],
+            handler: onPayment
+                ? handleWithResult(sid, endpoint, onPayment)
+                : followHref,
+        },
+        {
             eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
-            handler: onPaymentAuthorized
-                ? handleWithResult(sid, endpoint, onPaymentAuthorized)
+            handler: onPaymentAuthorized || onPayment
+                ? handleWithResult(sid, endpoint, onPaymentAuthorized || onPayment)
                 : followHref,
         },
         {
