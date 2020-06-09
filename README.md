@@ -13,7 +13,7 @@ _Note that this SDK is for redirecting or embedding existing payment sessions. Y
 
 We cannot guarantee the delivery of events from the embedded checkout to the SDK client runtime. The sessions machine-to-machine `callback_url` will be delivered at least once. Read more about the [callback_url parameter](https://docs.dintero.com/checkout-api.html#operation/checkout_session_profile_post) in our api spec.
 
-For payments on devices with the Vipps app installed, after payment is completed in the Vipps app, the end user will be returned to the browser where **the `return_url` on the payment is opened in a ew browser tab** leaving the site that has the embedded checkout still open in a background browser tab on the device. In this case the SDK cannot guarantee that the handlers for `onPaymentAuthorized` or `onPaymentError` will be called.
+For payments on devices with the Vipps app installed, after payment is completed in the Vipps app, the end user will be returned to the browser where **the `return_url` on the payment is opened in a new browser tab** leaving the site that has the embedded checkout still open in a background browser tab on the device. In this case the SDK cannot guarantee that the handlers for `onPaymentAuthorized` or `onPaymentError` will be called.
 
 If no custom handler are added for `onPaymentError`, `onPaymentAuthorized` and `onPaymentCanceled` the SDK will redirect the user to the `return_url` in the payment session.
 
@@ -64,6 +64,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
         .embed({
             container,
             sid: "T11223344.<short-uuid>",
+            language: "no", \\ optional parameter, an ISO 3166-1 alpha 2 code
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
@@ -104,6 +105,7 @@ const container = document.getElementById("#checkout-container");
 const checkout = await dintero.embed({
     container,
     sid: "T11223344.<short-uuid>",
+    language: "no", \\ optional parameter, an ISO 3166-1 alpha 2 code
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
