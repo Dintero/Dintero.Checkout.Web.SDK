@@ -64,7 +64,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
         .embed({
             container,
             sid: "T11223344.<short-uuid>",
-            language: "no", \\ optional parameter, an ISO 3166-1 alpha 2 code
+            language: "no", \\ optional parameter, an ISO 639-1 two-letter language code
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
@@ -105,7 +105,7 @@ const container = document.getElementById("#checkout-container");
 const checkout = await dintero.embed({
     container,
     sid: "T11223344.<short-uuid>",
-    language: "no", \\ optional parameter, an ISO 3166-1 alpha 2 code
+    language: "no", \\ optional parameter, an ISO 639-1 two-letter language code
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
