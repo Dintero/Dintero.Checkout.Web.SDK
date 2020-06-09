@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js" integrity="sha384-iR6i8hSBx+w5PWbu83MaVqQ04MocLyDm6JadFxy93xrp0GKTQEXeSD8I90hLvyy+"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.12/dist/checkout-web-sdk.umd.js" integrity="sha384-5O24oFt5onxdX5Oy89p2BiolScIILUAxKz7U3niumoIfkFQmVGY8N2DiqK5Ye7VL"></script>
 ```
 
 ## Using the SDK for an embedded checkout
@@ -164,4 +164,7 @@ The Dintero Checkout SDK is built with [microbundle](https://github.com/developi
 
 1. Bump the package version in `package.json`.
 2. Regenerate integrity hash and update the unpgk install instructions in this file `shasum -b -a 384 dist/checkout-web-sdk.umd.js | awk '{ print $1 }' | xxd -r -p | base64 | sed "s/^/sha384-/g"`
-3. Publish new version to npm with `npm publish --access=public`.
+3. Update README.md with new version/sha
+4. Publish new version to npm with `npm publish --access=public`.
+5. Tag and create release in Github
+   `git tag "v$(jq .version -r < package.json)"`
