@@ -43,7 +43,7 @@ _When payment is completed, the SDK will redirect the end user to the `return_ur
 
 ```html
 <script type="text/javascript">
-    const container = document.getElementById("#checkout-container");
+    const container = document.getElementById("checkout-container");
 
     dintero.embed({
         container,
@@ -58,7 +58,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
 
 ```html
 <script type="text/javascript">
-    const container = document.getElementById("#checkout-container");
+    const container = document.getElementById("checkout-container");
 
     dintero
         .embed({
@@ -100,7 +100,7 @@ import {
     SessionCancel,
 } from "@dintero/checkout-web-sdk";
 
-const container = document.getElementById("#checkout-container");
+const container = document.getElementById("checkout-container");
 
 const checkout = await dintero.embed({
     container,
