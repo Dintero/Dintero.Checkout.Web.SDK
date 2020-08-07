@@ -1,3 +1,10 @@
+## [0.0.14]
+
+### Changed
+
+- Bumped dev dependencies to fix security issues with some of the
+  dev dependencies
+
 ## [0.0.13]
 
 ### Changed
