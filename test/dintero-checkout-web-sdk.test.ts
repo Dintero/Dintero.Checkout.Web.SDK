@@ -11,7 +11,7 @@ import {
     SessionLoaded,
     SessionUpdated,
     SessionCancel,
-    SessionPaymentAuthorized,
+    SessionPaymentAuthorized, SessionLocked, SessionLockFailed,
 } from "../src/checkout";
 
 if (!process.env.CI) {
@@ -359,6 +359,77 @@ describe("dintero.embed", () => {
         );
         getSessionUrlStub.restore();
         windowLocationAssignStub.restore();
+    });
+
+
+    it("listens to onSession messages for SessionLocked", async () => {
+        const script = `
+            emit({
+                type: "SessionLocked",
+                pay_lock_id: "plid",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const onSessionResult: {
+            event: SessionLocked;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSessionLocked: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onSessionResult.event.type).to.equal(
+            CheckoutEvents.SessionLocked
+        );
+        expect(onSessionResult.event.pay_lock_id).to.equal("plid");
+        getSessionUrlStub.restore();
+    });
+
+    it("listens to onSession messages for SessionLockFailed", async () => {
+        const script = `
+            emit({
+                type: "SessionLockFailed"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const onSessionResult: {
+            event: SessionLockFailed;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSessionLockFailed: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onSessionResult.event.type).to.equal(
+            CheckoutEvents.SessionLockFailed
+        );
+        getSessionUrlStub.restore();
     });
 
     it("ignores messages from wrong origin", async () => {
