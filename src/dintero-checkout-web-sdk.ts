@@ -16,7 +16,7 @@ import {
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
-import { subscribe, SubscriptionHandler, Subscription } from "./subscribe";
+import {subscribe, SubscriptionHandler, Subscription, postSessionLock, postSessionRefresh} from "./subscribe";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -25,6 +25,8 @@ export interface DinteroCheckoutInstance {
     destroy: () => void;
     iframe: HTMLIFrameElement;
     language: string;
+    lockSession: () => void;
+    refreshSession: () => void;
 }
 
 export interface DinteroCheckoutOptions {
@@ -169,8 +171,23 @@ export const embed = async (
         }
     };
 
+    const lockSession = () => {
+        postSessionLock(iframe);
+    };
+
+    const refreshSession = () => {
+        postSessionRefresh(iframe);
+
+    };
+
     // Create checkout object that wraps the destroy function.
-    const checkout: DinteroCheckoutInstance = { destroy, iframe, language };
+    const checkout: DinteroCheckoutInstance = {
+        destroy,
+        iframe,
+        language,
+        lockSession,
+        refreshSession
+    };
 
     // Add event handlers (or in some cases add a fallback href handler).
     [

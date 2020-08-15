@@ -41,6 +41,30 @@ const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
 };
 
 /**
+ * Post a SessionLock-event to the checkout iframe.
+ */
+export const postSessionLock = (iframe: HTMLIFrameElement) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "LockSession" },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post RefreshSession-event to the checkout iframe.
+ */
+export const postSessionRefresh = (iframe: HTMLIFrameElement) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "RefreshSession" },
+            "*"
+        );
+    }
+};
+
+/**
  * Subscribe to events from an iframe given a handler and a set
  * of event types.
  */

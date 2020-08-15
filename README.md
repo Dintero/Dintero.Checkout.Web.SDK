@@ -81,6 +81,14 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                 console.log("href", event.href);
                 checkout.destroy();
             },
+            onSessionLocked: function(event, checkout) {
+                console.log("pay_lock_id", event.pay_lock_id);
+                checkout.destroy();
+            },
+            onSessionLockFailed: function(event, checkout) {
+                console.log("session lock failed");
+                checkout.destroy();
+            },
         })
         .then(function(checkout) {
             console.log("checkout", checkout);
@@ -122,8 +130,52 @@ const checkout = await dintero.embed({
         console.log("href", event.href);
         checkout.destroy();
     },
+    onSessionLocked: (event, checkout) => {
+        console.log("pay_lock_id", event.pay_lock_id);
+        checkout.destroy();
+    },
+    onSessionLockFailed: (event, checkout) => {
+        console.log("session lock failed");
+        checkout.destroy();
+    },
 });
 ```
+
+### Updating an Checkout Express-session
+
+To update an existing Checkout Express-session, follow these steps:
+
+1. Lock the session with the SDK
+2. Perform a server-to-server [session update](https://docs.dintero.com/checkout-api.html#operation/checkout_session_put)
+3. Refresh the session with the SDK
+
+#### Locking the session
+
+Call lockSession on the checkout object: 
+
+```js
+checkout.lockSession();
+```
+
+When the session is successfully locked, you'll get a callback at `onSessionLocked`.
+If locking the session fails, there will be a callback at `onSessionLockFailed`.
+
+While the session is locked, all editing and paying in the checkout is disabled.
+
+#### Perform a server-to-server session update
+
+See [session update](https://docs.dintero.com/checkout-api.html#operation/checkout_session_put) for details on what parts of the session can be updated, and how.
+
+#### Refreshing the session
+
+After updating the session, call refreshSession on the checkout object: 
+
+```js
+checkout.refreshSession();
+```
+
+Editing and paying in the checkout is enabled again.
+
 
 ## Using the SDK for a redirect checkout
 
