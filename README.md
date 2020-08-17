@@ -83,11 +83,9 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             },
             onSessionLocked: function(event, checkout) {
                 console.log("pay_lock_id", event.pay_lock_id);
-                checkout.destroy();
             },
             onSessionLockFailed: function(event, checkout) {
                 console.log("session lock failed");
-                checkout.destroy();
             },
         })
         .then(function(checkout) {
