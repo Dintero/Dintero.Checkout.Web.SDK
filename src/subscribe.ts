@@ -43,10 +43,10 @@ const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
 /**
  * Post a SessionLock-event to the checkout iframe.
  */
-export const postSessionLock = (iframe: HTMLIFrameElement) => {
+export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
-            { type: "LockSession" },
+            { type: "LockSession", sid },
             "*"
         );
     }
@@ -55,10 +55,10 @@ export const postSessionLock = (iframe: HTMLIFrameElement) => {
 /**
  * Post RefreshSession-event to the checkout iframe.
  */
-export const postSessionRefresh = (iframe: HTMLIFrameElement) => {
+export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
-            { type: "RefreshSession" },
+            { type: "RefreshSession", sid },
             "*"
         );
     }

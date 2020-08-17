@@ -172,11 +172,11 @@ export const embed = async (
     };
 
     const lockSession = () => {
-        postSessionLock(iframe);
+        postSessionLock(iframe, sid);
     };
 
     const refreshSession = () => {
-        postSessionRefresh(iframe);
+        postSessionRefresh(iframe, sid);
 
     };
 
