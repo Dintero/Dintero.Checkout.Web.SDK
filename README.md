@@ -130,11 +130,9 @@ const checkout = await dintero.embed({
     },
     onSessionLocked: (event, checkout) => {
         console.log("pay_lock_id", event.pay_lock_id);
-        checkout.destroy();
     },
     onSessionLockFailed: (event, checkout) => {
         console.log("session lock failed");
-        checkout.destroy();
     },
 });
 ```
