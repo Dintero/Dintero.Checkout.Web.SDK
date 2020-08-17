@@ -11,10 +11,12 @@ import {
     SessionPaymentOnHold,
     SessionPaymentAuthorized,
     SessionPaymentError,
+    SessionLocked,
+    SessionLockFailed,
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
-import { subscribe, SubscriptionHandler, Subscription } from "./subscribe";
+import {subscribe, SubscriptionHandler, Subscription, postSessionLock, postSessionRefresh} from "./subscribe";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -23,6 +25,8 @@ export interface DinteroCheckoutInstance {
     destroy: () => void;
     iframe: HTMLIFrameElement;
     language: string;
+    lockSession: () => void;
+    refreshSession: () => void;
 }
 
 export interface DinteroCheckoutOptions {
@@ -58,6 +62,14 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     ) => void;
     onSessionNotFound?: (
         event: SessionNotFound,
+        checkout: DinteroCheckoutInstance
+    ) => void;
+    onSessionLocked?: (
+        event: SessionLocked,
+        checkout: DinteroCheckoutInstance
+    ) => void;
+    onSessionLockFailed?: (
+        event: SessionLockFailed,
         checkout: DinteroCheckoutInstance
     ) => void;
 }
@@ -135,6 +147,8 @@ export const embed = async (
         onPaymentAuthorized,
         onPaymentError,
         onSessionNotFound,
+        onSessionLocked,
+        onSessionLockFailed,
     } = options;
     const subscriptions: Subscription[] = [];
 
@@ -157,8 +171,23 @@ export const embed = async (
         }
     };
 
+    const lockSession = () => {
+        postSessionLock(iframe, sid);
+    };
+
+    const refreshSession = () => {
+        postSessionRefresh(iframe, sid);
+
+    };
+
     // Create checkout object that wraps the destroy function.
-    const checkout: DinteroCheckoutInstance = { destroy, iframe, language };
+    const checkout: DinteroCheckoutInstance = {
+        destroy,
+        iframe,
+        language,
+        lockSession,
+        refreshSession
+    };
 
     // Add event handlers (or in some cases add a fallback href handler).
     [
@@ -204,6 +233,14 @@ export const embed = async (
         {
             handler: onSessionNotFound as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.SessionNotFound],
+        },
+        {
+            handler: onSessionLocked as SubscriptionHandler | undefined,
+            eventTypes: [CheckoutEvents.SessionLocked],
+        },
+        {
+            handler: onSessionLockFailed as SubscriptionHandler | undefined,
+            eventTypes: [CheckoutEvents.SessionLockFailed],
         },
     ].forEach(({ handler, eventTypes }) => {
         if (handler) {
