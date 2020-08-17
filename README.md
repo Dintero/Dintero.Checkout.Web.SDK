@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.13/dist/checkout-web-sdk.umd.js" integrity="sha384-sM9iYAp4hUFxf/0dZeDdKHrK0drTxFo+w4Of3CAt8QUFHzkaE1ZOgQZUOloi6b6+"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.14/dist/checkout-web-sdk.umd.js" integrity="sha384-E2Myyci1dTPk470XQKIR/AoEuuqsri5C30OGXIYxU7GI623+j3/YSZ60PUIkUqEV"></script>
 ```
 
 ## Using the SDK for an embedded checkout
