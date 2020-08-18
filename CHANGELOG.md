@@ -1,8 +1,12 @@
+## [0.0.15]
+
+### Changed
+- Added `lockSession` and `refreshSession` functions
+
 ## [0.0.14]
 
 ### Changed
 
-- Added `lockSession` and `refreshSession` functions
 - Added `onSessionLocked` and `onSessionLockFailed` callbacks
 - Bumped dev dependencies to fix security issues with some of the
   dev dependencies  
