@@ -1,4 +1,4 @@
-# Dintero Checkout JavaScript SDK for frontend applications
+# Dintero Checkout JavaScript SDK for frontend applications [![Actions Status](https://github.com/Dintero/Dintero.Checkout.Web.SDK/workflows/CI/badge.svg?branch=master)](https://github.com/Dintero/Dintero.Checkout.Web.SDK/actions?query=branch%3Amaster+workflow%3ACI+)
 
 Use this SDK in your frontend application to
 
