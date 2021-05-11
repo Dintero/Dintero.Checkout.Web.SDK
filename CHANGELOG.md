@@ -8,7 +8,7 @@
 
 ### Changed
 
--   Added `lockSession` and `refreshSession` functions
+- Added `lockSession` and `refreshSession` functions
 
 ## [0.0.14]
 
