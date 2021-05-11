@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.15/dist/checkout-web-sdk.umd.js" integrity="sha384-gK00EjapsB3XDSBcfZCytvn/3dISQtNuPAnHQliWpgjmgz+o7jQzhHDlVYWt3don"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.16/dist/dintero-checkout-web-sdk.umd.min.js" integrity="sha384-wSx8c2gSK0ipbhUEBTagUYLolGfrRERsuoyLDq92oWvrhFqnujApIeJ7+z6nvOfl"></script>
 ```
 
 ## Using the SDK for an embedded checkout
@@ -98,7 +98,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
 
 ```ts
 import {
-    dintero,
+    embed,
     SessionLoaded,
     SessionUpdated,
     SessionPayment,
@@ -108,7 +108,7 @@ import {
 
 const container = document.getElementById("checkout-container");
 
-const checkout = await dintero.embed({
+const checkout = await embed({
     container,
     sid: "T11223344.<short-uuid>",
     language: "no", \\ optional parameter, an ISO 639-1 two-letter language code
@@ -147,7 +147,7 @@ To update an existing Checkout Express-session, follow these steps:
 
 #### Locking the session
 
-Call lockSession on the checkout object: 
+Call lockSession on the checkout object:
 
 ```js
 checkout.lockSession();
@@ -164,7 +164,7 @@ See [session update](https://docs.dintero.com/checkout-api.html#operation/checko
 
 #### Refreshing the session
 
-After updating the session, call refreshSession on the checkout object: 
+After updating the session, call refreshSession on the checkout object:
 
 ```js
 checkout.refreshSession();
@@ -172,15 +172,14 @@ checkout.refreshSession();
 
 Editing and paying in the checkout is enabled again.
 
-
 ## Using the SDK for a redirect checkout
 
 The user is redirected to the Dintero Checkout to complete payment.
 
 ```ts
-import { dintero } from "dintero-checkout-web-sdk";
+import { redirect } from "dintero-checkout-web-sdk";
 
-const checkout = dintero.redirect({
+const checkout = redirect({
     sid: "T11223344.<short-uuid>",
 });
 ```
@@ -211,7 +210,7 @@ The Dintero Checkout SDK is built with [microbundle](https://github.com/developi
 ## Creating a new release checklist
 
 1. Bump the package version in `package.json`.
-2. Regenerate integrity hash and update the unpgk install instructions in this file `shasum -b -a 384 dist/checkout-web-sdk.umd.js | awk '{ print $1 }' | xxd -r -p | base64 | sed "s/^/sha384-/g"`
+2. Regenerate integrity hash and update the unpgk install instructions in this file `shasum -b -a 384 dist/dintero-checkout-web-sdk.umd.min.js | awk '{ print $1 }' | xxd -r -p | base64 | sed "s/^/sha384-/g"`
 3. Update README.md with new version/sha
 4. Publish new version to npm with `npm publish --access=public`.
 5. Tag and create release in Github

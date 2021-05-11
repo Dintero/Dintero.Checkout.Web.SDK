@@ -1,18 +1,17 @@
 {
     "name": "@dintero/checkout-web-sdk",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "description": "Dintero Checkout SDK for web frontends",
-    "source": "src/dintero-checkout-web-sdk.ts",
-    "browser": "dist/checkout-web-sdk.js",
-    "module": "dist/checkout-web-sdk.js.mjs",
-    "unpkg": "dist/checkout-web-sdk.umd.js",
-    "types": "dist/src/dintero-checkout-web-sdk.d.ts",
-    "files": [
-        "dist"
-    ],
+    "main": "dist/dintero-checkout-web-sdk.cjs.js",
+    "module": "dist/dintero-checkout-web-sdk.esm.js",
+    "umd:main": "dist/dintero-checkout-web-sdk.umd.min.js",
+    "unpkg": "dist/dintero-checkout-web-sdk.umd.min.js",
+    "types": "dist/dintero-checkout-web-sdk.cjs.d.ts",
+    "preconstruct": {
+        "umdName": "dintero"
+    },
     "scripts": {
-        "build": "microbundle --name dintero --external-native-promise-only --tsconfig tsconfig.json",
-        "dev": "microbundle watch --tsconfig tsconfig.json",
+        "build": "preconstruct build",
         "test": "karma start"
     },
     "private": false,
@@ -27,19 +26,23 @@
         "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
     },
     "devDependencies": {
+        "@babel/preset-env": "^7.14.1",
+        "@babel/preset-typescript": "^7.13.0",
+        "@preconstruct/cli": "^2.1.0",
         "chai": "^4.2.0",
         "karma": "^5.1.1",
         "karma-chai": "^0.1.0",
         "karma-chrome-launcher": "^3.1.0",
         "karma-mocha": "^2.0.1",
         "karma-typescript": "^5.0.3",
-        "microbundle": "^0.12.3",
         "mocha": "^8.1.1",
-        "native-promise-only": "^0.8.1",
         "prettier": "^1.19.1",
         "puppeteer": "^2.1.0",
         "rollup": "^1.30.1",
         "sinon": "^8.1.1",
-        "typescript": "^3.7.5"
+        "typescript": "^4.2.4"
+    },
+    "dependencies": {
+        "native-promise-only": "^0.8.1"
     }
 }
