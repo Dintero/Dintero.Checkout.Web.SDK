@@ -3,7 +3,7 @@ import {
     InternalCheckoutEvents,
     SessionEvent,
 } from "./checkout";
-import { DinteroCheckoutInstance } from "./dintero-checkout-web-sdk";
+import { DinteroCheckoutInstance } from ".";
 
 /**
  * Unsubscribe handler from event(s).
@@ -45,10 +45,7 @@ const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
  */
 export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
-            { type: "LockSession", sid },
-            "*"
-        );
+        iframe.contentWindow.postMessage({ type: "LockSession", sid }, "*");
     }
 };
 
@@ -57,10 +54,7 @@ export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
  */
 export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
-            { type: "RefreshSession", sid },
-            "*"
-        );
+        iframe.contentWindow.postMessage({ type: "RefreshSession", sid }, "*");
     }
 };
 

@@ -1,15 +1,22 @@
+## [0.0.16]
+
+### Changed
+
+-   Changed build tool from microbundle to preconstruct, should fix exported types, updated/fixed documentation
+
 ## [0.0.15]
 
 ### Changed
-- Added `lockSession` and `refreshSession` functions
+
+-   Added `lockSession` and `refreshSession` functions
 
 ## [0.0.14]
 
 ### Changed
 
-- Added `onSessionLocked` and `onSessionLockFailed` callbacks
-- Bumped dev dependencies to fix security issues with some of the
-  dev dependencies  
+-   Added `onSessionLocked` and `onSessionLockFailed` callbacks
+-   Bumped dev dependencies to fix security issues with some of the
+    dev dependencies
 
 ## [0.0.13]
 
