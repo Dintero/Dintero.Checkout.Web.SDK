@@ -1,3 +1,10 @@
+## [0.0.17]
+
+### Changed
+
+-  Adds `onActivePaymentProductType` callback.  
+-  Adds `setActivePaymentProductType` function.
+
 ## [0.0.16]
 
 ### Changed

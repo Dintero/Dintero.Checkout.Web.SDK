@@ -1,6 +1,6 @@
 {
     "name": "@dintero/checkout-web-sdk",
-    "version": "0.0.16",
+    "version": "0.0.17",
     "description": "Dintero Checkout SDK for web frontends",
     "main": "dist/dintero-checkout-web-sdk.cjs.js",
     "module": "dist/dintero-checkout-web-sdk.esm.js",

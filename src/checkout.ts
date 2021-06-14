@@ -10,6 +10,7 @@ export enum CheckoutEvents {
     SessionPaymentError = "SessionPaymentError",
     SessionLocked = "SessionLocked",
     SessionLockFailed = "SessionLockFailed",
+    ActivePaymentProductType = "ActivePaymentProductType",
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",
@@ -57,6 +58,10 @@ export type SessionLocked = {
 export type SessionLockFailed = {
     type: CheckoutEvents.SessionLockFailed;
 };
+export type ActivePaymentProductType = {
+    type: CheckoutEvents.ActivePaymentProductType;
+    payment_product_type: string | undefined;
+};
 
 export type SessionPayment = SessionPaymentAuthorized | SessionPaymentOnHold;
 
@@ -75,4 +80,5 @@ export type SessionEvent =
     | SessionPaymentAuthorized
     | SessionPaymentError
     | SessionLocked
-    | SessionLockFailed;
+    | SessionLockFailed
+    | ActivePaymentProductType;
