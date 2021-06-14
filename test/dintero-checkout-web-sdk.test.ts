@@ -14,8 +14,8 @@ import {
     SessionPaymentAuthorized,
     SessionLocked,
     SessionLockFailed,
+    ActivePaymentProductType
 } from "../src/checkout";
-import { ActivePaymentProductType } from "../dist/declarations/src/checkout";
 
 if (!process.env.CI) {
     // Listen to all events emitted, helpful during development
