@@ -13,10 +13,18 @@ import {
     SessionPaymentError,
     SessionLocked,
     SessionLockFailed,
+    ActivePaymentProductType,
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
-import {subscribe, SubscriptionHandler, Subscription, postSessionLock, postSessionRefresh} from "./subscribe";
+import {
+    subscribe,
+    SubscriptionHandler,
+    Subscription,
+    postSessionLock,
+    postSessionRefresh,
+    postActivePaymentProductType,
+} from "./subscribe";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -27,6 +35,7 @@ export interface DinteroCheckoutInstance {
     language: string;
     lockSession: () => void;
     refreshSession: () => void;
+    setActivePaymentProductType: (paymentProductType: string) => void;
 }
 
 export interface DinteroCheckoutOptions {
@@ -72,6 +81,10 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
         event: SessionLockFailed,
         checkout: DinteroCheckoutInstance
     ) => void;
+    onActivePaymentType?: (
+        event: ActivePaymentProductType,
+        checkout: DinteroCheckoutInstance
+    ) => void;
 }
 
 /**
@@ -112,7 +125,7 @@ const handleWithResult = (
             "transaction_id",
             "error",
         ];
-        const pairs = eventKeys.map(key => [key, event[key]]);
+        const pairs = eventKeys.map((key) => [key, event[key]]);
         if (event.type === CheckoutEvents.SessionCancel && !event.error) {
             pairs.push(["error", "cancelled"]);
         }
@@ -149,6 +162,7 @@ export const embed = async (
         onSessionNotFound,
         onSessionLocked,
         onSessionLockFailed,
+        onActivePaymentType,
     } = options;
     const subscriptions: Subscription[] = [];
 
@@ -164,7 +178,7 @@ export const embed = async (
      */
     const destroy = () => {
         if (iframe) {
-            subscriptions.forEach(sub => sub.unsubscribe());
+            subscriptions.forEach((sub) => sub.unsubscribe());
             if (iframe.parentElement) {
                 container.removeChild(iframe);
             }
@@ -177,7 +191,10 @@ export const embed = async (
 
     const refreshSession = () => {
         postSessionRefresh(iframe, sid);
+    };
 
+    const setActivePaymentProductType = (paymentProductType?:string) => {
+        postActivePaymentProductType(iframe, sid, paymentProductType);
     };
 
     // Create checkout object that wraps the destroy function.
@@ -186,7 +203,8 @@ export const embed = async (
         iframe,
         language,
         lockSession,
-        refreshSession
+        refreshSession,
+        setActivePaymentProductType
     };
 
     // Add event handlers (or in some cases add a fallback href handler).
@@ -214,9 +232,14 @@ export const embed = async (
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
-            handler: onPaymentAuthorized || onPayment
-                ? handleWithResult(sid, endpoint, onPaymentAuthorized || onPayment)
-                : followHref,
+            handler:
+                onPaymentAuthorized || onPayment
+                    ? handleWithResult(
+                          sid,
+                          endpoint,
+                          onPaymentAuthorized || onPayment
+                      )
+                    : followHref,
         },
         {
             handler: onSessionCancel
@@ -241,6 +264,10 @@ export const embed = async (
         {
             handler: onSessionLockFailed as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.SessionLockFailed],
+        },
+        {
+            handler: onActivePaymentType as SubscriptionHandler | undefined,
+            eventTypes: [CheckoutEvents.ActivePaymentProductType],
         },
     ].forEach(({ handler, eventTypes }) => {
         if (handler) {

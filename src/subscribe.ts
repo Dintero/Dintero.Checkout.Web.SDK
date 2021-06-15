@@ -59,6 +59,18 @@ export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
 };
 
 /**
+ * Post setActivePaymentProductType-event to the checkout iframe.
+ */
+export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: string, paymentProductType?: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "SetActivePaymentProductType", sid, payment_product_type:paymentProductType },
+            "*"
+        );
+    }
+};
+
+/**
  * Subscribe to events from an iframe given a handler and a set
  * of event types.
  */

@@ -14,6 +14,7 @@ import {
     SessionPaymentAuthorized,
     SessionLocked,
     SessionLockFailed,
+    ActivePaymentProductType
 } from "../src/checkout";
 
 if (!process.env.CI) {
@@ -430,6 +431,42 @@ describe("dintero.embed", () => {
         expect(onSessionResult.event.type).to.equal(
             CheckoutEvents.SessionLockFailed
         );
+        getSessionUrlStub.restore();
+    });
+
+    it("listens to onSession messages for ActivePaymentProductType", async () => {
+        const script = `
+            emit({
+                type: "ActivePaymentProductType",
+                payment_product_type: "vipps",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const onSessionResult: {
+            event: ActivePaymentProductType;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onActivePaymentType: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onSessionResult.event.type).to.equal(
+            CheckoutEvents.ActivePaymentProductType
+        );
+        expect(onSessionResult.event.payment_product_type).to.equal("vipps");
         getSessionUrlStub.restore();
     });
 

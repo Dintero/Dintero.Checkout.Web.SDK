@@ -30,7 +30,7 @@ npm install @dintero/checkout-web-sdk
 Load the Dintero Checkout SDK in a script tag on your site.
 
 ```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.16/dist/dintero-checkout-web-sdk.umd.min.js" integrity="sha384-wSx8c2gSK0ipbhUEBTagUYLolGfrRERsuoyLDq92oWvrhFqnujApIeJ7+z6nvOfl"></script>
+<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.17/dist/dintero-checkout-web-sdk.umd.min.js" integrity="sha384-C+s7429Bxo4cmt8Tt3N5MRR4fZ/OsEBHDJaHwOnhlizydtc7wgCGvH5u5cXnjSSx"></script>
 ```
 
 ## Using the SDK for an embedded checkout
@@ -87,6 +87,9 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             onSessionLockFailed: function(event, checkout) {
                 console.log("session lock failed");
             },
+            onActivePaymentType: function(event, checkout) {
+                console.log("payment product type selected", event.payment_product_type);
+            },
         })
         .then(function(checkout) {
             console.log("checkout", checkout);
@@ -134,7 +137,24 @@ const checkout = await embed({
     onSessionLockFailed: (event, checkout) => {
         console.log("session lock failed");
     },
+    onActivePaymentType: function(event, checkout) {
+        console.log("payment product type selected", event.payment_product_type);
+    },
 });
+```
+
+### Setting payment product type
+
+The payment product type can be set with the returned `setActivePaymentProductType()`function when embedding the checkout.
+
+Select "vipps" payment product type:
+```
+checkout.setActivePaymentProductType("vipps");
+```
+
+Resetting selection (so no option is selected in the checkout):
+```
+checkout.setActivePaymentProductType();
 ```
 
 ### Updating an Checkout Express-session
