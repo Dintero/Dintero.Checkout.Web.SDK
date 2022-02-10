@@ -90,6 +90,13 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             onActivePaymentType: function(event, checkout) {
                 console.log("payment product type selected", event.payment_product_type);
             },
+            onValidateSession: function(event, checkout, callback) {
+                console.log("validating session", event.session);
+                callback({
+                   success: true,
+                   clientValidationError: undefined,
+                });
+            },
         })
         .then(function(checkout) {
             console.log("checkout", checkout);
@@ -140,6 +147,13 @@ const checkout = await embed({
     onActivePaymentType: function(event, checkout) {
         console.log("payment product type selected", event.payment_product_type);
     },
+    onValidateSession: function(event, checkout, callback) {
+        console.log("validating session", event.session);
+        callback({
+            success: true,
+            clientValidationError: undefined,
+        });
+   },
 });
 ```
 
@@ -191,6 +205,41 @@ checkout.refreshSession();
 ```
 
 Editing and paying in the checkout is enabled again.
+
+### Validating session before payment
+
+To validate the session and perform actions before the session is paid, use the `onSessionValidation`-handler.
+
+The checkout will be locked and payment will be paused until the provided callback function is called, or `checkout.submitValidationResult` is called with the result.
+
+When validated successfully, return a successful result:
+
+```js
+{
+   success: true
+}
+```
+
+If the validation is not successful, return the result with an error message:
+
+```js
+{
+   success: false,
+   clientValidationError: "session is not in sync with cart"
+}
+```
+
+Example implementation:
+
+```
+onValidateSession: function(event, checkout, callback) {
+     // Call the ecommerce solution to make sure the session is sync with the cart
+     callback({
+         success: false,
+         clientValidationError: "session is not in sync with cart",
+     });
+},
+```
 
 ## Using the SDK for a redirect checkout
 

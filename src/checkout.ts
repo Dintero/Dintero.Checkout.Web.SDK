@@ -1,4 +1,5 @@
 import { Session } from "./session";
+import {SessionValidationCallback} from "./index";
 
 export enum CheckoutEvents {
     SessionNotFound = "SessionNotFound",
@@ -11,6 +12,7 @@ export enum CheckoutEvents {
     SessionLocked = "SessionLocked",
     SessionLockFailed = "SessionLockFailed",
     ActivePaymentProductType = "ActivePaymentProductType",
+    ValidateSession = "ValidateSession",
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",
@@ -63,6 +65,14 @@ export type ActivePaymentProductType = {
     payment_product_type: string | undefined;
 };
 
+export type ValidateSession = {
+    type: CheckoutEvents.ValidateSession;
+    session: Session;
+    callback: (result: SessionValidationCallback) => void;
+};
+
+export type WrappedValidateSession = Pick<ValidateSession, "type" | "session">;
+
 export type SessionPayment = SessionPaymentAuthorized | SessionPaymentOnHold;
 
 export type SessionPaymentError = {
@@ -81,4 +91,5 @@ export type SessionEvent =
     | SessionPaymentError
     | SessionLocked
     | SessionLockFailed
-    | ActivePaymentProductType;
+    | ActivePaymentProductType
+    | WrappedValidateSession;

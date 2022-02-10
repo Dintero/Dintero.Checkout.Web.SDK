@@ -3,7 +3,7 @@ import {
     InternalCheckoutEvents,
     SessionEvent,
 } from "./checkout";
-import { DinteroCheckoutInstance } from ".";
+import {DinteroCheckoutInstance, SessionValidationCallback} from ".";
 
 /**
  * Unsubscribe handler from event(s).
@@ -46,6 +46,15 @@ const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
 export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage({ type: "LockSession", sid }, "*");
+    }
+};
+
+/**
+ * Post the validation result to the checkout iframe
+ */
+export const postValidationResult = (iframe: HTMLIFrameElement, sid: string, result: SessionValidationCallback) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "ValidationResult", sid, ...result }, "*");
     }
 };
 

@@ -13,7 +13,7 @@ import {
     SessionPaymentError,
     SessionLocked,
     SessionLockFailed,
-    ActivePaymentProductType,
+    ActivePaymentProductType, ValidateSession,
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
@@ -24,6 +24,7 @@ import {
     postSessionLock,
     postSessionRefresh,
     postActivePaymentProductType,
+    postValidationResult,
 } from "./subscribe";
 
 export interface DinteroCheckoutInstance {
@@ -36,12 +37,18 @@ export interface DinteroCheckoutInstance {
     lockSession: () => void;
     refreshSession: () => void;
     setActivePaymentProductType: (paymentProductType: string) => void;
+    submitValidationResult: (result: SessionValidationCallback) => void;
 }
 
 export interface DinteroCheckoutOptions {
     sid: string;
     endpoint?: string;
     language?: string;
+}
+
+export interface SessionValidationCallback {
+    success: boolean;
+    clientValidationError?: string;
 }
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
@@ -84,6 +91,11 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     onActivePaymentType?: (
         event: ActivePaymentProductType,
         checkout: DinteroCheckoutInstance
+    ) => void;
+    onValidateSession?: (
+        event: ValidateSession,
+        checkout: DinteroCheckoutInstance,
+        callback: (result: SessionValidationCallback) => void,
     ) => void;
 }
 
@@ -163,14 +175,21 @@ export const embed = async (
         onSessionLocked,
         onSessionLockFailed,
         onActivePaymentType,
+        onValidateSession,
     } = options;
     const subscriptions: Subscription[] = [];
 
     // Create iframe
-    const { iframe, initiate } = await createIframeAsync(
+    const { iframe, initiate } = createIframeAsync(
         container,
         endpoint,
-        getSessionUrl({ sid, endpoint, language, ui: "inline" })
+        getSessionUrl({
+            sid,
+            endpoint,
+            language,
+            ui: "inline",
+            shouldCallValidateSession: onValidateSession !== undefined
+        }),
     );
 
     /**
@@ -197,6 +216,19 @@ export const embed = async (
         postActivePaymentProductType(iframe, sid, paymentProductType);
     };
 
+    const submitValidationResult = (result: SessionValidationCallback) => {
+        postValidationResult(iframe, sid, result);
+    }
+
+    const wrappedOnValidateSession = (
+        event: ValidateSession,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        if (onValidateSession) {
+            onValidateSession(event, checkout, submitValidationResult);
+        }
+    }
+
     // Create checkout object that wraps the destroy function.
     const checkout: DinteroCheckoutInstance = {
         destroy,
@@ -204,7 +236,8 @@ export const embed = async (
         language,
         lockSession,
         refreshSession,
-        setActivePaymentProductType
+        setActivePaymentProductType,
+        submitValidationResult,
     };
 
     // Add event handlers (or in some cases add a fallback href handler).
@@ -269,6 +302,14 @@ export const embed = async (
             handler: onActivePaymentType as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.ActivePaymentProductType],
         },
+        {
+            handler: onActivePaymentType as SubscriptionHandler | undefined,
+            eventTypes: [CheckoutEvents.ActivePaymentProductType],
+        },
+        {
+            handler: wrappedOnValidateSession as SubscriptionHandler | undefined,
+            eventTypes: [CheckoutEvents.ValidateSession],
+        },
     ].forEach(({ handler, eventTypes }) => {
         if (handler) {
             subscriptions.push(
@@ -299,5 +340,5 @@ export const redirect = (options: DinteroCheckoutOptions) => {
         endpoint = "https://checkout.dintero.com",
     } = options;
     // Redirect the current browser window to the checkout session url.
-    windowLocationAssign(getSessionUrl({ sid, endpoint, language }));
+    windowLocationAssign(getSessionUrl({ sid, endpoint, language, shouldCallValidateSession: false }));
 };
