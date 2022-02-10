@@ -13,7 +13,9 @@ import {
     SessionPaymentError,
     SessionLocked,
     SessionLockFailed,
-    ActivePaymentProductType, ValidateSession,
+    ActivePaymentProductType,
+    ValidateSession,
+    SessionValidationCallback,
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
@@ -44,11 +46,6 @@ export interface DinteroCheckoutOptions {
     sid: string;
     endpoint?: string;
     language?: string;
-}
-
-export interface SessionValidationCallback {
-    success: boolean;
-    clientValidationError?: string;
 }
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {

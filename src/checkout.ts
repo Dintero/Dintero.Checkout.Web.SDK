@@ -1,5 +1,4 @@
 import { Session } from "./session";
-import {SessionValidationCallback} from "./index";
 
 export enum CheckoutEvents {
     SessionNotFound = "SessionNotFound",
@@ -70,6 +69,11 @@ export type ValidateSession = {
     session: Session;
     callback: (result: SessionValidationCallback) => void;
 };
+
+export interface SessionValidationCallback {
+    success: boolean;
+    clientValidationError?: string;
+}
 
 export type WrappedValidateSession = Pick<ValidateSession, "type" | "session">;
 

@@ -2,8 +2,9 @@ import {
     CheckoutEvents,
     InternalCheckoutEvents,
     SessionEvent,
+    SessionValidationCallback,
 } from "./checkout";
-import {DinteroCheckoutInstance, SessionValidationCallback} from ".";
+import { DinteroCheckoutInstance } from ".";
 
 /**
  * Unsubscribe handler from event(s).
