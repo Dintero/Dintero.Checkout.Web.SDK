@@ -16,8 +16,8 @@ import {
     SessionLockFailed,
     ActivePaymentProductType,
     ValidateSession,
+    SessionValidationCallback,
 } from "../src/checkout";
-import {SessionValidationCallback} from "../src";
 
 if (!process.env.CI) {
     // Listen to all events emitted, helpful during development
