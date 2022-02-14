@@ -25,14 +25,6 @@ If no custom handler are added for `onPaymentError`, `onPaymentAuthorized` and `
 npm install @dintero/checkout-web-sdk
 ```
 
-**unpkg**
-
-Load the Dintero Checkout SDK in a script tag on your site.
-
-```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.17/dist/dintero-checkout-web-sdk.umd.min.js" integrity="sha384-C+s7429Bxo4cmt8Tt3N5MRR4fZ/OsEBHDJaHwOnhlizydtc7wgCGvH5u5cXnjSSx"></script>
-```
-
 ## Using the SDK for an embedded checkout
 
 The Dintero Checkout will be added to the `<div id="checkout-container"></div>` DOM-node.
@@ -276,11 +268,7 @@ npm run build
 
 The Dintero Checkout SDK is built with [microbundle](https://github.com/developit/microbundle).
 
-## Creating a new release checklist
+## Creating a new release
 
-1. Bump the package version in `package.json`.
-2. Regenerate integrity hash and update the unpgk install instructions in this file `shasum -b -a 384 dist/dintero-checkout-web-sdk.umd.min.js | awk '{ print $1 }' | xxd -r -p | base64 | sed "s/^/sha384-/g"`
-3. Update README.md with new version/sha
-4. Publish new version to npm with `npm publish --access=public`.
-5. Tag and create release in Github
-   `git tag "v$(jq .version -r < package.json)"`
+1. Enforce all commits to the master branch to be formatted according to the [Angular Commit Message Format](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
+2. When merged to master, it will automatically be released with [semantic-release](https://github.com/semantic-release/semantic-release)
