@@ -131,7 +131,7 @@ const checkout = await embed({
         console.log("href", event.href);
         checkout.destroy();
     },
-    onSessionLocked: (event, checkout) => {
+    onSessionLocked: (event, checkout, callback) => {
         console.log("pay_lock_id", event.pay_lock_id);
         callback(); // refresh session
     },
