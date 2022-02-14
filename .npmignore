@@ -12,3 +12,4 @@ package-lock.json
 tsconfig.json
 tslint.json
 renovate.json
+.idea/
