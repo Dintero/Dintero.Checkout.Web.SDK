@@ -268,9 +268,7 @@ npm run build
 
 The Dintero Checkout SDK is built with [microbundle](https://github.com/developit/microbundle).
 
-## Creating a new release checklist
+## Creating a new release
 
-1. Bump the package version in `package.json`.
-2. Publish new version to npm with `npm publish --access=public`.
-3. Tag and create release in Github
-   `git tag "v$(jq .version -r < package.json)"`
+1. Enforce all commits to the master branch to be formatted according to the [Angular Commit Message Format](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
+2. When merged to master, it will automatically be released with [semantic-release](https://github.com/semantic-release/semantic-release)
