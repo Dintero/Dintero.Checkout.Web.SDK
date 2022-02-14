@@ -79,7 +79,8 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     ) => void;
     onSessionLocked?: (
         event: SessionLocked,
-        checkout: DinteroCheckoutInstance
+        checkout: DinteroCheckoutInstance,
+        callback: () => void,
     ) => void;
     onSessionLockFailed?: (
         event: SessionLockFailed,
@@ -226,6 +227,15 @@ export const embed = async (
         }
     }
 
+    const wrappedOnSessionLocked = (
+        event: SessionLocked,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        if (onSessionLocked) {
+            onSessionLocked(event, checkout, refreshSession);
+        }
+    }
+
     // Create checkout object that wraps the destroy function.
     const checkout: DinteroCheckoutInstance = {
         destroy,
@@ -288,7 +298,7 @@ export const embed = async (
             eventTypes: [CheckoutEvents.SessionNotFound],
         },
         {
-            handler: onSessionLocked as SubscriptionHandler | undefined,
+            handler: wrappedOnSessionLocked as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.SessionLocked],
         },
         {

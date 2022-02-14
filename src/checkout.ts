@@ -54,6 +54,7 @@ export type SessionPaymentAuthorized = {
 export type SessionLocked = {
     type: CheckoutEvents.SessionLocked;
     pay_lock_id: string;
+    callback: () => void;
 };
 
 export type SessionLockFailed = {
@@ -76,6 +77,7 @@ export interface SessionValidationCallback {
 }
 
 export type WrappedValidateSession = Pick<ValidateSession, "type" | "session">;
+export type WrappedSessionLocked = Pick<SessionLocked, "type" | "pay_lock_id">;
 
 export type SessionPayment = SessionPaymentAuthorized | SessionPaymentOnHold;
 
@@ -93,7 +95,7 @@ export type SessionEvent =
     | SessionPaymentOnHold
     | SessionPaymentAuthorized
     | SessionPaymentError
-    | SessionLocked
+    | WrappedSessionLocked
     | SessionLockFailed
     | ActivePaymentProductType
     | WrappedValidateSession;

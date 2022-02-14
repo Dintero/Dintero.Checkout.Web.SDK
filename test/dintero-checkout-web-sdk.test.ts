@@ -382,6 +382,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionLocked;
             checkout: dintero.DinteroCheckoutInstance;
+            callback: () => void;
         } = await new Promise((resolve, reject) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
@@ -389,8 +390,8 @@ describe("dintero.embed", () => {
                 sid: "<session_id>",
                 container,
                 endpoint: "http://localhost:9999",
-                onSessionLocked: (event, checkout) => {
-                    resolve({ event, checkout });
+                onSessionLocked: (event, checkout, callback) => {
+                    resolve({ event, checkout, callback });
                 },
             });
         });
@@ -398,6 +399,8 @@ describe("dintero.embed", () => {
         expect(onSessionResult.event.type).to.equal(
             CheckoutEvents.SessionLocked
         );
+
+        expect(onSessionResult.callback).to.be.a('function');
         expect(onSessionResult.event.pay_lock_id).to.equal("plid");
         getSessionUrlStub.restore();
     });
