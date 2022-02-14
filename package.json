@@ -41,7 +41,7 @@
     "prettier": "^1.19.1",
     "puppeteer": "^2.1.0",
     "semantic-release": "^19.0.2",
-    "sinon": "^8.1.1",
+    "sinon": "^13.0.1",
     "typescript": "^4.2.4"
   },
   "dependencies": {
