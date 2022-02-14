@@ -73,8 +73,9 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onSessionLocked: function(event, checkout) {
+            onSessionLocked: function(event, checkout, callback) {
                 console.log("pay_lock_id", event.pay_lock_id);
+                callback(); // refresh session
             },
             onSessionLockFailed: function(event, checkout) {
                 console.log("session lock failed");
@@ -130,8 +131,9 @@ const checkout = await embed({
         console.log("href", event.href);
         checkout.destroy();
     },
-    onSessionLocked: (event, checkout) => {
+    onSessionLocked: (event, checkout, callback) => {
         console.log("pay_lock_id", event.pay_lock_id);
+        callback(); // refresh session
     },
     onSessionLockFailed: (event, checkout) => {
         console.log("session lock failed");
@@ -194,6 +196,15 @@ After updating the session, call refreshSession on the checkout object:
 
 ```js
 checkout.refreshSession();
+```
+
+or use the callback in `onSessionLocked`:
+
+```js
+onSessionLocked: (event, checkout, callback) => {
+    console.log("pay_lock_id", event.pay_lock_id);
+    callback(); // refresh session
+}
 ```
 
 Editing and paying in the checkout is enabled again.
