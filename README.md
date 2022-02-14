@@ -25,14 +25,6 @@ If no custom handler are added for `onPaymentError`, `onPaymentAuthorized` and `
 npm install @dintero/checkout-web-sdk
 ```
 
-**unpkg**
-
-Load the Dintero Checkout SDK in a script tag on your site.
-
-```
-<script src="https://unpkg.com/@dintero/checkout-web-sdk@0.0.17/dist/dintero-checkout-web-sdk.umd.min.js" integrity="sha384-C+s7429Bxo4cmt8Tt3N5MRR4fZ/OsEBHDJaHwOnhlizydtc7wgCGvH5u5cXnjSSx"></script>
-```
-
 ## Using the SDK for an embedded checkout
 
 The Dintero Checkout will be added to the `<div id="checkout-container"></div>` DOM-node.
@@ -279,8 +271,6 @@ The Dintero Checkout SDK is built with [microbundle](https://github.com/developi
 ## Creating a new release checklist
 
 1. Bump the package version in `package.json`.
-2. Regenerate integrity hash and update the unpgk install instructions in this file `shasum -b -a 384 dist/dintero-checkout-web-sdk.umd.min.js | awk '{ print $1 }' | xxd -r -p | base64 | sed "s/^/sha384-/g"`
-3. Update README.md with new version/sha
-4. Publish new version to npm with `npm publish --access=public`.
-5. Tag and create release in Github
+2. Publish new version to npm with `npm publish --access=public`.
+3. Tag and create release in Github
    `git tag "v$(jq .version -r < package.json)"`
