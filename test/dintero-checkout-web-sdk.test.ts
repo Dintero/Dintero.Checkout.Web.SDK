@@ -14,7 +14,9 @@ import {
     SessionPaymentAuthorized,
     SessionLocked,
     SessionLockFailed,
-    ActivePaymentProductType
+    ActivePaymentProductType,
+    ValidateSession,
+    SessionValidationCallback,
 } from "../src/checkout";
 
 if (!process.env.CI) {
@@ -757,6 +759,68 @@ describe("dintero.embed", () => {
         expect(checkout.iframe.src).to.equal(
             `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&error=cancelled&language=no&sdk=${pkg.version}`
         );
+        getSessionUrlStub.restore();
+    });
+
+    it("should handle validation", async () => {
+        const script = `
+            emit({
+                type: "ValidateSession",
+                session: {},
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+        const onSessionResult: {
+            event: ValidateSession;
+            checkout: dintero.DinteroCheckoutInstance;
+            callback: (result: SessionValidationCallback) => void;
+        } = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onValidateSession: (event, checkout, callback) => {
+                    resolve({ event, checkout, callback });
+                },
+            });
+        });
+        expect(onSessionResult.callback).to.not.be.undefined;
+        expect(getSessionUrlStub.getCall(0).args[0].shouldCallValidateSession).to.be.true;
+        getSessionUrlStub.restore();
+    });
+
+    it("should not handle validation in onValidateSession is not defined", async () => {
+        const script = `
+            emit({
+                type: "ValidateSession",
+                session: {},
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        await new Promise((resolve) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            }).then(() => {
+                resolve({});
+            });
+        });
+
+        expect(getSessionUrlStub.getCall(0).args[0].shouldCallValidateSession).to.be.false;
         getSessionUrlStub.restore();
     });
 

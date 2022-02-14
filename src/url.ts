@@ -16,10 +16,11 @@ export interface SessionUrlOptions {
     endpoint: string;
     language: string | undefined;
     ui?: "fullscreen" | "inline";
+    shouldCallValidateSession: boolean;
 }
 
 export const getSessionUrl = (options: SessionUrlOptions): string => {
-    const { sid, endpoint, language, ui } = options;
+    const { sid, endpoint, language, ui, shouldCallValidateSession } = options;
     if (!endpoint) {
         throw new Error("Invalid endpoint");
     }
@@ -28,6 +29,7 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     let languageParam = language ? `language=${language}` : "";
     let uiParam = ui ? `ui=${ui}` : "";
     let sdk = `sdk=${pkg.version}`;
-    const params = [languageParam, uiParam, sdk].filter(x => x).join("&");
+    let validate = shouldCallValidateSession ? `client_side_validation=true` : undefined;
+    const params = [languageParam, uiParam, sdk, validate].filter(x => x).join("&");
     return `${endpoint}/v1/view/${sid}${params ? "?" + params : ""}`;
 };
