@@ -25,10 +25,9 @@ jobs:
         run: |
           npm install
           npm run test
-          npm run build
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-        run: npx semantic-release
+        run: npm semantic-release
