@@ -178,8 +178,13 @@ To update an existing Checkout Express-session, follow these steps:
 Call lockSession on the checkout object:
 
 ```js
-checkout.lockSession();
+checkout.lockSession().then(function(sessionLockedEvent){
+    // initiate server side session update and then refresh the session
+});
 ```
+
+`lockSession()` returns a promise that is resolved when the `SessionLocked` event is 
+received from the checkout or rejected if the SessionLockFailed event is received.
 
 When the session is successfully locked, you'll get a callback at `onSessionLocked`.
 If locking the session fails, there will be a callback at `onSessionLockFailed`.
@@ -206,6 +211,9 @@ onSessionLocked: (event, checkout, callback) => {
     callback(); // refresh session
 }
 ```
+
+`refreshSession()` returns a promise that is resolved when the `SessionUpdated`
+event is received from the checkout.
 
 Editing and paying in the checkout is enabled again.
 

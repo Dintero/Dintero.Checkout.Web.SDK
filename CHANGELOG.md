@@ -1,3 +1,10 @@
+## [0.0.18]
+
+### Changed
+
+-  Changes `lockSession` to return a promise that resolves when the following `SessionLocked` event is returned from the checkout.
+-  Changes `refreshSession` to return a promise that resolves when the following `SessionUpdated` event is returned from the checkout.
+
 ## [0.0.17]
 
 ### Changed
