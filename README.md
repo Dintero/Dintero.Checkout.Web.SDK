@@ -180,10 +180,12 @@ Call lockSession on the checkout object:
 ```js
 checkout.lockSession().then(function(sessionLockedEvent){
     // initiate server side session update and then refresh the session
-});
+}).catch(function(sessionLockFailedEvent) {
+    // handle failure to lock
+});;
 ```
 
-`lockSession()` returns a promise that is resolved when the `SessionLocked` event is 
+`lockSession()` returns a promise that is resolved when the `SessionLocked` event is
 received from the checkout or rejected if the SessionLockFailed event is received.
 
 When the session is successfully locked, you'll get a callback at `onSessionLocked`.
@@ -215,7 +217,8 @@ onSessionLocked: (event, checkout, callback) => {
 `refreshSession()` returns a promise that is resolved when the `SessionUpdated`
 event is received from the checkout.
 
-Editing and paying in the checkout is enabled again.
+Editing and paying in the checkout is enabled again when a session without a `pay_lock`
+is loaded by the checkout.
 
 ### Validating session before payment
 
