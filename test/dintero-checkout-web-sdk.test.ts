@@ -827,6 +827,141 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+    it("should return a promise that resolves when calling lockSession and the SessionLocked is received", async () => {
+        const script = `
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionLocked",
+                    pay_lock_id: "plid",
+                });
+            }, 10);
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const event: any = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            }).then((checkout) => {
+                checkout.lockSession().then((lockedEvent)=> {
+                    resolve(lockedEvent);
+                }).catch(() =>{
+                    reject('lockSession() raised unexpected exception')
+                });
+            });
+        });
+        getSessionUrlStub.restore();
+        expect(event).to.not.be.not.undefined;
+    });
+    it("should raise an exception when calling lockSession and the SessionLocked is received", async () => {
+        const script = `
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionLockFailed",
+                });
+            }, 10);
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const error: any = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            }).then((checkout) => {
+                checkout.lockSession().then((lockedEvent)=> {
+                    reject('lockSession() did not raise exception');
+                }).catch(err => {
+                    resolve(err);
+                });
+            });
+        });
+        console.log(error);
+        expect(error).to.not.be.undefined;
+        getSessionUrlStub.restore();
+    });
+
+
+    it("should return a promise that resolves when calling refreshSession and the SessionUpdated is received", async () => {
+        const script = `
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionUpdated",
+                });
+            }, 10);
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const event: any = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            }).then((checkout) => {
+                checkout.refreshSession().then((sessionUpdatedEvent)=> {
+                    resolve(sessionUpdatedEvent);
+                }).catch(() =>{
+                    reject('refreshSession() raised unexpected exception')
+                });
+            });
+        });
+        getSessionUrlStub.restore();
+        expect(event).to.not.be.not.undefined;
+    });
+    it("should raise an exception when calling refreshSession and the SessionNotFound is received", async () => {
+        const script = `
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionNotFound",
+                });
+            }, 10);
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const error: any = await new Promise((resolve, reject) => {
+            const container = document.createElement("div");
+            document.body.appendChild(container);
+            dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+            }).then((checkout) => {
+                checkout.refreshSession().then((lockedEvent)=> {
+                    reject('refreshSession() did not raise exception');
+                }).catch(err => {
+                    resolve(err);
+                });
+            });
+        });
+        console.log(error);
+        expect(error).to.not.be.undefined;
+        getSessionUrlStub.restore();
+    });
+
+
     it("posts ack for received messages", async () => {
         const mid = Math.floor(Math.random() * 1000000000000000000);
         const script = `

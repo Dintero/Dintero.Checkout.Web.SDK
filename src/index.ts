@@ -16,6 +16,7 @@ import {
     ActivePaymentProductType,
     ValidateSession,
     SessionValidationCallback,
+    SessionEvent
 } from "./checkout";
 import { getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
@@ -36,8 +37,8 @@ export interface DinteroCheckoutInstance {
     destroy: () => void;
     iframe: HTMLIFrameElement;
     language: string;
-    lockSession: () => void;
-    refreshSession: () => void;
+    lockSession: () => Promise<SessionEvent>;
+    refreshSession: () => Promise<SessionEvent>;
     setActivePaymentProductType: (paymentProductType: string) => void;
     submitValidationResult: (result: SessionValidationCallback) => void;
 }
@@ -153,6 +154,7 @@ const handleWithResult = (
     };
 };
 
+
 /**
  * Show a dintero payment session in an embedded iframe.
  */
@@ -175,6 +177,7 @@ export const embed = async (
         onActivePaymentType,
         onValidateSession,
     } = options;
+    let checkout: DinteroCheckoutInstance | undefined;
     const subscriptions: Subscription[] = [];
 
     // Create iframe
@@ -202,12 +205,54 @@ export const embed = async (
         }
     };
 
+    /**
+     * Turn an action into a promise by specifying resolve and
+     * reject events.
+     */
+    const promisifyAction = (action:()=> void, resolveEvent:CheckoutEvents, rejectEvent:CheckoutEvents) => {
+        if(!checkout){
+            throw new Error("Unable to create action promise: checkout is undefined");
+        }
+        return new Promise<SessionEvent>((resolve, reject)=> {
+            const eventSubscriptions:Subscription[] = [];
+            eventSubscriptions.push(subscribe({
+                sid,
+                endpoint,
+                handler: (sessionEvent) => {
+                    eventSubscriptions.forEach((sub)=> sub.unsubscribe());
+                    resolve(sessionEvent);
+                },
+                eventTypes: [resolveEvent],
+                checkout,
+            }));
+            eventSubscriptions.push(subscribe({
+                sid,
+                endpoint,
+                handler: () => {
+                    eventSubscriptions.forEach((sub)=> sub.unsubscribe());
+                    reject(`Received unexpected event: ${rejectEvent}`);
+                },
+                eventTypes: [rejectEvent],
+                checkout,
+            }));
+            action();
+        });
+    }
+
     const lockSession = () => {
-        postSessionLock(iframe, sid);
+        return promisifyAction(
+            ()=>{postSessionLock(iframe, sid)},
+            CheckoutEvents.SessionLocked,
+            CheckoutEvents.SessionLockFailed
+        );
     };
 
     const refreshSession = () => {
-        postSessionRefresh(iframe, sid);
+        return promisifyAction(
+            ()=>{postSessionRefresh(iframe, sid)},
+            CheckoutEvents.SessionUpdated,
+            CheckoutEvents.SessionNotFound
+        );
     };
 
     const setActivePaymentProductType = (paymentProductType?:string) => {
@@ -237,7 +282,7 @@ export const embed = async (
     }
 
     // Create checkout object that wraps the destroy function.
-    const checkout: DinteroCheckoutInstance = {
+    checkout = {
         destroy,
         iframe,
         language,
