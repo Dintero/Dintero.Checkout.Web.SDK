@@ -32,7 +32,7 @@ export const createIframeAsync = (
     // allow popups is needed to open terms in new window
     iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-forms allow-same-origin allow-popups"
+        "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
     );
 
     // The download priority of the resource in the <iframe>'s src attribute.
