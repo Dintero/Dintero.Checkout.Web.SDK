@@ -73,6 +73,10 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                 console.log("href", event.href);
                 checkout.destroy();
             },
+            onSessionNotFound: function(event) {
+                console.log("session not found (expired", event.type);
+                checkout.destroy();
+            },
             onSessionLocked: function(event, checkout, callback) {
                 console.log("pay_lock_id", event.pay_lock_id);
                 callback(); // refresh session
@@ -107,6 +111,7 @@ import {
     SessionPayment,
     SessionPaymentError,
     SessionCancel,
+    SessionNotFound,
 } from "@dintero/checkout-web-sdk";
 
 const container = document.getElementById("checkout-container");
@@ -129,6 +134,10 @@ const checkout = await embed({
     },
     onSessionCancel: (event: SessionCancel) => {
         console.log("href", event.href);
+        checkout.destroy();
+    },
+    onSessionNotFound: (event: SessionNotFound) => {
+        console.log("session not found (expired", event.type);
         checkout.destroy();
     },
     onSessionLocked: (event, checkout, callback) => {
