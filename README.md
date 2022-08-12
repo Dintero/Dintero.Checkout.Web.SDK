@@ -74,7 +74,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                 checkout.destroy();
             },
             onSessionNotFound: function(event) {
-                console.log("session not found (expired", event.type);
+                console.log("session not found (expired)", event.type);
                 checkout.destroy();
             },
             onSessionLocked: function(event, checkout, callback) {
@@ -137,7 +137,7 @@ const checkout = await embed({
         checkout.destroy();
     },
     onSessionNotFound: (event: SessionNotFound) => {
-        console.log("session not found (expired", event.type);
+        console.log("session not found (expired)", event.type);
         checkout.destroy();
     },
     onSessionLocked: (event, checkout, callback) => {
