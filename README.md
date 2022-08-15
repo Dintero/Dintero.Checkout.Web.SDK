@@ -73,7 +73,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onSessionNotFound: function(event) {
+            onSessionNotFound: function(event, checkout) {
                 console.log("session not found (expired)", event.type);
                 checkout.destroy();
             },
@@ -123,20 +123,20 @@ const checkout = await embed({
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
-    onPayment: (event: SessionPayment) => {
+    onPayment: (event: SessionPayment, checkout) => {
         console.log("transaction_id", event.transaction_id);
         console.log("href", event.href);
         checkout.destroy();
     },
-    onPaymentError: (event: SessionPaymentError) => {
+    onPaymentError: (event: SessionPaymentError, checkout) => {
         console.log("href", event.href);
         checkout.destroy();
     },
-    onSessionCancel: (event: SessionCancel) => {
+    onSessionCancel: (event: SessionCancel, checkout) => {
         console.log("href", event.href);
         checkout.destroy();
     },
-    onSessionNotFound: (event: SessionNotFound) => {
+    onSessionNotFound: (event: SessionNotFound, checkout) => {
         console.log("session not found (expired)", event.type);
         checkout.destroy();
     },
