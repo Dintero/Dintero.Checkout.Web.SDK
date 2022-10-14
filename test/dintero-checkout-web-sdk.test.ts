@@ -603,6 +603,32 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+
+    it("changes scrolls to top of iframe when iframe tells it to", async () => {
+        const script = `
+            emit({
+                type: "ScrollToTop",
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        const container = document.createElement("div");
+        document.body.appendChild(container);
+
+        const checkout = await dintero.embed({
+            sid: "<session_id>",
+            container,
+            endpoint: "http://localhost:9999",
+        });
+        await sleep(10);
+        expect(checkout).to.not.be.undefined;
+        getSessionUrlStub.restore();
+    });
+
     it("changes language when iframe changes language", async () => {
         const script = `
             emit({
