@@ -110,7 +110,7 @@ const followHref: SubscriptionHandler = (event: any): void => {
 /**
  * An event handler that sets height of the iframe.
  */
-const setIframeHeight: SubscriptionHandler = (event: any, checkout): void => {
+const setIframeHeight: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (event.height || event.height === 0) {
         checkout.iframe.setAttribute(
             "style",
@@ -118,7 +118,27 @@ const setIframeHeight: SubscriptionHandler = (event: any, checkout): void => {
         );
     }
 };
-const setLanguage: SubscriptionHandler = (event: any, checkout): void => {
+
+/**
+ * An event handler that scrolls to the top of the iframe. This is useful when the user
+ * is navigated to another page.
+ */
+ const scrollToIframeTop: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
+    try {
+        checkout.iframe.scrollIntoView({
+            block: 'start',
+            behavior: 'smooth',
+        });
+    } catch (e){
+        // Ignore erorr silenty bug log it to the console.
+        console.error(e);
+    }
+};
+
+/**
+ * An event handler that sets language in the iframe.
+ */
+const setLanguage: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (event.language) {
         checkout.language = event.language;
     }
@@ -301,6 +321,10 @@ export const embed = async (
         {
             handler: setIframeHeight,
             eventTypes: [InternalCheckoutEvents.HeightChanged],
+        },
+        {
+            handler: scrollToIframeTop,
+            eventTypes: [InternalCheckoutEvents.ScrollToTop],
         },
         {
             handler: onSession as SubscriptionHandler | undefined,
