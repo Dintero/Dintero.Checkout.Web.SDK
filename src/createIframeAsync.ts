@@ -35,6 +35,9 @@ export const createIframeAsync = (
         "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
     );
 
+    // Needed for to allow apple pay from iframe
+    iframe.setAttribute("allow", "payment");
+
     // The download priority of the resource in the <iframe>'s src attribute.
     iframe.setAttribute("importance", "high");
 
