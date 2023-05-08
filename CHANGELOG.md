@@ -1,3 +1,8 @@
+## [0.6.0]
+### Changed
+
+- Changes iframe to also have `allow="payment"` property to support Apple Pay when embedded
+
 ## [0.4.0]
 
 ### Changed
