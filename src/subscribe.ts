@@ -69,7 +69,7 @@ export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
 };
 
 /**
- * Post setActivePaymentProductType-event to the checkout iframe.
+ * Post SetActivePaymentProductType-event to the checkout iframe.
  */
 export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: string, paymentProductType?: string) => {
     if (iframe.contentWindow) {
@@ -79,6 +79,32 @@ export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: str
         );
     }
 };
+
+/**
+ * Post ClosePopOut-event to the checkout iframe.
+ */
+export const postClosePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "ClosePopOut", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post FocusPopOut-event to the checkout iframe.
+ */
+export const postFocusPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "FocusPopOut", sid },
+            "*"
+        );
+    }
+};
+
+
 
 /**
  * Subscribe to events from an iframe given a handler and a set

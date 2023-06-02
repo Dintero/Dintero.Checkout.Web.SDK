@@ -12,6 +12,8 @@ export enum CheckoutEvents {
     SessionLockFailed = "SessionLockFailed",
     ActivePaymentProductType = "ActivePaymentProductType",
     ValidateSession = "ValidateSession",
+    PopOutOpened = "PopOutOpened",
+    PopOutClosed = "PopOutClosed"
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",

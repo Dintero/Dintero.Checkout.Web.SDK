@@ -28,7 +28,10 @@ import {
     postSessionRefresh,
     postActivePaymentProductType,
     postValidationResult,
+    postFocusPopOutEvent,
+    postClosePopOutEvent,
 } from "./subscribe";
+import { createBackdrop, removeBackdrop } from "./backdrop";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -41,6 +44,7 @@ export interface DinteroCheckoutInstance {
     refreshSession: () => Promise<SessionEvent>;
     setActivePaymentProductType: (paymentProductType: string) => void;
     submitValidationResult: (result: SessionValidationCallback) => void;
+    options: DinteroCheckoutOptions | DinteroEmbedCheckoutOptions;
 }
 
 export interface DinteroCheckoutOptions {
@@ -51,6 +55,7 @@ export interface DinteroCheckoutOptions {
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     container: HTMLDivElement;
+    popOut?: boolean;
     onPayment?: (
         event: SessionPaymentAuthorized | SessionPaymentOnHold,
         checkout: DinteroCheckoutInstance
@@ -144,6 +149,30 @@ const setLanguage: SubscriptionHandler = (event: any, checkout: DinteroCheckoutI
     }
 };
 
+/**
+ * An event handler that adds the popOut backdrop.
+ */
+const handleOpenBackdrop: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
+    if (event.type === "PopOutOpened") {
+        const focus = () => {
+            postFocusPopOutEvent(checkout.iframe, checkout.options.sid);
+        }
+        const close = () => {
+            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
+        }
+        createBackdrop({ focus, close });
+    }
+};
+/**
+ * An event handler that removes the popOut backdrop.
+ */
+const handleCloseBackdrop: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
+    if (event.type === "PopOutClosed") {
+        removeBackdrop();
+    }
+};
+
+
 const handleWithResult = (
     sid: string,
     endpoint: string,
@@ -218,6 +247,10 @@ export const embed = async (
      */
     const destroy = () => {
         if (iframe) {
+            if (options.popOut) {
+                // Try to remove backdrop if it exists
+                removeBackdrop();
+            }
             subscriptions.forEach((sub) => sub.unsubscribe());
             if (iframe.parentElement) {
                 container.removeChild(iframe);
@@ -310,6 +343,7 @@ export const embed = async (
         refreshSession,
         setActivePaymentProductType,
         submitValidationResult,
+        options
     };
 
     // Add event handlers (or in some cases add a fallback href handler).
@@ -382,6 +416,21 @@ export const embed = async (
             handler: wrappedOnValidateSession as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.ValidateSession],
         },
+        {
+            handler: handleOpenBackdrop,
+            eventTypes: [CheckoutEvents.PopOutOpened]
+        },
+        {
+            handler: handleCloseBackdrop,
+            eventTypes: [
+                CheckoutEvents.PopOutClosed,
+                CheckoutEvents.SessionCancel,
+                CheckoutEvents.SessionNotFound,
+                CheckoutEvents.SessionPaymentAuthorized,
+                CheckoutEvents.SessionPaymentError,
+                CheckoutEvents.SessionPaymentOnHold,
+            ]
+        }
     ].forEach(({ handler, eventTypes }) => {
         if (handler) {
             subscriptions.push(
@@ -401,6 +450,7 @@ export const embed = async (
     // Return object with function to destroy the checkout.
     return checkout;
 };
+
 
 /**
  * Redirect the customer to a payment session in the Dintero Checkout.
