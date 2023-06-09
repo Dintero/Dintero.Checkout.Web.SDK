@@ -20,6 +20,7 @@ interface SubscriptionOptions {
     handler: SubscriptionHandler;
     eventTypes: (CheckoutEvents | InternalCheckoutEvents)[];
     checkout: DinteroCheckoutInstance;
+    source: Window;
 }
 
 export type Subscription = {
@@ -32,9 +33,9 @@ export type Subscription = {
 /**
  * Post a message acknowledgement to the checkout iframe.
  */
-const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
-    if (event.data.mid && iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
+const postAck = (source: Window, event: MessageEvent) => {
+    if (event.data.mid && source) {
+        source.postMessage(
             { ack: event.data.mid },
             event.origin || "*"
         );
@@ -86,24 +87,20 @@ export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: str
 export const postClosePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
-            { type: "ClosePopOut", sid },
+            { type: "ClosedPopOut", sid },
             "*"
         );
     }
 };
 
 /**
- * Post FocusPopOut-event to the checkout iframe.
+ * Post SetLanguage-event to the checkout iframe.
  */
-export const postFocusPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+export const postSetLanguage = (iframe: HTMLIFrameElement, sid: string, language: string) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
-            { type: "FocusPopOut", sid },
-            "*"
-        );
+        iframe.contentWindow.postMessage({ type: "SetLanguage", sid, language }, "*");
     }
 };
-
 
 
 /**
@@ -115,19 +112,22 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
 
     // Wrap event handler in a function that checks for correct origin and
     // filters on event type(s) in the event data.
+    const endpointUrl = new URL(endpoint);
+
     const wrappedHandler = (event: MessageEvent) => {
-        const correctOrigin = event.origin === endpoint;
+        const correctOrigin = event.origin === endpointUrl.origin;
         const correctWindow = event.source === checkout.iframe.contentWindow;
         const correctSid = event.data && event.data.sid === sid;
         const correctMessageType =
             eventTypes.indexOf(event.data && event.data.type) !== -1;
+
         if (
             correctOrigin &&
             correctWindow &&
             correctSid &&
             correctMessageType
         ) {
-            postAck(checkout.iframe, event);
+            postAck(checkout.iframe.contentWindow, event);
             handler(event.data, checkout);
         }
     };

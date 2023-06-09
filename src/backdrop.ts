@@ -1,9 +1,7 @@
-import { postFocusPopOutEvent } from "./subscribe";
-
-
 type BackdropOptions = {
     close: () => void;
     focus: () => void;
+    label?: string;
 }
 
 const getBackdropZIndex = () => {
@@ -28,9 +26,9 @@ const getBackdropZIndex = () => {
     return (highest + 1).toString();
 }
 
-const styleId = 'dintero-checkout-sdk-style';
-const backdropId = 'dintero-checkout-sdk-backdrop';
-const backdropCloseButtonId = 'dintero-checkout-sdk-backdrop-close';
+const STYLE_ID = 'dintero-checkout-sdk-style';
+const BACKDROP_ID = 'dintero-checkout-sdk-backdrop';
+const CLOSE_BACKDROP_BUTTON_ID = 'dintero-checkout-sdk-backdrop-close';
 
 const wrapPreventDefault = (fn: () => void) => {
     // Creates a wrapped function that will invoke preventDefault() to stop
@@ -43,30 +41,36 @@ const wrapPreventDefault = (fn: () => void) => {
 
 const appendBackdropStyles = () => {
     // Check if exists before appending to DOM
-    if (document.getElementById(styleId)) {
+    if (document.getElementById(STYLE_ID)) {
         return;
     }
     // Add style to DOM
     const style = document.createElement('style');
-    style.setAttribute('id', styleId);
+    style.setAttribute('id', STYLE_ID);
     style.innerHTML = `
-        @keyframes dintero-checkout-sdk-backdrop-fade-in {
+        @keyframes ${BACKDROP_ID}-fade-in {
             from {opacity: 0;}
             to {opacity: 1;}
         }
 
-        .dintero-checkout-sdk-backdrop {
+        #${BACKDROP_ID} {
             position: fixed;
             top: 0;
             bottom: 0;
+            left: 0;
+            right: 0;
             height: 100vh;
             width: 100vw;
             background-color: rgba(0,0,0,0.8);
             cursor: pointer;
-            animation:  500ms ease-in dintero-checkout-sdk-backdrop-fade-in;
+            animation:  20ms ease-out ${BACKDROP_ID}-fade-in;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
         }
 
-        .dintero-checkout-sdk-close-button {
+        #${CLOSE_BACKDROP_BUTTON_ID} {
             background: transparent !important;
             padding: 0 !important;
             margin: 0 !important;
@@ -76,11 +80,11 @@ const appendBackdropStyles = () => {
             color: #efefef !important;
             position: absolute;
             top: 16px;
-            right:16px;
+            right: 24px;
             transition: all 200ms ease-out;
         }
-        .dintero-checkout-sdk-close-button:hover,
-        .dintero-checkout-sdk-close-button:focus {
+        #${CLOSE_BACKDROP_BUTTON_ID}:hover,
+        #${CLOSE_BACKDROP_BUTTON_ID}:focus {
             outline: none;
             color: #ffffff !important;
         }
@@ -91,7 +95,7 @@ const appendBackdropStyles = () => {
 const createBackdropDOM = () => {
     // Dark translucent backdrop element
     const backdrop = document.createElement('div');
-    backdrop.setAttribute("id", backdropId);
+    backdrop.setAttribute("id", BACKDROP_ID);
     backdrop.style.zIndex = getBackdropZIndex();
     return backdrop
 }
@@ -99,8 +103,7 @@ const createBackdropDOM = () => {
 const createCloseButtonDOM = () => {
     // Close button for the top right corner
     const button = document.createElement('button');
-    button.setAttribute("id", backdropCloseButtonId);
-    button.className = 'dintero-checkout-sdk-close-button';
+    button.setAttribute("id", CLOSE_BACKDROP_BUTTON_ID);
     button.innerHTML = `
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -124,6 +127,7 @@ const createBackdropView = (options: BackdropOptions) => {
     appendBackdropStyles();
     // Create DOM nodes
     const backdrop = createBackdropDOM();
+    backdrop.innerText = options.label || '';
     const closeButton = createCloseButtonDOM();
 
     // Add click handlers
@@ -133,16 +137,17 @@ const createBackdropView = (options: BackdropOptions) => {
     // Append to document
     backdrop.appendChild(closeButton);
     document.body.appendChild(backdrop);
+    return backdrop;
 }
 
 export const createBackdrop = (options: BackdropOptions) => {
     try {
         // Check if backdrop already exists
-        const backdrop = document.getElementById(backdropId);
+        const backdrop = document.getElementById(BACKDROP_ID);
         if (backdrop) {
             return;
         }
-        createBackdropView(options);
+        return createBackdropView(options);
     } catch (e) {
         // Ignore errors when creating backdrop. If it fails we should not
         // block the payment.
@@ -152,7 +157,7 @@ export const createBackdrop = (options: BackdropOptions) => {
 
 export const removeBackdrop = () => {
     try {
-        const backdrop = document.getElementById(backdropId);
+        const backdrop = document.getElementById(BACKDROP_ID);
         if (backdrop) {
             document.body.removeChild(backdrop);
         }
