@@ -158,27 +158,42 @@ const setLanguage: SubscriptionHandler = (event: any, checkout: DinteroCheckoutI
     }
 };
 
+/**
+ * Wrap function with try catch so an error wont blok other handlers from being invoked.
+ */
+const safeHandler = (fn: () => void) => {
+    try {
+        fn();
+    } catch (e) {
+        console.error(e);
+    }
+}
 
-
-
+/**
+ *  Handle messages sendt to the SDK from the pop out.
+ */
 const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutInstance) => {
-    // Close pop out when payment is completed.
-    // Invoke handlers for payment events.
+    // Change language in embed if changed in pop out
     const popOutChangedLanguageHandler = {
+        popOut: true,
         eventTypes: [InternalCheckoutEvents.LanguageChanged],
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
-            // Tell the embedded checkout to change language
-            postSetLanguage(checkout.iframe, checkout.options.sid, event.data.language);
+            // Tell the embedded checkout to change language.
+            postSetLanguage(checkout.iframe, checkout.options.sid, eventData.language);
         }
     }
 
+    // Show result animation in pop out, close pop out, and remove SDK rendered button when payment is completed.
+    const paymentCompletedEvents = [
+        CheckoutEvents.SessionCancel,
+        CheckoutEvents.SessionPaymentOnHold,
+        CheckoutEvents.SessionPaymentAuthorized,
+        CheckoutEvents.SessionPaymentError
+    ];
     const popOutCompletedHandler = {
+        popOut: true,
         eventTypes: [
-            CheckoutEvents.SessionNotFound,
-            CheckoutEvents.SessionCancel,
-            CheckoutEvents.SessionPaymentOnHold,
-            CheckoutEvents.SessionPaymentAuthorized,
-            CheckoutEvents.SessionPaymentError
+            paymentCompletedEvents
         ],
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
@@ -204,12 +219,20 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
                     }
                 }, timeout);
 
-                console.log('remove button');
                 // Remove button rendered by SDK
                 removeButton(OPEN_POP_OUT_BUTTON_ID);
             }
+            else {
+                console.error('Payment Complete event missing href property');
+            }
         }
     }
+
+    // Check if handler is popOutHandler or a general one.
+    const checkPopOutHandler = (handlerObject: any) => {
+        return handlerObject.popOut || false;
+    }
+
     const handlerWrapper = (event: MessageEvent) => {
         // Check that we should handle the message
         if (
@@ -217,21 +240,38 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
             event.data.context === 'popOut' &&
             event.data.sid === checkout.options.sid
         ) {
-            // Invoke handlers
-            const sessionEvent = event.data;
+            // Trigger handlers for the event
             [
                 popOutChangedLanguageHandler,
                 popOutCompletedHandler,
                 ...checkout.handlers
-            ].forEach(handlerObject => {
-                if ((handlerObject.eventTypes as string[]).includes(sessionEvent.type)) {
-                    handlerObject.handler(sessionEvent, checkout);
+            ]
+                .forEach(handlerObject => {
+                    if ((handlerObject.eventTypes as string[]).includes(event.data.type)) {
+
+                        const isPaymentCompleted = paymentCompletedEvents.includes(event.data.type);
+                        const isPopOutHandler = checkPopOutHandler(handlerObject);
+                        if (isPaymentCompleted && !isPopOutHandler) {
+                            // Delay invocation of payment complete handlers.
+                            window.setTimeout(() => {
+                                safeHandler(() => {
+                                    handlerObject.handler(event.data, checkout)
+                                })
+                            }, 1000);
+                        } else {
+                            // Immediate invocation for other handlers.
+                            safeHandler(() => {
+                                handlerObject.handler(event.data, checkout)
+                            })
+                        }
                 }
             });
         }
     };
+    // Add event listener to the Pop Out
     window.addEventListener('message', handlerWrapper);
-    // returns unsubscribe function
+
+    // Return unsubscribe function
     return () => {
         window.removeEventListener('message', handlerWrapper);
     };
@@ -265,7 +305,6 @@ const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroChec
                             unsubscribe();
                         }
                         removeBackdrop();
-                        // TODO: unsubscribe to events added on open
                     }
                 })
                 createBackdrop({ focus, close });
