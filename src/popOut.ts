@@ -91,7 +91,13 @@ const configureButton = (button: HTMLElement, { id, label, disabled, top, left, 
     }
 
     // Click handler
-    button.onclick = onClick;
+    button.onclick = () => {
+        button.style.boxShadow = 'inset 0 0 10px rgba(34, 84, 65, 0.9)';
+        onClick();
+        window.setTimeout(() => {
+            button.style.boxShadow = 'none';
+        }, 200);
+    }
 
     // Label
     button.innerText = label;

@@ -29,11 +29,15 @@ import {
     postActivePaymentProductType,
     postValidationResult,
     postSetLanguage,
+    postOpenPopOutEvent,
+    postClosePopOutEvent,
+    postValidatePopOutEvent,
     // postFocusPopOutEvent,
     // postClosePopOutEvent,
 } from "./subscribe";
 import { createBackdrop, removeBackdrop } from "./backdrop";
 import { OPEN_POP_OUT_BUTTON_ID, addButton, openPopOut, removeButton } from "./popOut";
+import { Session } from "./session";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -54,6 +58,7 @@ export interface DinteroCheckoutInstance {
         handler: SubscriptionHandler;
         eventTypes: CheckoutEvents[];
     })[];
+    session: Session | undefined;
 }
 
 export interface DinteroCheckoutOptions {
@@ -280,7 +285,6 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
 
 const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (event.type === InternalCheckoutEvents.ShowPopOutButton) {
-        let unsubscribe: undefined | (() => void);
         addButton({
             id: OPEN_POP_OUT_BUTTON_ID,
             container: checkout.options.container,
@@ -291,23 +295,49 @@ const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroChec
             styles: event.styles,
             disabled: event.disabled,
             onClick: () => {
-                const { close, focus } = openPopOut({
-                    sid: checkout.options.sid,
-                    endpoint: checkout.options.endpoint,
-                    shouldCallValidateSession: false,
-                    language: event.language,
-                    onOpen: (popOutWindow: Window) => {
-                        console.log('onOpen', { popOutWindow });
-                        unsubscribe = createPopOutMessageHandler(popOutWindow, checkout);
-                    },
-                    onClose: () => {
-                        if (unsubscribe) {
-                            unsubscribe();
+                let unsubscribe: undefined | (() => void);
+                const handleOpenPopOut = () => {
+                    postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
+                    const { close, focus } = openPopOut({
+                        sid: checkout.options.sid,
+                        endpoint: checkout.options.endpoint,
+                        shouldCallValidateSession: false,
+                        language: event.language,
+                        onOpen: (popOutWindow: Window) => {
+                            unsubscribe = createPopOutMessageHandler(popOutWindow, checkout);
+                        },
+                        onClose: () => {
+                            if (unsubscribe) {
+                                unsubscribe();
+                            }
+                            removeBackdrop();
+                            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
                         }
-                        removeBackdrop();
+                    })
+                    createBackdrop({ focus, close });
+                }
+
+                // Validate before opening checkout.
+                if (checkout.options.onValidateSession) {
+                    postValidatePopOutEvent(checkout.iframe, checkout.options.sid);
+                    const callback = (result: SessionValidationCallback) => {
+                        console.log('posting result from SDK');
+                        postValidationResult(checkout.iframe, checkout.options.sid, result);
+                        console.log('posted result from SDK');
+                        if (result.success) {
+                            handleOpenPopOut();
+                        } else {
+                            console.error(result.clientValidationError);
+                        }
                     }
-                })
-                createBackdrop({ focus, close });
+                    checkout.options.onValidateSession({
+                        type: CheckoutEvents.ValidateSession,
+                        session: checkout.session,
+                        callback
+                    }, checkout, callback);
+                } else {
+                    handleOpenPopOut();
+                }
             }
         });
     }
@@ -315,7 +345,6 @@ const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroChec
 
 const handleRemoveButton: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (event.type === InternalCheckoutEvents.HidePopOutButton) {
-        removeBackdrop();
         removeButton(OPEN_POP_OUT_BUTTON_ID);
     }
 };
@@ -492,6 +521,16 @@ export const embed = async (
         }
     }
 
+    const wrappedOnLoadedOrUpdated = (
+        event: SessionLoaded | SessionUpdated,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        // Update the checkout instance to include the session object
+        checkout.session = event.session;
+        if (onSession) {
+            onSession(event, checkout);
+        }
+    }
 
     // Add event handlers (or in some cases add a fallback href handler).
     const handlers = [
@@ -508,7 +547,7 @@ export const embed = async (
             eventTypes: [InternalCheckoutEvents.ScrollToTop],
         },
         {
-            handler: onSession as SubscriptionHandler | undefined,
+            handler: wrappedOnLoadedOrUpdated as SubscriptionHandler | undefined,
             eventTypes: [
                 CheckoutEvents.SessionLoaded,
                 CheckoutEvents.SessionUpdated,
@@ -583,6 +622,7 @@ export const embed = async (
         submitValidationResult,
         options,
         handlers,
+        session: undefined
     };
 
     handlers.forEach(({ handler, eventTypes }) => {

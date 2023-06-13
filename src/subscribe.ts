@@ -84,6 +84,31 @@ export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: str
 /**
  * Post ClosePopOut-event to the checkout iframe.
  */
+export const postValidatePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "ValidatingPopOut", sid },
+            "*"
+        );
+    }
+};
+
+
+/**
+ * Post ClosePopOut-event to the checkout iframe.
+ */
+export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "OpenedPopOut", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post ClosePopOut-event to the checkout iframe.
+ */
 export const postClosePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
