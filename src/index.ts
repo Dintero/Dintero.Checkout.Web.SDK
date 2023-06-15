@@ -183,6 +183,7 @@ const safelyInvoke = (fn: () => void) => {
 const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutInstance) => {
     // Change language in embed if changed in pop out
     const popOutChangedLanguageHandler = {
+        internalPopOutHandler: true,
         eventTypes: [InternalCheckoutEvents.LanguageChanged],
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             // Tell the embedded checkout to change language.
@@ -198,20 +199,25 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
         CheckoutEvents.SessionPaymentError
     ];
     const popOutCompletedHandler = {
+        internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
                 // Remove open pop out button rendered by SDK
                 removePopOutButton();
-                // Close pop out window
-                source.close();
+
+                // Close checkout
+                try {
+                    source.close();
+                } catch (e) {
+                    console.error(e);
+                }
             }
             else {
                 console.error('Payment Complete event missing href property');
             }
         }
     };
-
 
     // Listens to messages from pop out window and routes the events to dedicated handlers
     const messageRouter = (event: MessageEvent) => {
@@ -233,9 +239,9 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
                 .forEach(handlerObject => {
                     if ((handlerObject.eventTypes as string[]).includes(event.data.type)) {
                         // Invoking the handler function if the event type matches the handler.
-                            safelyInvoke(() => {
-                                handlerObject.handler(event.data, checkout)
-                            })
+                        safelyInvoke(() => {
+                            handlerObject.handler(event.data, checkout)
+                        })
                 }
             });
         }
@@ -254,6 +260,22 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
  */
 const showPopOut = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
     postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
+    const { close, focus, popOutWindow } = openPopOut({
+        sid: checkout.options.sid,
+        endpoint: checkout.options.endpoint,
+        shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
+        language: event.language,
+        onOpen: (popOutWindow: Window) => createPopOutMessageHandler(popOutWindow, checkout),
+        onClose: () => {
+            removeBackdrop();
+            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
+            setPopOutButtonDisabled(false);
+            checkout.popOutWindow = undefined;
+        },
+    })
+    // Add pop out window to checkout instance
+    checkout.popOutWindow = popOutWindow;
+    createBackdrop({ focus, close, event });
 }
 
 /**
