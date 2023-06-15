@@ -89,7 +89,7 @@ describe("dintero.embed", () => {
                 return iframeSrc;
             });
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const checkout = await dintero.embed({
             sid: "<session_id>",
@@ -111,7 +111,7 @@ describe("dintero.embed", () => {
                 return iframeSrc;
             });
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const checkout = await dintero.embed({
             sid: "<session_id>",
@@ -132,7 +132,7 @@ describe("dintero.embed", () => {
                 return iframeSrc;
             });
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const checkout = await dintero.embed({
             sid: "<session_id>",
@@ -309,7 +309,7 @@ describe("dintero.embed", () => {
                 windowLocationAssignStub.callsFake(() => {
                     resolve(undefined);
                 });
-                const container = document.createElement("div");
+                const container = document.createElement("p");
                 document.body.appendChild(container);
                 dintero.embed({
                     sid: "<session_id>",
@@ -349,7 +349,7 @@ describe("dintero.embed", () => {
             windowLocationAssignStub.callsFake(() => {
                 resolve(undefined);
             });
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -589,7 +589,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
 
         const checkout = await dintero.embed({
@@ -616,7 +616,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
 
         const checkout = await dintero.embed({
@@ -642,7 +642,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
 
         const checkout = await dintero.embed({
@@ -843,7 +843,7 @@ describe("dintero.embed", () => {
             );
 
         await new Promise((resolve) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -874,7 +874,7 @@ describe("dintero.embed", () => {
             );
 
         const event: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -906,7 +906,7 @@ describe("dintero.embed", () => {
             );
 
         const error: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -941,7 +941,7 @@ describe("dintero.embed", () => {
             );
 
         const event: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -973,7 +973,7 @@ describe("dintero.embed", () => {
             );
 
         const error: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -1016,14 +1016,14 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const onSessionHandler = sinon.fake();
         const result: {
             event: SessionPaymentAuthorized;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             dintero.embed({
                 sid: "<session_id>",
@@ -1058,12 +1058,12 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const onSessionHandler = sinon.fake();
         let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
         const result: HTMLElement = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             checkout = dintero.embed({
                 sid: "<session_id>",
@@ -1106,12 +1106,12 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const onSessionHandler = sinon.fake();
         let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
         const result: void = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             checkout = dintero.embed({
                 sid: "<session_id>",
@@ -1156,7 +1156,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const onSessionHandler = sinon.fake();
         let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
@@ -1164,7 +1164,7 @@ describe("dintero.embed", () => {
             event: SessionPaymentAuthorized;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             checkout = dintero.embed({
                 sid: "<session_id>",
@@ -1215,7 +1215,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const container = document.createElement("div");
+        const container = document.createElement("p");
         document.body.appendChild(container);
         const onSessionHandler = sinon.fake();
         let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
@@ -1223,7 +1223,7 @@ describe("dintero.embed", () => {
             event: SessionPaymentAuthorized;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
-            const container = document.createElement("div");
+            const container = document.createElement("p");
             document.body.appendChild(container);
             checkout = dintero.embed({
                 sid: "<session_id>",
