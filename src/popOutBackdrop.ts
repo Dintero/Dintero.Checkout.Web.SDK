@@ -1,13 +1,9 @@
-type BackdropEvent = {
-    focusLabel: string;
-    descriptionLabel: string;
-    closeLabel: string;
-}
+import { ShowPopOutButton } from "./checkout";
 
 type BackdropOptions = {
     close: () => void;
     focus: () => void;
-    event: BackdropEvent;
+    event: ShowPopOutButton;
 }
 
 const getBackdropZIndex = () => {
@@ -277,7 +273,7 @@ const createBackdropView = (options: BackdropOptions) => {
     return backdrop;
 }
 
-export const setBackdropLabels = (event: BackdropEvent) => {
+export const setBackdropLabels = (event: ShowPopOutButton) => {
     const focusButton = document.getElementById(FOCUS_CHECKOUT_BUTTON_ID);
     if (focusButton) {
         focusButton.innerText = event.focusLabel;

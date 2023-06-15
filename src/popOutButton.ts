@@ -1,8 +1,7 @@
-export const OPEN_POP_OUT_BUTTON_ID = "dintero-checkout-sdk-launch-pop-out";
+const OPEN_POP_OUT_BUTTON_ID = "dintero-checkout-sdk-launch-pop-out";
 
 type PopOutButtonOptions = {
     container: HTMLElement;
-    id: string;
     label: string;
     disabled: string;
     top: string;
@@ -13,8 +12,8 @@ type PopOutButtonOptions = {
 }
 
 
-const configureButton = (button: HTMLElement, { id, label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions) => {
-    button.setAttribute('id', id);
+const configureButton = (button: HTMLElement, { label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions) => {
+    button.setAttribute('id', OPEN_POP_OUT_BUTTON_ID);
 
     // Is clickable
     if (disabled === 'true') {
@@ -48,10 +47,10 @@ const configureButton = (button: HTMLElement, { id, label, disabled, top, left, 
 
 }
 
-export const addButton = (options: PopOutButtonOptions) => {
+export const addPopOutButton = (options: PopOutButtonOptions) => {
     // Will add or update existing button
-    const { container, id } = options;
-    const exists = document.getElementById(id);
+    const { container } = options;
+    const exists = document.getElementById(OPEN_POP_OUT_BUTTON_ID);
     const button = exists || document.createElement('button');
     configureButton(button, options);
     if (!exists) {
@@ -60,9 +59,9 @@ export const addButton = (options: PopOutButtonOptions) => {
 }
 
 
-export const setButtonDisabled = (id: string, disabled: boolean) => {
+export const setPopOutButtonDisabled = (disabled: boolean) => {
     try {
-        const button = document.getElementById(id);
+        const button = document.getElementById(OPEN_POP_OUT_BUTTON_ID);
         if (button) {
             if (disabled) {
                 button.setAttribute('disabled', disabled.toString())
@@ -76,9 +75,9 @@ export const setButtonDisabled = (id: string, disabled: boolean) => {
     }
 }
 
-export const removeButton = (id: string) => {
+export const removePopOutButton = () => {
     try {
-        const button = document.getElementById(id);
+        const button = document.getElementById(OPEN_POP_OUT_BUTTON_ID);
         if (button) {
             button.remove();
         }

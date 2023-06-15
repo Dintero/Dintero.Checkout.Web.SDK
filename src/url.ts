@@ -39,7 +39,10 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     return `${endpoint}/?sid=${sid}${params ? "&" + params : ""}`;
 };
 
-export const getPopOutUrl = ({ sid, endpoint, language }: SessionUrlOptions) => {
+export const getPopOutUrl = ({ sid, endpoint, language, shouldCallValidateSession }: SessionUrlOptions) => {
+    if (shouldCallValidateSession) {
+        return `${endpoint}?loader=true`;
+    }
     const params = new URLSearchParams();
     params.append('ui', 'fullscreen');
     params.append('role', 'popOutPayment');

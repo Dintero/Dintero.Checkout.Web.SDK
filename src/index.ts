@@ -16,9 +16,10 @@ import {
     ActivePaymentProductType,
     ValidateSession,
     SessionValidationCallback,
-    SessionEvent
+    SessionEvent,
+    ShowPopOutButton
 } from "./checkout";
-import { getSessionUrl, windowLocationAssign } from "./url";
+import { getPopOutUrl, getSessionUrl, windowLocationAssign } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
 import {
     subscribe,
@@ -36,7 +37,7 @@ import {
     // postClosePopOutEvent,
 } from "./subscribe";
 import { createBackdrop, removeBackdrop, setBackdropLabels } from "./popOutBackdrop";
-import { OPEN_POP_OUT_BUTTON_ID, addButton, removeButton, setButtonDisabled } from "./popOutButton";
+import { addPopOutButton, removePopOutButton, setPopOutButtonDisabled } from "./popOutButton";
 import { openPopOut } from "./popOut";
 import { Session } from "./session";
 
@@ -60,6 +61,7 @@ export interface DinteroCheckoutInstance {
         eventTypes: CheckoutEvents[];
     })[];
     session: Session | undefined;
+    popOutWindow: Window | undefined;
 }
 
 export interface DinteroCheckoutOptions {
@@ -150,7 +152,7 @@ const setIframeHeight: SubscriptionHandler = (event: any, checkout: DinteroCheck
             behavior: 'smooth',
         });
     } catch (e){
-        // Ignore erorr silenty bug log it to the console.
+        // Ignore error silently bug log it to the console.
         console.error(e);
     }
 };
@@ -181,7 +183,6 @@ const safelyInvoke = (fn: () => void) => {
 const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutInstance) => {
     // Change language in embed if changed in pop out
     const popOutChangedLanguageHandler = {
-        internalPopOutHandler: true,
         eventTypes: [InternalCheckoutEvents.LanguageChanged],
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             // Tell the embedded checkout to change language.
@@ -197,33 +198,13 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
         CheckoutEvents.SessionPaymentError
     ];
     const popOutCompletedHandler = {
-        internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
                 // Remove open pop out button rendered by SDK
-                removeButton(OPEN_POP_OUT_BUTTON_ID);
-
-                // Show result animation in pop out.
-                let timeout = 1000;
-                try {
-                    const messageHref = new URL(eventData.href);
-                    const popOutResultUrl = checkout.options.endpoint + '/popOutResult/' + messageHref.search;
-                    source.location.href = popOutResultUrl;
-                } catch (e) {
-                    // Ignore if we cannot set the origin.
-                    console.error(e);
-                    timeout = 0;
-                }
-
-                // Close pop out after a timeout.
-                window.setTimeout(() => {
-                    try {
-                        source.close();
-                    } catch (e) {
-                        console.error(e);
-                    }
-                }, timeout);
+                removePopOutButton();
+                // Close pop out window
+                source.close();
             }
             else {
                 console.error('Payment Complete event missing href property');
@@ -231,10 +212,6 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
         }
     };
 
-    // Check if handler is popOutHandler or a general one.
-    const checkInternalPopOutHandler = (handlerObject: any) => {
-        return handlerObject.internalPopOutHandler || false;
-    }
 
     // Listens to messages from pop out window and routes the events to dedicated handlers
     const messageRouter = (event: MessageEvent) => {
@@ -256,25 +233,9 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
                 .forEach(handlerObject => {
                     if ((handlerObject.eventTypes as string[]).includes(event.data.type)) {
                         // Invoking the handler function if the event type matches the handler.
-
-                        // If the payment is completed we delay the delivery of the event so
-                        // we have time to show a success/failure animation before the pop out
-                        // is closed.
-                        const isPaymentCompleted = paymentCompletedEvents.includes(event.data.type);
-                        const isInternalPopOutHandler = checkInternalPopOutHandler(handlerObject);
-                        if (isPaymentCompleted && !isInternalPopOutHandler) {
-                            // Delay invocation of checkout payment complete handlers.
-                            window.setTimeout(() => {
-                                safelyInvoke(() => {
-                                    handlerObject.handler(event.data, checkout)
-                                })
-                            }, 1000);
-                        } else {
-                            // Immediate invocation for other handlers.
                             safelyInvoke(() => {
                                 handlerObject.handler(event.data, checkout)
                             })
-                        }
                 }
             });
         }
@@ -291,21 +252,8 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
 /**
  * Configures and shows the pop out with the payment options.
  */
-const showPopOut = (event: any, checkout: DinteroCheckoutInstance) => {
+const showPopOut = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
     postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
-    const { close, focus } = openPopOut({
-        sid: checkout.options.sid,
-        endpoint: checkout.options.endpoint,
-        shouldCallValidateSession: false,
-        language: event.language,
-        onOpen: (popOutWindow: Window) => createPopOutMessageHandler(popOutWindow, checkout),
-        onClose: () => {
-            removeBackdrop();
-            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
-            setButtonDisabled(OPEN_POP_OUT_BUTTON_ID, false);
-        }
-    })
-    createBackdrop({ focus, close, event });
 }
 
 /**
@@ -313,15 +261,25 @@ const showPopOut = (event: any, checkout: DinteroCheckoutInstance) => {
  * host application to validate the content of the payment session before the
  * pop out is opened.
  */
-const createPopOutValidationCallback = (event: any, checkout: DinteroCheckoutInstance) => {
+const createPopOutValidationCallback = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
     return (result: SessionValidationCallback) => {
         // Tell the embedded iframe about the validation result so it can show an error message if
         // the validation failed.
         postValidationResult(checkout.iframe, checkout.options.sid, result);
-        if (result.success) {
-            // Open the pop out.
-            showPopOut(event, checkout);
+        if (result.success && checkout.popOutWindow) {
+            // Redirect user to session in pop out window
+            checkout.popOutWindow.location.href = getPopOutUrl({
+                sid: checkout.options.sid,
+                endpoint: checkout.options.endpoint,
+                shouldCallValidateSession: false,
+                language: event.language,
+            });
+
         } else {
+            // Close pop out
+            if (checkout.popOutWindow) {
+                checkout.popOutWindow.close();
+            }
             // Log validation error to console log.
             console.error(result.clientValidationError);
         }
@@ -331,8 +289,9 @@ const createPopOutValidationCallback = (event: any, checkout: DinteroCheckoutIns
 /**
  * Handle click event on the SDK rendered pop out button
  */
-const handlePopOutButtonClick = (event: any, checkout: DinteroCheckoutInstance) => {
+const handlePopOutButtonClick = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
     // Disable button while pop out is open
+    showPopOut(event, checkout);
 
     if (checkout.options.onValidateSession) {
         // Let the host application validate the payment session before opening checkout.
@@ -357,19 +316,19 @@ const handlePopOutButtonClick = (event: any, checkout: DinteroCheckoutInstance) 
                 clientValidationError: 'Validation runtime error'
             });
         }
-    } else {
-        // Regular flow without validation
-        showPopOut(event, checkout);
     }
 }
 
+
+function isShowPopOutButton(event: any): event is ShowPopOutButton {
+    return event && event.type === InternalCheckoutEvents.ShowPopOutButton;
+}
 /**
  * Display the SDK rendered pop out button on top of the embedded iframe
  */
 const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
-    if (event.type === InternalCheckoutEvents.ShowPopOutButton) {
-        addButton({
-            id: OPEN_POP_OUT_BUTTON_ID,
+    if (isShowPopOutButton(event)) {
+        addPopOutButton({
             container: checkout.options.container,
             label: event.openLabel,
             top: event.top,
@@ -388,7 +347,7 @@ const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroChec
  */
 const handleRemoveButton: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (event.type === InternalCheckoutEvents.HidePopOutButton) {
-        removeButton(OPEN_POP_OUT_BUTTON_ID);
+        removePopOutButton();
     }
 };
 
@@ -682,6 +641,7 @@ export const embed = async (
         options,
         handlers,
         session: undefined,
+        popOutWindow: undefined,
     };
 
     handlers.forEach(({ handler, eventTypes }) => {

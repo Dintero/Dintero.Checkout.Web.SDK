@@ -72,6 +72,7 @@ export const openPopOut = (options: PopOutOptions) => {
 
     return {
         close: closePopOut,
-        focus: focusPopOut
+        focus: focusPopOut,
+        popOutWindow
     };
 };
