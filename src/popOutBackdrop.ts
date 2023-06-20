@@ -30,16 +30,18 @@ const getBackdropZIndex = () => {
 
 const STYLE_ID = 'dintero-checkout-sdk-style';
 const BACKDROP_ID = 'dintero-checkout-sdk-backdrop';
-const BACKDROP_DESCRIPTION = 'dintero-checkout-sdk-backdrop-desciption';
+const BACKDROP_DESCRIPTION = 'dintero-checkout-sdk-backdrop-description';
 const FOCUS_CHECKOUT_BUTTON_ID = 'dintero-checkout-sdk-backdrop-focus';
 const CLOSE_BACKDROP_BUTTON_ID = 'dintero-checkout-sdk-backdrop-close';
 
 const wrapPreventDefault = (fn: () => void) => {
     // Creates a wrapped function that will invoke preventDefault() to stop
-    // the event from bubling up the DOM tree.
+    // the event from bubbling up the DOM tree.
     return (e: MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         fn();
+        return false;
     }
 }
 

@@ -33,9 +33,13 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     const validate = shouldCallValidateSession ? `client_side_validation=true` : undefined;
     const role = popOut ? 'role=popOutLauncher' : undefined;
     const params = [languageParam, uiParam, sdk, validate, role].filter(x => x).join("&");
-    // TODO: Remove this temporary hack to use the checkout from a PR branch
-    // return `${endpoint}/v1/view/${sid}${params ? "?" + params : ""}`;
-    console.log('URL TMP override');
+    if (endpoint === "https://checkout.dintero.com") {
+        // Default endpoint will redirect via the view endpoint
+        return `${endpoint}/v1/view/${sid}${params ? "?" + params : ""}`;
+    }
+    // When a custom endpoint is set skip the view redirect endpoint since
+    // custom endpoints like localhost and PR builds does not support the
+    // serverside view flow.
     return `${endpoint}/?sid=${sid}${params ? "&" + params : ""}`;
 };
 

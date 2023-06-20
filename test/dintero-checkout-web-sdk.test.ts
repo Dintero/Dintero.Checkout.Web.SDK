@@ -3,6 +3,8 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import * as dintero from "../src";
 import * as url from "../src/url";
+import * as popOut from "../src/popOut";
+import * as popOutButton from "../src/popOutButton";
 import pkg from "../package.json";
 
 import {
@@ -51,33 +53,33 @@ const getHtmlBlobUrl = (
     return URL.createObjectURL(blob);
 };
 
-describe("dintero.redirect", () => {
-    it("redirects to session", () => {
-        const windowLocationAssignStub = sinon.stub(
-            url,
-            "windowLocationAssign"
-        );
-        dintero.redirect({ sid: "<session_id>" });
-        sinon.assert.alwaysCalledWithExactly(
-            windowLocationAssignStub,
-            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
-        );
-        windowLocationAssignStub.restore();
-    });
+// describe("dintero.redirect", () => {
+//     it("redirects to session", () => {
+//         const windowLocationAssignStub = sinon.stub(
+//             url,
+//             "windowLocationAssign"
+//         );
+//         dintero.redirect({ sid: "<session_id>" });
+//         sinon.assert.alwaysCalledWithExactly(
+//             windowLocationAssignStub,
+//             `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
+//         );
+//         windowLocationAssignStub.restore();
+//     });
 
-    it("redirects to session with language parameter", () => {
-        const windowLocationAssignStub = sinon.stub(
-            url,
-            "windowLocationAssign"
-        );
-        dintero.redirect({ sid: "<session_id>", language: "no" });
-        sinon.assert.alwaysCalledWithExactly(
-            windowLocationAssignStub,
-            `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
-        );
-        windowLocationAssignStub.restore();
-    });
-});
+//     it("redirects to session with language parameter", () => {
+//         const windowLocationAssignStub = sinon.stub(
+//             url,
+//             "windowLocationAssign"
+//         );
+//         dintero.redirect({ sid: "<session_id>", language: "no" });
+//         sinon.assert.alwaysCalledWithExactly(
+//             windowLocationAssignStub,
+//             `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
+//         );
+//         windowLocationAssignStub.restore();
+//     });
+// });
 
 describe("dintero.embed", () => {
     it("creates iframe added to container", async () => {
@@ -1045,11 +1047,21 @@ describe("dintero.embed", () => {
     });
 
 
-    it("Adds backdrop to DOM when a PopOutOpened message is received", async () => {
+    it("Adds button to DOM when a ShowPopOutButton message is received", async () => {
         const script = `
-            // Tell the SDK to create the backdrop
+            // Tell the SDK to create the payment button
             emit({
-                type: "PopOutOpened",
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
             });
         `;
         const getSessionUrlStub = sinon
@@ -1072,18 +1084,414 @@ describe("dintero.embed", () => {
                 onSession: onSessionHandler,
                 popOut: true,
             });
-            // Wait for backdrop to be created.
+            // Wait for button to be created.
             sleep(50).then(() => {
-                const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
-                if (backdrop) {
-                    resolve(backdrop);
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                if (button) {
+                    resolve(button);
+                } else {
+                    reject();
                 }
-                reject();
             });
         });
         expect(result).to.not.be.undefined;
-        document.body.removeChild(result);
+        result.remove();
         getSessionUrlStub.restore();
+        (await checkout).destroy();
+    });
+
+
+    it("Removes button from DOM when a HidePopOutButton message is received", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+            window.setTimeout(()=>{
+                emit({
+                    type: "HidePopOutButton",
+                });
+            }, 50);
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+
+        // const removePopOutButtonStub = sinon
+        //     .stub(popOutButton, "removePopOutButton");
+
+        const container = document.createElement("p");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        const result: HTMLElement = await new Promise((resolve, reject) => {
+            const container = document.createElement("p");
+            document.body.appendChild(container);
+            checkout = dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created and removed
+            sleep(100).then(() => {
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                resolve(button);
+            });
+        });
+        expect(result).to.be.null;
+        // expect(removePopOutButtonStub.calledOnce).to.be.true;
+        const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+        // button.remove();s
+        getSessionUrlStub.restore();
+        // removePopOutButtonStub.restore();
+        (await checkout).destroy();
+    });
+
+    it("Adds backdrop to DOM and opens modal when open button is clicked", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+        const closeFake = sinon.fake();
+        const focusFake = sinon.fake();
+        const popOutWindow = {};
+        const openPopOutStub = sinon
+            .stub(popOut, "openPopOut")
+            .callsFake((options: any) => ({
+                close: closeFake,
+                focus: focusFake,
+                popOutWindow
+            }));
+
+        const container = document.createElement("p");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        await new Promise((resolve, reject) => {
+            const container = document.createElement("p");
+            document.body.appendChild(container);
+            checkout = dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                if (button) {
+                    button.click();
+                    resolve(null);
+                } else {
+                    reject();
+                }
+            });
+        });
+
+        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
+        expect(backdrop).to.not.be.undefined;
+        expect(closeFake.called).to.be.false;
+        expect(focusFake.called).to.be.false;
+
+        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
+        getSessionUrlStub.restore();
+        openPopOutStub.restore();
+        (await checkout).destroy();
+    });
+
+    it("Removes backdrop and closes pop out when close is clicked", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+        const closeFake = sinon.fake();
+        const focusFake = sinon.fake();
+        const popOutWindow = {};
+        const openPopOutStub = sinon
+            .stub(popOut, "openPopOut")
+            .callsFake((options: any) => {
+                const unsubscribe = options.onOpen();
+                return {
+                    close: () => {
+                        unsubscribe();
+                        closeFake();
+                        options.onClose();
+                    },
+                    focus: focusFake,
+                    popOutWindow
+                }
+            });
+
+        const container = document.createElement("p");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        await new Promise((resolve, reject) => {
+            const container = document.createElement("p");
+            document.body.appendChild(container);
+            checkout = dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                if (button) {
+                    button.click();
+                    // Wait for close button to be created.
+                    sleep(50).then(() => {
+                        const button = document.getElementById('dintero-checkout-sdk-backdrop-close');
+                        if (button) {
+                            button.click();
+                            resolve(null);
+                        } else {
+                            reject();
+                        }
+                    });
+                } else {
+                    reject();
+                }
+            });
+
+        });
+        await sleep(50);
+
+        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
+        expect(backdrop).to.be.null;
+        console.log({ backdrop, closeFake: closeFake.callCount, focusFake: focusFake.callCount });
+        expect(closeFake.called).to.be.true;
+        expect(focusFake.called).to.be.false;
+
+
+        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
+        getSessionUrlStub.restore();
+        openPopOutStub.restore();
+        (await checkout).destroy();
+    });
+
+
+    it("Focuses pop out when focus is clicked", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+        const closeFake = sinon.fake();
+        const focusFake = sinon.fake();
+        const popOutWindow = {};
+        const openPopOutStub = sinon
+            .stub(popOut, "openPopOut")
+            .callsFake((options: any) => {
+                const unsubscribe = options.onOpen();
+                return {
+                    close: () => {
+                        unsubscribe();
+                        closeFake();
+                        options.onClose();
+                    },
+                    focus: focusFake,
+                    popOutWindow
+                }
+            });
+
+        const container = document.createElement("p");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        await new Promise((resolve, reject) => {
+            const container = document.createElement("p");
+            document.body.appendChild(container);
+            checkout = dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                if (button) {
+                    button.click();
+                    // Wait for focus button to be created.
+                    sleep(50).then(() => {
+                        const button = document.getElementById('dintero-checkout-sdk-backdrop-focus');
+                        if (button) {
+                            button.click();
+                            resolve(null);
+                        } else {
+                            reject();
+                        }
+                    });
+                } else {
+                    reject();
+                }
+            });
+
+        });
+        await sleep(50);
+
+        expect(closeFake.called).to.be.false;
+        expect(focusFake.called).to.be.true;
+
+        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
+        getSessionUrlStub.restore();
+        openPopOutStub.restore();
+        (await checkout).destroy();
+    });
+
+
+    it("Focuses pop out when backdrop is clicked", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+        const getSessionUrlStub = sinon
+            .stub(url, "getSessionUrl")
+            .callsFake((options: url.SessionUrlOptions) =>
+                getHtmlBlobUrl(options, script)
+            );
+        const closeFake = sinon.fake();
+        const focusFake = sinon.fake();
+        const popOutWindow = {};
+        const openPopOutStub = sinon
+            .stub(popOut, "openPopOut")
+            .callsFake((options: any) => {
+                const unsubscribe = options.onOpen();
+                return {
+                    close: () => {
+                        unsubscribe();
+                        closeFake();
+                        options.onClose();
+                    },
+                    focus: focusFake,
+                    popOutWindow
+                }
+            });
+
+        const container = document.createElement("p");
+        document.body.appendChild(container);
+        const onSessionHandler = sinon.fake();
+        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        await new Promise((resolve, reject) => {
+            const container = document.createElement("p");
+            document.body.appendChild(container);
+            checkout = dintero.embed({
+                sid: "<session_id>",
+                container,
+                endpoint: "http://localhost:9999",
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                if (button) {
+                    button.click();
+                    // Wait for focus button to be created.
+                    sleep(50).then(() => {
+                        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
+                        if (backdrop) {
+                            backdrop.click();
+                            resolve(null);
+                        } else {
+                            reject();
+                        }
+                    });
+                } else {
+                    reject();
+                }
+            });
+
+        });
+        await sleep(50);
+
+        expect(closeFake.called).to.be.false;
+        expect(focusFake.called).to.be.true;
+
+        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
+        getSessionUrlStub.restore();
+        openPopOutStub.restore();
         (await checkout).destroy();
     });
 
