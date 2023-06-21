@@ -416,9 +416,10 @@ const handleWithResult = (
 export const embed = async (
     options: DinteroEmbedCheckoutOptions
 ): Promise<DinteroCheckoutInstance> => {
-    if (!options.endpoint) {
-        options.endpoint = "https://checkout.dintero.com"
-    }
+    const internalOptions = {
+        endpoint: "https://checkout.dintero.com",
+        ...options
+    };
     const {
         container,
         sid,
@@ -435,7 +436,7 @@ export const embed = async (
         onActivePaymentType,
         onValidateSession,
         popOut
-    } = options;
+    } = internalOptions;
     let checkout: DinteroCheckoutInstance | undefined;
     const subscriptions: Subscription[] = [];
 
@@ -462,7 +463,7 @@ export const embed = async (
      */
     const destroy = () => {
         if (iframe) {
-            if (options.popOut) {
+            if (internalOptions.popOut) {
                 // Try to remove backdrop if it exists
                 removeBackdrop();
             }
@@ -661,7 +662,7 @@ export const embed = async (
         refreshSession,
         setActivePaymentProductType,
         submitValidationResult,
-        options,
+        options: internalOptions,
         handlers,
         session: undefined,
         popOutWindow: undefined,
