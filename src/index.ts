@@ -33,8 +33,6 @@ import {
     postOpenPopOutEvent,
     postClosePopOutEvent,
     postValidatePopOutEvent,
-    // postFocusPopOutEvent,
-    // postClosePopOutEvent,
 } from "./subscribe";
 import { createBackdrop, removeBackdrop, setBackdropLabels } from "./popOutBackdrop";
 import { addPopOutButton, removePopOutButton, setPopOutButtonDisabled } from "./popOutButton";
