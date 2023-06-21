@@ -339,10 +339,13 @@ const handlePopOutButtonClick = (event: ShowPopOutButton, checkout: DinteroCheck
     }
 }
 
-
-function isShowPopOutButton(event: any): event is ShowPopOutButton {
+/**
+ * Type guard for ShowPopOutButton
+ */
+const isShowPopOutButton = (event: any): event is ShowPopOutButton => {
     return event && event.type === InternalCheckoutEvents.ShowPopOutButton;
 }
+
 /**
  * Display the SDK rendered pop out button on top of the embedded iframe
  */
