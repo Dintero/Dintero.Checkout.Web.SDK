@@ -53,33 +53,33 @@ const getHtmlBlobUrl = (
     return URL.createObjectURL(blob);
 };
 
-// describe("dintero.redirect", () => {
-//     it("redirects to session", () => {
-//         const windowLocationAssignStub = sinon.stub(
-//             url,
-//             "windowLocationAssign"
-//         );
-//         dintero.redirect({ sid: "<session_id>" });
-//         sinon.assert.alwaysCalledWithExactly(
-//             windowLocationAssignStub,
-//             `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
-//         );
-//         windowLocationAssignStub.restore();
-//     });
+describe("dintero.redirect", () => {
+    it("redirects to session", () => {
+        const windowLocationAssignStub = sinon.stub(
+            url,
+            "windowLocationAssign"
+        );
+        dintero.redirect({ sid: "<session_id>" });
+        sinon.assert.alwaysCalledWithExactly(
+            windowLocationAssignStub,
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
+        );
+        windowLocationAssignStub.restore();
+    });
 
-//     it("redirects to session with language parameter", () => {
-//         const windowLocationAssignStub = sinon.stub(
-//             url,
-//             "windowLocationAssign"
-//         );
-//         dintero.redirect({ sid: "<session_id>", language: "no" });
-//         sinon.assert.alwaysCalledWithExactly(
-//             windowLocationAssignStub,
-//             `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
-//         );
-//         windowLocationAssignStub.restore();
-//     });
-// });
+    it("redirects to session with language parameter", () => {
+        const windowLocationAssignStub = sinon.stub(
+            url,
+            "windowLocationAssign"
+        );
+        dintero.redirect({ sid: "<session_id>", language: "no" });
+        sinon.assert.alwaysCalledWithExactly(
+            windowLocationAssignStub,
+            `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
+        );
+        windowLocationAssignStub.restore();
+    });
+});
 
 describe("dintero.embed", () => {
     it("creates iframe added to container", async () => {
