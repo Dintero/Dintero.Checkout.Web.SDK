@@ -235,11 +235,12 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
                 ...checkout.handlers
             ]
                 .forEach(handlerObject => {
-                    if ((handlerObject.eventTypes as string[]).includes(event.data.type)) {
+                    if ((handlerObject.eventTypes as string[]).includes(event.data.type) && handlerObject.handler) {
                         // Invoking the handler function if the event type matches the handler.
                         safelyInvoke(() => {
                             handlerObject.handler(event.data, checkout)
                         })
+
                 }
             });
         }
@@ -257,23 +258,6 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
  * Configures and shows the pop out with the payment options.
  */
 const showPopOut = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
-    postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
-    const { close, focus, popOutWindow } = openPopOut({
-        sid: checkout.options.sid,
-        endpoint: checkout.options.endpoint,
-        shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
-        language: event.language,
-        onOpen: (popOutWindow: Window) => createPopOutMessageHandler(popOutWindow, checkout),
-        onClose: () => {
-            removeBackdrop();
-            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
-            setPopOutButtonDisabled(false);
-            checkout.popOutWindow = undefined;
-        },
-    })
-    // Add pop out window to checkout instance
-    checkout.popOutWindow = popOutWindow;
-    createBackdrop({ focus, close, event });
 }
 
 /**
