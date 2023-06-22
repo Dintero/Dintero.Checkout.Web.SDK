@@ -43,9 +43,11 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     return `${endpoint}/?sid=${sid}${params ? "&" + params : ""}`;
 };
 
+const padTralingSlash = (endpoint: string) => endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
+
 export const getPopOutUrl = ({ sid, endpoint, language, shouldCallValidateSession }: SessionUrlOptions) => {
     if (shouldCallValidateSession) {
-        return `${endpoint}?loader=true`;
+        return `${padTralingSlash(endpoint)}?loader=true`;
     }
     const params = new URLSearchParams();
     params.append('ui', 'fullscreen');
