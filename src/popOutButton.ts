@@ -36,9 +36,9 @@ const configureButton = (button: HTMLElement, { label, disabled, top, left, righ
 
     // Position
     button.style.position = 'absolute';
-    button.style.top = top;
-    button.style.left = left;
-    button.style.right = right;
+    button.style.top = top + 'px';
+    button.style.left = left + 'px';
+    button.style.right = right + 'px';
 
     // Appearance from checkout
     for (const [key, value] of Object.entries(styles)) {
