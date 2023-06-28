@@ -14,6 +14,7 @@ type PopOutButtonOptions = {
 
 const configureButton = (button: HTMLElement, { label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions) => {
     button.setAttribute('id', OPEN_POP_OUT_BUTTON_ID);
+    button.setAttribute('type', 'button');
 
     // Is clickable
     if (disabled === 'true') {
@@ -23,9 +24,18 @@ const configureButton = (button: HTMLElement, { label, disabled, top, left, righ
     }
 
     // Click handler
-    button.onclick = () => {
+    button.onclick = (event) => {
+        // Do not submit any form on the page using the SDK
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Update look
         button.style.boxShadow = 'inset 0 0 10px rgba(34, 84, 65, 0.9)';
+
+        // Invoke handler
         onClick();
+
+        // Reset look
         window.setTimeout(() => {
             button.style.boxShadow = 'none';
         }, 200);

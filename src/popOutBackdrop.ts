@@ -179,6 +179,7 @@ const createCloseButtonDOM = (label: string) => {
     // Close button for the top right corner
     const button = document.createElement('button');
     button.setAttribute("id", CLOSE_BACKDROP_BUTTON_ID);
+    button.setAttribute("type", "button");
     button.setAttribute("aria-label", label);
     button.innerHTML = `
         <svg
@@ -225,10 +226,11 @@ const createFocusButtonDOM = (text: string) => {
     // Mock button to give the user a call to action element to click, even
     // though the entire backdrop (except the close button) returns focus to the
     // checkout.
-    const div = document.createElement('button');
-    div.setAttribute("id", FOCUS_CHECKOUT_BUTTON_ID);
-    div.innerText = text;
-    return div;
+    const button = document.createElement('button');
+    button.setAttribute("id", FOCUS_CHECKOUT_BUTTON_ID);
+    button.setAttribute("type", "button");
+    button.innerText = text;
+    return button;
 }
 
 const focusTrap = (e: KeyboardEvent) => {
