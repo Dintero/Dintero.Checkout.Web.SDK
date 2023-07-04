@@ -418,3 +418,19 @@ export const redirect = (options: DinteroCheckoutOptions) => {
     // Redirect the current browser window to the checkout session url.
     windowLocationAssign(getSessionUrl({ sid, endpoint, language, shouldCallValidateSession: false }));
 };
+
+export type {
+    SessionNotFound,
+    SessionLoaded,
+    SessionUpdated,
+    SessionCancel,
+    SessionPaymentOnHold,
+    SessionPaymentAuthorized,
+    SessionPaymentError,
+    SessionLocked,
+    SessionLockFailed,
+    ActivePaymentProductType,
+    ValidateSession,
+    SessionValidationCallback,
+} from "./checkout";
+
