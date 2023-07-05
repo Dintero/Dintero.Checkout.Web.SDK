@@ -123,7 +123,7 @@ const checkout = await embed({
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
-    onPayment: (event: SessionPayment, checkout) => {
+    onPayment: (event: SessionPaymentAuthorized | SessionPaymentOnHold, checkout) => {
         console.log("transaction_id", event.transaction_id);
         console.log("href", event.href);
         checkout.destroy();
@@ -140,17 +140,17 @@ const checkout = await embed({
         console.log("session not found (expired)", event.type);
         checkout.destroy();
     },
-    onSessionLocked: (event, checkout, callback) => {
+    onSessionLocked: (event: SessionLocked, checkout, callback) => {
         console.log("pay_lock_id", event.pay_lock_id);
         callback(); // refresh session
     },
-    onSessionLockFailed: (event, checkout) => {
+    onSessionLockFailed: (event: SessionLockFailed, checkout) => {
         console.log("session lock failed");
     },
-    onActivePaymentType: function(event, checkout) {
+    onActivePaymentType: function(event: ActivePaymentProductType, checkout) {
         console.log("payment product type selected", event.payment_product_type);
     },
-    onValidateSession: function(event, checkout, callback) {
+    onValidateSession: function(event: ValidateSession, checkout, callback) {
         console.log("validating session", event.session);
         callback({
             success: true,
