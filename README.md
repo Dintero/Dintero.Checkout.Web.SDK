@@ -1,4 +1,4 @@
-# Dintero Checkout JavaScript SDK for frontend applications [![Actions Status](https://github.com/Dintero/Dintero.Checkout.Web.SDK/workflows/CI/badge.svg?branch=master)](https://github.com/Dintero/Dintero.Checkout.Web.SDK/actions?query=branch%3Amaster+workflow%3ACI+)
+# Dintero Checkout JavaScript SDK for frontend applications [![Actions Status](https://github.com/Dintero/Dintero.Checkout.Web.SDK/workflows/CI/badge.svg?branch=master)](https://github.com/Dintero/Dintero.Checkout.Web.SDK/actions?query=branch%3Amaster+workflow%3ACI+) [![npm latest version](https://img.shields.io/npm/v/@dintero/checkout-web-sdk/latest.svg)](https://www.npmjs.com/package/@dintero/checkout-web-sdk)
 
 Use this SDK in your frontend application to
 
@@ -293,8 +293,8 @@ The SDK includes a [polyfill for promises](https://github.com/getify/native-prom
 ## Building from source
 
 ```bash
-npm install
-npm run build
+yarn install
+yarn run build
 ```
 
 The Dintero Checkout SDK is built with [microbundle](https://github.com/developit/microbundle).
