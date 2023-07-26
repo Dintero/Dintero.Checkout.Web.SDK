@@ -31,7 +31,7 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     const uiParam = ui ? `ui=${ui}` : "";
     const sdk = `sdk=${pkg.version}`;
     const validate = shouldCallValidateSession ? `client_side_validation=true` : undefined;
-    const role = popOut ? 'role=popOutLauncher' : undefined;
+    const role = popOut ? 'role=pop_out_launcher' : undefined;
     const params = [languageParam, uiParam, sdk, validate, role].filter(x => x).join("&");
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
@@ -51,7 +51,7 @@ export const getPopOutUrl = ({ sid, endpoint, language, shouldCallValidateSessio
     }
     const params = new URLSearchParams();
     params.append('ui', 'fullscreen');
-    params.append('role', 'popOutPayment');
+    params.append('role', 'pop_out_payment');
     params.append('sid', sid);
     params.append('sdk', pkg.version);
     if (language) {

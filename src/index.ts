@@ -717,16 +717,3 @@ export type {
     ValidateSession,
     SessionValidationCallback,
 } from "./checkout";
-
-/**
- * Redirect the customer to a payment session in the Dintero Checkout.
- */
-export const redirect = (options: DinteroCheckoutOptions) => {
-    const {
-        sid,
-        language,
-        endpoint = "https://checkout.dintero.com",
-    } = options;
-    // Redirect the current browser window to the checkout session url.
-    windowLocationAssign(getSessionUrl({ sid, endpoint, language, shouldCallValidateSession: false }));
-};
