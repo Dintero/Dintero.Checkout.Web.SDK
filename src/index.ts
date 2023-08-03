@@ -379,10 +379,6 @@ export const embed = async (
             eventTypes: [CheckoutEvents.ActivePaymentProductType],
         },
         {
-            handler: onActivePaymentType as SubscriptionHandler | undefined,
-            eventTypes: [CheckoutEvents.ActivePaymentProductType],
-        },
-        {
             handler: wrappedOnValidateSession as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.ValidateSession],
         },
