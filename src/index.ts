@@ -121,7 +121,8 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
 /**
  * An event handler that navigates to the href in the event.
  */
-const followHref: SubscriptionHandler = (event: any): void => {
+const followHref: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
+    cleanUpPopOut(checkout);
     if (event.href) {
         windowLocationAssign(event.href);
     }
@@ -189,7 +190,7 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
         }
     };
 
-    // Show result animation in pop out, then close pop out, and remove SDK rendered button when payment is completed.
+    // Close pop out, and remove SDK rendered button when payment is completed.
     const paymentCompletedEvents = [
         CheckoutEvents.SessionCancel,
         CheckoutEvents.SessionPaymentOnHold,
@@ -374,6 +375,22 @@ const handleRemoveButton: SubscriptionHandler = (event: any, checkout: DinteroCh
     }
 };
 
+const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
+    // Ensures that the pop out is no longer open when the payment is completed or the checkout is destroyed.
+    removePopOutButton();
+    removeBackdrop();
+    if (checkout.popOutWindow) {
+        try {
+            checkout.popOutWindow.close();
+            // Pop out message handlers will be removed when the pop out window is closed
+            // via the interval created by openPopOut.
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+
+
 /**
  *  Internal result event message handler wrapper, to replace the content of the iframe with a success/or
  *  error message. Only used when the embed function in the SDK has a dedicated handler for onPayment, onError etc.
@@ -385,6 +402,8 @@ const handleWithResult = (
     handler: SubscriptionHandler
 ): SubscriptionHandler => {
     return (event: any, checkout: DinteroCheckoutInstance) => {
+        cleanUpPopOut(checkout);
+
         const eventKeys = [
             "sid",
             "merchant_reference",
@@ -459,9 +478,10 @@ export const embed = async (
     }
 
     /**
-     * Function that removes the iframe and all event listeners.
+     * Function that removes the iframe, pop out and all event listeners.
      */
     const destroy = () => {
+        cleanUpPopOut(checkout);
         if (iframe) {
             if (internalOptions.popOut) {
                 // Try to remove backdrop if it exists
