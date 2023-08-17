@@ -391,42 +391,6 @@ const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
 }
 
 
-/**
- *  Internal result event message handler wrapper, to replace the content of the iframe with a success/or
- *  error message. Only used when the embed function in the SDK has a dedicated handler for onPayment, onError etc.
- *  If no custom handler is set the followHref handler is used instead.
- */
-const handleWithResult = (
-    sid: string,
-    endpoint: string,
-    handler: SubscriptionHandler
-): SubscriptionHandler => {
-    return (event: any, checkout: DinteroCheckoutInstance) => {
-        cleanUpPopOut(checkout);
-
-        const eventKeys = [
-            "sid",
-            "merchant_reference",
-            "transaction_id",
-            "error",
-        ];
-        const pairs = eventKeys.map((key) => [key, event[key]]);
-        if (event.type === CheckoutEvents.SessionCancel && !event.error) {
-            pairs.push(["error", "cancelled"]);
-        }
-        pairs.push(["language", checkout.language]);
-        pairs.push(["sdk", pkg.version]);
-        const urlQuery = pairs
-            .filter(([key, value]) => value)
-            .map(([key, value]) => `${key}=${value}`)
-            .join("&");
-        checkout.iframe.setAttribute(
-            "src",
-            `${endpoint}/embedResult/?${urlQuery}`
-        );
-        handler(event, checkout);
-    };
-};
 
 
 /**
@@ -458,6 +422,7 @@ export const embed = async (
     } = internalOptions;
     let checkout: DinteroCheckoutInstance | undefined;
     const subscriptions: Subscription[] = [];
+    let has_delivered_final_event = false;
 
     // Create iframe
     const { iframe, initiate } = createIframeAsync(
@@ -553,6 +518,47 @@ export const embed = async (
     const submitValidationResult = (result: SessionValidationCallback) => {
         postValidationResult(iframe, sid, result);
     }
+
+    /**
+     *  Internal result event message handler wrapper, to replace the content of the iframe with a success/or
+     *  error message. Only used when the embed function in the SDK has a dedicated handler for onPayment, onError etc.
+     *  If no custom handler is set the followHref handler is used instead.
+     */
+    const handleWithResult = (
+        sid: string,
+        endpoint: string,
+        handler: SubscriptionHandler
+    ): SubscriptionHandler => {
+        return (event: any, checkout: DinteroCheckoutInstance) => {
+            if (!has_delivered_final_event) {
+                has_delivered_final_event = true;
+                cleanUpPopOut(checkout);
+
+                const eventKeys = [
+                    "sid",
+                    "merchant_reference",
+                    "transaction_id",
+                    "error",
+                ];
+                const pairs = eventKeys.map((key) => [key, event[key]]);
+                if (event.type === CheckoutEvents.SessionCancel && !event.error) {
+                    pairs.push(["error", "cancelled"]);
+                }
+                pairs.push(["language", checkout.language]);
+                pairs.push(["sdk", pkg.version]);
+                const urlQuery = pairs
+                    .filter(([key, value]) => value)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join("&");
+                checkout.iframe.setAttribute(
+                    "src",
+                    `${endpoint}/embedResult/?${urlQuery}`
+                );
+                handler(event, checkout);
+            };
+        }
+    };
+
 
     const wrappedOnValidateSession = (
         event: ValidateSession,
