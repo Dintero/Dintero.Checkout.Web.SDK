@@ -1,4 +1,4 @@
-import { Session } from "./session";
+import type { Session } from "./session";
 
 export enum CheckoutEvents {
     SessionNotFound = "SessionNotFound",
