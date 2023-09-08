@@ -161,7 +161,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -196,7 +196,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -231,7 +231,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionNotFound;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -266,7 +266,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionCancel;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -305,7 +305,7 @@ describe("dintero.embed", () => {
                     getHtmlBlobUrl(options, script)
                 );
 
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 windowLocationAssignStub.callsFake(() => {
                     resolve(undefined);
                 });
@@ -345,7 +345,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             windowLocationAssignStub.callsFake(() => {
                 resolve(undefined);
             });
@@ -383,7 +383,7 @@ describe("dintero.embed", () => {
             event: SessionLocked;
             checkout: dintero.DinteroCheckoutInstance;
             callback: () => void;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -420,7 +420,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionLockFailed;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -455,7 +455,7 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: ActivePaymentProductType;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -485,7 +485,7 @@ describe("dintero.embed", () => {
             );
 
         const onSession = sinon.fake();
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero
@@ -527,7 +527,7 @@ describe("dintero.embed", () => {
             );
 
         const fakeHandler = sinon.fake();
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -561,7 +561,7 @@ describe("dintero.embed", () => {
             );
 
         const onSession = sinon.fake();
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -656,6 +656,11 @@ describe("dintero.embed", () => {
         getSessionUrlStub.restore();
     });
 
+    type Callback = {
+        event: unknown,
+        checkout: dintero.DinteroCheckoutInstance,
+    };
+
     ["SessionPaymentAuthorized", "SessionPaymentOnHold"].forEach((type) => {
         it(`shows embedResult onPayment ${type} message if handler is defined`, async () => {
             const script = `
@@ -672,7 +677,7 @@ describe("dintero.embed", () => {
                     getHtmlBlobUrl(options, script)
                 );
 
-            const { event, checkout } = await new Promise((resolve, reject) => {
+            const { checkout } = await new Promise<Callback>((resolve) => {
                 const container = document.createElement("div");
                 document.body.appendChild(container);
                 dintero.embed({
@@ -706,7 +711,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const { event, checkout } = await new Promise((resolve, reject) => {
+        const { checkout } = await new Promise<Callback>((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -739,7 +744,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const { event, checkout } = await new Promise((resolve, reject) => {
+        const { checkout } = await new Promise<Callback>((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -772,7 +777,7 @@ describe("dintero.embed", () => {
                 getHtmlBlobUrl(options, script)
             );
 
-        const { event, checkout } = await new Promise((resolve, reject) => {
+        const { checkout } = await new Promise<Callback>((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -807,7 +812,7 @@ describe("dintero.embed", () => {
             event: ValidateSession;
             checkout: dintero.DinteroCheckoutInstance;
             callback: (result: SessionValidationCallback) => void;
-        } = await new Promise((resolve, reject) => {
+        } = await new Promise((resolve) => {
             const container = document.createElement("div");
             document.body.appendChild(container);
             dintero.embed({
@@ -908,7 +913,7 @@ describe("dintero.embed", () => {
                 container,
                 endpoint: "http://localhost:9999",
             }).then((checkout) => {
-                checkout.lockSession().then((lockedEvent)=> {
+                checkout.lockSession().then((_)=> {
                     reject('lockSession() did not raise exception');
                 }).catch(err => {
                     resolve(err);
@@ -975,7 +980,7 @@ describe("dintero.embed", () => {
                 container,
                 endpoint: "http://localhost:9999",
             }).then((checkout) => {
-                checkout.refreshSession().then((lockedEvent)=> {
+                checkout.refreshSession().then((_)=> {
                     reject('refreshSession() did not raise exception');
                 }).catch(err => {
                     resolve(err);
@@ -989,7 +994,7 @@ describe("dintero.embed", () => {
 
 
     it("posts ack for received messages", async () => {
-        const mid = Math.floor(Math.random() * 1000000000000000000);
+        const mid = Math.floor(Math.random() * 1000000000000000);
         const script = `
             emit({
                 type: "SessionLoaded",
