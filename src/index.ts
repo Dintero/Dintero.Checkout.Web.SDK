@@ -50,7 +50,7 @@ export interface DinteroCheckoutInstance {
     refreshSession: () => Promise<SessionEvent>;
     setActivePaymentProductType: (paymentProductType: string) => void;
     submitValidationResult: (result: SessionValidationCallback) => void;
-    options: DinteroEmbedCheckoutOptions;
+    options: InternalDinteroEmbedCheckoutOptions;
     handlers: ({
         handler: SubscriptionHandler;
         eventTypes: InternalCheckoutEvents[];
@@ -116,6 +116,10 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
         checkout: DinteroCheckoutInstance,
         callback: (result: SessionValidationCallback) => void,
     ) => void;
+}
+
+interface InternalDinteroEmbedCheckoutOptions extends DinteroEmbedCheckoutOptions {
+    innerContainer: HTMLDivElement;
 }
 
 /**
@@ -353,7 +357,7 @@ const isShowPopOutButton = (event: any): event is ShowPopOutButton => {
 const handleShowButton: SubscriptionHandler = (event: any, checkout: DinteroCheckoutInstance): void => {
     if (isShowPopOutButton(event)) {
         addPopOutButton({
-            container: checkout.options.container,
+            container: checkout.options.innerContainer,
             label: event.openLabel,
             top: event.top,
             left: event.left,
@@ -399,8 +403,14 @@ const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
 export const embed = async (
     options: DinteroEmbedCheckoutOptions
 ): Promise<DinteroCheckoutInstance> => {
+    // Create inner container to offset any styling on the container.
+    const innerContainer = document.createElement('div');
+    innerContainer.style.position = 'relative';
+    innerContainer.style['box-sizing'] = 'border-box';
+
     const internalOptions = {
         endpoint: "https://checkout.dintero.com",
+        innerContainer: innerContainer,
         ...options
     };
     const {
@@ -420,13 +430,15 @@ export const embed = async (
         onValidateSession,
         popOut
     } = internalOptions;
+
     let checkout: DinteroCheckoutInstance | undefined;
     const subscriptions: Subscription[] = [];
     let has_delivered_final_event = false;
 
     // Create iframe
+    container.appendChild(innerContainer);
     const { iframe, initiate } = createIframeAsync(
-        container,
+        innerContainer,
         endpoint,
         getSessionUrl({
             sid,
@@ -438,9 +450,6 @@ export const embed = async (
         }),
     );
 
-    if (!container.style.position) {
-        container.style.position = 'relative';
-    }
 
     /**
      * Function that removes the iframe, pop out and all event listeners.
@@ -454,9 +463,10 @@ export const embed = async (
             }
             subscriptions.forEach((sub) => sub.unsubscribe());
             if (iframe.parentElement) {
-                container.removeChild(iframe);
+                innerContainer.removeChild(iframe);
             }
         }
+        container.removeChild(innerContainer);
     };
 
     /**
