@@ -119,7 +119,8 @@ const container = document.getElementById("checkout-container");
 const checkout = await embed({
     container,
     sid: "T11223344.<short-uuid>",
-    language: "no", \\ optional parameter, an ISO 639-1 two-letter language code
+    popOut: false, // optional parameter to enable pop out mode
+    language: "no", // optional parameter, an ISO 639-1 two-letter language code
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
