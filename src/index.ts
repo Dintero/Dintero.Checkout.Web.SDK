@@ -466,7 +466,9 @@ export const embed = async (
                 innerContainer.removeChild(iframe);
             }
         }
-        container.removeChild(innerContainer);
+        if(innerContainer.parentElement){
+            container.removeChild(innerContainer);
+        }
     };
 
     /**

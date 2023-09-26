@@ -97,7 +97,7 @@ describe("dintero.embed", () => {
             sid: "<session_id>",
             container,
         });
-        expect(checkout.iframe.parentElement).to.equal(container);
+        expect(checkout.iframe.parentElement.parentElement).to.equal(container);
         expect(checkout.iframe).to.be.instanceOf(HTMLIFrameElement);
         expect(checkout.iframe.src).to.equal(iframeSrc);
         sinon.assert.calledOnce(getSessionUrlStub);
