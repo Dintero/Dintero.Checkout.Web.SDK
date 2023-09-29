@@ -56,7 +56,8 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
         .embed({
             container,
             sid: "T11223344.<short-uuid>",
-            language: "no", \\ optional parameter, an ISO 639-1 two-letter language code
+            popOut: false, // optional parameter to enable pop out mode
+            language: "no", // optional parameter, an ISO 639-1 two-letter language code
             onSession: function(event, checkout) {
                 console.log("session", event.session);
             },
