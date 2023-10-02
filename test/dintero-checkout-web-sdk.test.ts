@@ -75,7 +75,7 @@ describe("dintero.redirect", () => {
         dintero.redirect({ sid: "<session_id>", language: "no" });
         sinon.assert.alwaysCalledWithExactly(
             windowLocationAssignStub,
-            `https://checkout.dintero.com/v1/view/<session_id>?language=no&sdk=${pkg.version}`
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no`
         );
         windowLocationAssignStub.restore();
     });
