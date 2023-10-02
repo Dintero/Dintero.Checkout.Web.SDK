@@ -33,6 +33,7 @@ import {
     postOpenPopOutEvent,
     postClosePopOutEvent,
     postValidatePopOutEvent,
+    postOpenPopOutFailedEvent,
 } from "./subscribe";
 import { createBackdrop, removeBackdrop, setBackdropLabels } from "./popOutBackdrop";
 import { addPopOutButton, removePopOutButton, setPopOutButtonDisabled } from "./popOutButton";
@@ -261,9 +262,8 @@ const createPopOutMessageHandler = (source: Window, checkout: DinteroCheckoutIns
 /**
  * Configures and shows the pop out with the payment options.
  */
-const showPopOut = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
-    postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
-    const { close, focus, popOutWindow } = openPopOut({
+const showPopOut = async (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
+    const { close, focus, popOutWindow } = await openPopOut({
         sid: checkout.options.sid,
         endpoint: checkout.options.endpoint,
         shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
@@ -276,9 +276,16 @@ const showPopOut = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) 
             checkout.popOutWindow = undefined;
         },
     })
-    // Add pop out window to checkout instance
-    checkout.popOutWindow = popOutWindow;
-    createBackdrop({ focus, close, event });
+    if(popOutWindow){
+        postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
+        // Add pop out window to checkout instance
+        checkout.popOutWindow = popOutWindow;
+        createBackdrop({ focus, close, event });
+        return true;
+    } else {
+        postOpenPopOutFailedEvent(checkout.iframe, checkout.options.sid);
+        return false;
+    }
 }
 
 /**
@@ -314,11 +321,11 @@ const createPopOutValidationCallback = (event: ShowPopOutButton, checkout: Dinte
 /**
  * Handle click event on the SDK rendered pop out button
  */
-const handlePopOutButtonClick = (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
+const handlePopOutButtonClick = async (event: ShowPopOutButton, checkout: DinteroCheckoutInstance) => {
     // Disable button while pop out is open
-    showPopOut(event, checkout);
+    const opened = await showPopOut(event, checkout);
 
-    if (checkout.options.onValidateSession) {
+    if (opened && checkout.options.onValidateSession) {
         // Let the host application validate the payment session before opening checkout.
 
         // Tell the embedded iframe that we are validating the session
@@ -393,8 +400,6 @@ const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
         }
     }
 }
-
-
 
 
 /**

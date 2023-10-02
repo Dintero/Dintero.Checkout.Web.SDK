@@ -95,7 +95,19 @@ export const postValidatePopOutEvent = (iframe: HTMLIFrameElement, sid: string) 
 
 
 /**
- * Post ClosePopOut-event to the checkout iframe.
+ * Post OpenPopOutFailed-event to the checkout iframe.
+ */
+export const postOpenPopOutFailedEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "OpenPopOutFailed", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post OpenedPopOut-event to the checkout iframe.
  */
 export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {

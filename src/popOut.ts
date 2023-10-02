@@ -5,11 +5,32 @@ const HEIGHT = Math.min(840, window.screen.height);
 let popOutWindow: undefined | Window;
 
 const createPopOutWindow = (url: string, width: number, height: number) => {
-    // Opens a centered pop up window
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-    const features = `width=${width},height=${height},left=${left},top=${top},location=no,menubar=no,toolbar=no,status=no`;
-    return window.open(url, 'dintero-checkout', features);
+    return new Promise<Window| undefined>((resolve)=> {
+        try {
+            // Opens a centered pop up window
+            const left = window.screenX + (window.outerWidth - width) / 2;
+            const top = window.screenY + (window.outerHeight - height) / 2;
+            const features = `width=${width},height=${height},left=${left},top=${top},location=no,menubar=no,toolbar=no,status=no`;
+            const popOut =  window.open(url, 'dintero-checkout', features);
+            if(!popOut){
+                console.log('createPopOutWindow no popOut');
+                resolve(undefined);
+                return;
+            }
+            const timeout = window.setTimeout(()=> {
+                console.log('createPopOutWindow timeout');
+                resolve(undefined);
+            }, 3000);
+            popOut.addEventListener('load', (event) => {
+                console.log('createPopOutWindow loaded', {popOut, event});
+                clearTimeout(timeout);
+                resolve(popOut)
+            })
+        } catch (err) {
+            resolve(undefined);
+        }
+    });
+
 };
 
 type Unsubscribe = () => void;
@@ -19,7 +40,7 @@ type PopOutOptions = SessionUrlOptions & {
     onClose: () => void;
 }
 
-export const openPopOut = (options: PopOutOptions) => {
+export const openPopOut = async (options: PopOutOptions) => {
     let unsubscribe: undefined | Unsubscribe;
     let intervalId = -1;
     if (popOutWindow && !popOutWindow.closed) {
@@ -29,7 +50,7 @@ export const openPopOut = (options: PopOutOptions) => {
 
     // Open popup window
     const url = getPopOutUrl(options);
-    popOutWindow = createPopOutWindow(url, WIDTH, HEIGHT);
+    popOutWindow = await createPopOutWindow(url, WIDTH, HEIGHT);
 
     const focusPopOut = () => {
         if (popOutWindow) {
@@ -73,6 +94,6 @@ export const openPopOut = (options: PopOutOptions) => {
     return {
         close: closePopOut,
         focus: focusPopOut,
-        popOutWindow
+        popOutWindow,
     };
 };
