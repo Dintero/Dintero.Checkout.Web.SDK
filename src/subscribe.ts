@@ -20,6 +20,7 @@ interface SubscriptionOptions {
     handler: SubscriptionHandler;
     eventTypes: (CheckoutEvents | InternalCheckoutEvents)[];
     checkout: DinteroCheckoutInstance;
+    source: Window;
 }
 
 export type Subscription = {
@@ -32,9 +33,9 @@ export type Subscription = {
 /**
  * Post a message acknowledgement to the checkout iframe.
  */
-const postAck = (iframe: HTMLIFrameElement, event: MessageEvent) => {
-    if (event.data.mid && iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
+const postAck = (source: Window, event: MessageEvent) => {
+    if (event.data.mid && source) {
+        source.postMessage(
             { ack: event.data.mid },
             event.origin || "*"
         );
@@ -69,7 +70,7 @@ export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
 };
 
 /**
- * Post setActivePaymentProductType-event to the checkout iframe.
+ * Post SetActivePaymentProductType-event to the checkout iframe.
  */
 export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: string, paymentProductType?: string) => {
     if (iframe.contentWindow) {
@@ -81,6 +82,65 @@ export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: str
 };
 
 /**
+ * Post ClosePopOut-event to the checkout iframe.
+ */
+export const postValidatePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "ValidatingPopOut", sid },
+            "*"
+        );
+    }
+};
+
+
+/**
+ * Post OpenPopOutFailed-event to the checkout iframe.
+ */
+export const postOpenPopOutFailedEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "OpenPopOutFailed", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post OpenedPopOut-event to the checkout iframe.
+ */
+export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "OpenedPopOut", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post ClosePopOut-event to the checkout iframe.
+ */
+export const postClosePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "ClosedPopOut", sid },
+            "*"
+        );
+    }
+};
+
+/**
+ * Post SetLanguage-event to the checkout iframe.
+ */
+export const postSetLanguage = (iframe: HTMLIFrameElement, sid: string, language: string) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "SetLanguage", sid, language }, "*");
+    }
+};
+
+
+/**
  * Subscribe to events from an iframe given a handler and a set
  * of event types.
  */
@@ -89,19 +149,22 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
 
     // Wrap event handler in a function that checks for correct origin and
     // filters on event type(s) in the event data.
+    const endpointUrl = new URL(endpoint);
+
     const wrappedHandler = (event: MessageEvent) => {
-        const correctOrigin = event.origin === endpoint;
+        const correctOrigin = event.origin === endpointUrl.origin;
         const correctWindow = event.source === checkout.iframe.contentWindow;
         const correctSid = event.data && event.data.sid === sid;
         const correctMessageType =
             eventTypes.indexOf(event.data && event.data.type) !== -1;
+
         if (
             correctOrigin &&
             correctWindow &&
             correctSid &&
             correctMessageType
         ) {
-            postAck(checkout.iframe, event);
+            postAck(checkout.iframe.contentWindow, event);
             handler(event.data, checkout);
         }
     };
