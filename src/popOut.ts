@@ -86,7 +86,7 @@ export const openPopOut = async (options: PopOutOptions) => {
     window.addEventListener('beforeunload', closePopOut);
 
     // Check if checkout is still open
-    intervalId = window.setInterval(checkIfPopupClosed, 50);
+    intervalId = window.setInterval(checkIfPopupClosed, 200);
 
     // Set up pub/sub of messages from pop out to SDK
     unsubscribe = options.onOpen(popOutWindow);
