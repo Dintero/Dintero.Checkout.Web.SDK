@@ -11,8 +11,9 @@
     "umdName": "dintero"
   },
   "scripts": {
+    "postinstall": "patch -u node_modules/vitest/dist/vendor-node.a7c48fe1.js -i patches/vitest+0.34.6.patch --forward || true",
     "build": "preconstruct build",
-    "test": "$(yarn bin)/karma start",
+    "test": "$(yarn bin)/vitest --browser.name=chrome --browser.headless",
     "semantic-release": "semantic-release",
     "prepublishOnly": "yarn run build"
   },
@@ -28,24 +29,18 @@
     "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.14.1",
-    "@babel/preset-typescript": "^7.13.0",
-    "@preconstruct/cli": "^2.1.5",
-    "@semantic-release/git": "^10.0.1",
-    "chai": "^4.2.0",
-    "karma": "^6.4.2",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-mocha": "^2.0.1",
-    "karma-typescript": "^5.0.3",
-    "mocha": "^8.1.1",
-    "prettier": "^3.0.3",
-    "puppeteer": "^21.1.0",
-    "semantic-release": "^22.0.1",
-    "sinon": "^15.0.0",
-    "typescript": "^5.2.2"
+    "@babel/core": "7.13.0",
+    "@babel/preset-typescript": "7.13.0",
+    "@preconstruct/cli": "2.8.1",
+    "@semantic-release/git": "10.0.1",
+    "@vitest/browser": "0.34.6",
+    "prettier": "3.0.3",
+    "semantic-release": "22.0.5",
+    "typescript": "5.2.2",
+    "vitest": "0.34.6",
+    "webdriverio": "8.16.22"
   },
   "dependencies": {
-    "native-promise-only": "^0.8.1"
+    "native-promise-only": "0.8.1"
   }
 }
