@@ -18,7 +18,7 @@ export enum InternalCheckoutEvents {
     LanguageChanged = "LanguageChanged",
     ScrollToTop = "ScrollToTop",
     ShowPopOutButton = "ShowPopOutButton",
-    HidePopOutButton = "HidePopOutButton"
+    HidePopOutButton = "HidePopOutButton",
 }
 
 export type SessionNotFound = {
@@ -61,7 +61,7 @@ export type SessionLocked = {
 };
 
 export type ShowPopOutButton = {
-    type: 'ShowPopOutButton';
+    type: "ShowPopOutButton";
     styles: {
         font: string;
         height: string;
@@ -84,8 +84,8 @@ export type ShowPopOutButton = {
     left: string;
     right: string;
     language: string;
-    disabled: 'true' | 'false';
-}
+    disabled: "true" | "false";
+};
 
 export type SessionLockFailed = {
     type: CheckoutEvents.SessionLockFailed;

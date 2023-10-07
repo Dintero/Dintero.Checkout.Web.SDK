@@ -4,17 +4,19 @@ type BackdropOptions = {
     close: () => void;
     focus: () => void;
     event: ShowPopOutButton;
-}
+};
 
 const getBackdropZIndex = () => {
     // Iterate all DOM items to get current highest element.
-    const elements = document.getElementsByTagName('*');
+    const elements = document.getElementsByTagName("*");
     const highest = Array.from(elements).reduce((acc, element) => {
         try {
-            const zIndexStr = document.defaultView.getComputedStyle(element, null).getPropertyValue("z-index");
-            const zIndex = parseInt(zIndexStr || '0');
+            const zIndexStr = document.defaultView
+                .getComputedStyle(element, null)
+                .getPropertyValue("z-index");
+            const zIndex = parseInt(zIndexStr || "0");
             if (!isNaN(zIndex) && zIndex > acc) {
-                return zIndex
+                return zIndex;
             }
         } catch (e) {
             // Ignore errors when getting z-index
@@ -23,16 +25,16 @@ const getBackdropZIndex = () => {
         return acc;
     }, 0);
     if (highest < 9999) {
-        return '9999';
+        return "9999";
     }
     return (highest + 1).toString();
-}
+};
 
-const STYLE_ID = 'dintero-checkout-sdk-style';
-const BACKDROP_ID = 'dintero-checkout-sdk-backdrop';
-const BACKDROP_DESCRIPTION = 'dintero-checkout-sdk-backdrop-description';
-const FOCUS_CHECKOUT_BUTTON_ID = 'dintero-checkout-sdk-backdrop-focus';
-const CLOSE_BACKDROP_BUTTON_ID = 'dintero-checkout-sdk-backdrop-close';
+const STYLE_ID = "dintero-checkout-sdk-style";
+const BACKDROP_ID = "dintero-checkout-sdk-backdrop";
+const BACKDROP_DESCRIPTION = "dintero-checkout-sdk-backdrop-description";
+const FOCUS_CHECKOUT_BUTTON_ID = "dintero-checkout-sdk-backdrop-focus";
+const CLOSE_BACKDROP_BUTTON_ID = "dintero-checkout-sdk-backdrop-close";
 
 const wrapPreventDefault = (fn: () => void) => {
     // Creates a wrapped function that will invoke preventDefault() to stop
@@ -42,8 +44,8 @@ const wrapPreventDefault = (fn: () => void) => {
         e.stopPropagation();
         fn();
         return false;
-    }
-}
+    };
+};
 
 const appendBackdropStyles = () => {
     // Check if exists before appending to DOM
@@ -51,8 +53,8 @@ const appendBackdropStyles = () => {
         return;
     }
     // Add style to DOM
-    const style = document.createElement('style');
-    style.setAttribute('id', STYLE_ID);
+    const style = document.createElement("style");
+    style.setAttribute("id", STYLE_ID);
     style.innerHTML = `
         @keyframes ${BACKDROP_ID}-fade-in {
             from {opacity: 0;}
@@ -164,20 +166,20 @@ const appendBackdropStyles = () => {
         }
     `;
     document.head.appendChild(style);
-}
+};
 
 const createBackdropDOM = () => {
     // Dark translucent backdrop element
-    const backdrop = document.createElement('div');
+    const backdrop = document.createElement("div");
     backdrop.setAttribute("id", BACKDROP_ID);
     backdrop.setAttribute("role", "dialog");
     backdrop.style.zIndex = getBackdropZIndex();
-    return backdrop
-}
+    return backdrop;
+};
 
 const createCloseButtonDOM = (label: string) => {
     // Close button for the top right corner
-    const button = document.createElement('button');
+    const button = document.createElement("button");
     button.setAttribute("id", CLOSE_BACKDROP_BUTTON_ID);
     button.setAttribute("type", "button");
     button.setAttribute("aria-label", label);
@@ -198,11 +200,11 @@ const createCloseButtonDOM = (label: string) => {
             <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>`;
     return button;
-}
+};
 
 const createDinteroLogoDOM = () => {
     // Close button for the top right corner
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = `
         <svg width="120px" height="22px" viewBox="0 0 630 111" version="1.1" >
             <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
@@ -212,32 +214,32 @@ const createDinteroLogoDOM = () => {
             </g>
         </svg>`;
     return div;
-}
+};
 
 const createLabelDOM = (text: string) => {
     // Text about the pop out
-    const p = document.createElement('p');
-    p.setAttribute('id', BACKDROP_DESCRIPTION);
+    const p = document.createElement("p");
+    p.setAttribute("id", BACKDROP_DESCRIPTION);
     p.innerText = text;
     return p;
-}
+};
 
 const createFocusButtonDOM = (text: string) => {
     // Mock button to give the user a call to action element to click, even
     // though the entire backdrop (except the close button) returns focus to the
     // checkout.
-    const button = document.createElement('button');
+    const button = document.createElement("button");
     button.setAttribute("id", FOCUS_CHECKOUT_BUTTON_ID);
     button.setAttribute("type", "button");
     button.innerText = text;
     return button;
-}
+};
 
 const focusTrap = (e: KeyboardEvent) => {
     // Prevent the user focusing outside of the backdrop while it is visible
     const focusButton = document.getElementById(FOCUS_CHECKOUT_BUTTON_ID);
     const closeButton = document.getElementById(CLOSE_BACKDROP_BUTTON_ID);
-    if (e.key === 'Tab' || e.code === "Tab") {
+    if (e.key === "Tab" || e.code === "Tab") {
         if (document.activeElement === focusButton) {
             closeButton.focus();
             e.preventDefault();
@@ -247,7 +249,7 @@ const focusTrap = (e: KeyboardEvent) => {
             e.preventDefault();
         }
     }
-}
+};
 
 const createBackdropView = (options: BackdropOptions) => {
     // Add styles needed for the backdrop;
@@ -265,7 +267,7 @@ const createBackdropView = (options: BackdropOptions) => {
     closeButton.onclick = wrapPreventDefault(options.close);
 
     // Add focus trap when backdrop is visible
-    document.addEventListener('keydown', focusTrap);
+    document.addEventListener("keydown", focusTrap);
 
     // Append to document
     backdrop.appendChild(closeButton);
@@ -275,7 +277,7 @@ const createBackdropView = (options: BackdropOptions) => {
     document.body.appendChild(backdrop);
     backdrop.focus();
     return backdrop;
-}
+};
 
 export const setBackdropLabels = (event: ShowPopOutButton) => {
     const focusButton = document.getElementById(FOCUS_CHECKOUT_BUTTON_ID);
@@ -288,9 +290,9 @@ export const setBackdropLabels = (event: ShowPopOutButton) => {
     }
     const closeButton = document.getElementById(CLOSE_BACKDROP_BUTTON_ID);
     if (closeButton) {
-        closeButton.setAttribute('aria-label', event.descriptionLabel);
+        closeButton.setAttribute("aria-label", event.descriptionLabel);
     }
-}
+};
 
 export const createBackdrop = (options: BackdropOptions) => {
     try {
@@ -305,7 +307,7 @@ export const createBackdrop = (options: BackdropOptions) => {
         // block the payment.
         console.error(e);
     }
-}
+};
 
 export const removeBackdrop = () => {
     try {
@@ -313,10 +315,10 @@ export const removeBackdrop = () => {
         if (backdrop) {
             document.body.removeChild(backdrop);
         }
-        document.removeEventListener('keydown', focusTrap);
+        document.removeEventListener("keydown", focusTrap);
     } catch (e) {
         // Ignore errors when closing backdrop. If it fails we should not stop
         // the rest of the application from working.
         console.error(e);
     }
-}
+};

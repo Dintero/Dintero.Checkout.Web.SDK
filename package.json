@@ -1,46 +1,47 @@
 {
-  "name": "@dintero/checkout-web-sdk",
-  "version": "0.0.0-development",
-  "description": "Dintero Checkout SDK for web frontends",
-  "main": "dist/dintero-checkout-web-sdk.cjs.js",
-  "module": "dist/dintero-checkout-web-sdk.esm.js",
-  "umd:main": "dist/dintero-checkout-web-sdk.umd.min.js",
-  "unpkg": "dist/dintero-checkout-web-sdk.umd.min.js",
-  "types": "dist/dintero-checkout-web-sdk.cjs.d.ts",
-  "preconstruct": {
-    "umdName": "dintero"
-  },
-  "scripts": {
-    "postinstall": "patch -u node_modules/vitest/dist/vendor-node.a7c48fe1.js -i patches/vitest+0.34.6.patch --forward || true",
-    "build": "preconstruct build",
-    "test": "$(yarn bin)/vitest --browser.name=chrome --browser.headless",
-    "semantic-release": "semantic-release",
-    "prepublishOnly": "yarn run build"
-  },
-  "private": false,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK.git"
-  },
-  "homepage": "https://github.com/Dintero/Dintero.Checkout.Web.SDK#readme",
-  "author": "Sven Nicolai Viig <sven@dintero.com> (http://dintero.com)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
-  },
-  "devDependencies": {
-    "@babel/core": "7.13.0",
-    "@babel/preset-typescript": "7.13.0",
-    "@preconstruct/cli": "2.8.1",
-    "@semantic-release/git": "10.0.1",
-    "@vitest/browser": "0.34.6",
-    "prettier": "3.0.3",
-    "semantic-release": "22.0.5",
-    "typescript": "5.2.2",
-    "vitest": "0.34.6",
-    "webdriverio": "8.16.22"
-  },
-  "dependencies": {
-    "native-promise-only": "0.8.1"
-  }
+    "name": "@dintero/checkout-web-sdk",
+    "version": "0.0.0-development",
+    "description": "Dintero Checkout SDK for web frontends",
+    "main": "dist/dintero-checkout-web-sdk.cjs.js",
+    "module": "dist/dintero-checkout-web-sdk.esm.js",
+    "umd:main": "dist/dintero-checkout-web-sdk.umd.min.js",
+    "unpkg": "dist/dintero-checkout-web-sdk.umd.min.js",
+    "types": "dist/dintero-checkout-web-sdk.cjs.d.ts",
+    "preconstruct": {
+        "umdName": "dintero"
+    },
+    "scripts": {
+        "postinstall": "patch -u node_modules/vitest/dist/vendor-node.a7c48fe1.js -i patches/vitest+0.34.6.patch --forward || true",
+        "build": "preconstruct build",
+        "lint": "prettier --cache --log-level warn -c --config .prettierrc.yml .",
+        "test": "$(yarn bin)/vitest --browser.name=chrome --browser.headless",
+        "semantic-release": "semantic-release",
+        "prepublishOnly": "yarn run build"
+    },
+    "private": false,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK.git"
+    },
+    "homepage": "https://github.com/Dintero/Dintero.Checkout.Web.SDK#readme",
+    "author": "Sven Nicolai Viig <sven@dintero.com> (http://dintero.com)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
+    },
+    "devDependencies": {
+        "@babel/core": "7.13.0",
+        "@babel/preset-typescript": "7.13.0",
+        "@preconstruct/cli": "2.8.1",
+        "@semantic-release/git": "10.0.1",
+        "@vitest/browser": "0.34.6",
+        "prettier": "3.0.3",
+        "semantic-release": "22.0.5",
+        "typescript": "5.2.2",
+        "vitest": "0.34.6",
+        "webdriverio": "8.16.22"
+    },
+    "dependencies": {
+        "native-promise-only": "0.8.1"
+    }
 }

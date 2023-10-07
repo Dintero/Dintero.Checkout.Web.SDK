@@ -58,45 +58,48 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             sid: "T11223344.<short-uuid>",
             popOut: false, // optional parameter to enable pop out mode
             language: "no", // optional parameter, an ISO 639-1 two-letter language code
-            onSession: function(event, checkout) {
+            onSession: function (event, checkout) {
                 console.log("session", event.session);
             },
-            onPayment: function(event, checkout) {
+            onPayment: function (event, checkout) {
                 console.log("transaction_id", event.transaction_id);
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onPaymentError: function(event, checkout) {
+            onPaymentError: function (event, checkout) {
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onSessionCancel: function(event, checkout) {
+            onSessionCancel: function (event, checkout) {
                 console.log("href", event.href);
                 checkout.destroy();
             },
-            onSessionNotFound: function(event, checkout) {
+            onSessionNotFound: function (event, checkout) {
                 console.log("session not found (expired)", event.type);
                 checkout.destroy();
             },
-            onSessionLocked: function(event, checkout, callback) {
+            onSessionLocked: function (event, checkout, callback) {
                 console.log("pay_lock_id", event.pay_lock_id);
                 callback(); // refresh session
             },
-            onSessionLockFailed: function(event, checkout) {
+            onSessionLockFailed: function (event, checkout) {
                 console.log("session lock failed");
             },
-            onActivePaymentType: function(event, checkout) {
-                console.log("payment product type selected", event.payment_product_type);
+            onActivePaymentType: function (event, checkout) {
+                console.log(
+                    "payment product type selected",
+                    event.payment_product_type,
+                );
             },
-            onValidateSession: function(event, checkout, callback) {
+            onValidateSession: function (event, checkout, callback) {
                 console.log("validating session", event.session);
                 callback({
-                   success: true,
-                   clientValidationError: undefined,
+                    success: true,
+                    clientValidationError: undefined,
                 });
             },
         })
-        .then(function(checkout) {
+        .then(function (checkout) {
             console.log("checkout", checkout);
         });
 </script>
@@ -125,7 +128,10 @@ const checkout = await embed({
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
-    onPayment: (event: SessionPaymentAuthorized | SessionPaymentOnHold, checkout) => {
+    onPayment: (
+        event: SessionPaymentAuthorized | SessionPaymentOnHold,
+        checkout,
+    ) => {
         console.log("transaction_id", event.transaction_id);
         console.log("href", event.href);
         checkout.destroy();
@@ -149,16 +155,19 @@ const checkout = await embed({
     onSessionLockFailed: (event: SessionLockFailed, checkout) => {
         console.log("session lock failed");
     },
-    onActivePaymentType: function(event: ActivePaymentProductType, checkout) {
-        console.log("payment product type selected", event.payment_product_type);
+    onActivePaymentType: function (event: ActivePaymentProductType, checkout) {
+        console.log(
+            "payment product type selected",
+            event.payment_product_type,
+        );
     },
-    onValidateSession: function(event: ValidateSession, checkout, callback) {
+    onValidateSession: function (event: ValidateSession, checkout, callback) {
         console.log("validating session", event.session);
         callback({
             success: true,
             clientValidationError: undefined,
         });
-   },
+    },
 });
 ```
 
@@ -167,11 +176,13 @@ const checkout = await embed({
 The payment product type can be set with the returned `setActivePaymentProductType()`function when embedding the checkout.
 
 Select "vipps" payment product type:
+
 ```
 checkout.setActivePaymentProductType("vipps");
 ```
 
 Resetting selection (so no option is selected in the checkout):
+
 ```
 checkout.setActivePaymentProductType();
 ```
@@ -189,11 +200,14 @@ To update an existing Checkout Express-session, follow these steps:
 Call lockSession on the checkout object:
 
 ```js
-checkout.lockSession().then(function(sessionLockedEvent){
-    // initiate server side session update and then refresh the session
-}).catch(function(sessionLockFailedEvent) {
-    // handle failure to lock
-});;
+checkout
+    .lockSession()
+    .then(function (sessionLockedEvent) {
+        // initiate server side session update and then refresh the session
+    })
+    .catch(function (sessionLockFailedEvent) {
+        // handle failure to lock
+    });
 ```
 
 `lockSession()` returns a promise that is resolved when the `SessionLocked` event is
@@ -222,7 +236,7 @@ or use the callback in `onSessionLocked`:
 onSessionLocked: (event, checkout, callback) => {
     console.log("pay_lock_id", event.pay_lock_id);
     callback(); // refresh session
-}
+};
 ```
 
 `refreshSession()` returns a promise that is resolved when the `SessionUpdated`
@@ -241,7 +255,7 @@ When validated successfully, return a successful result:
 
 ```js
 {
-   success: true
+    success: true;
 }
 ```
 
