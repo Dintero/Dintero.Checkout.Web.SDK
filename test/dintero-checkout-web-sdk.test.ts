@@ -1,10 +1,7 @@
-import { describe, it } from "mocha";
-import { expect } from "chai";
-import * as sinon from "sinon";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as dintero from "../src";
 import * as url from "../src/url";
 import * as popOut from "../src/popOut";
-import * as popOutButton from "../src/popOutButton";
 import pkg from "../package.json";
 
 import {
@@ -21,21 +18,19 @@ import {
     SessionValidationCallback,
 } from "../src/checkout";
 
-if (!process.env.CI) {
-    // Listen to all events emitted, helpful during development
-    window.addEventListener(
-        "message",
-        (event: MessageEvent) => {
-            console.log(event, event.data, event.origin);
-        },
-        false
-    );
-}
+//// Listen to all events emitted, helpful during development
+//window.addEventListener(
+//    "message",
+//    (event: MessageEvent) => {
+//        console.log(event, event.data, event.origin);
+//    },
+//    false,
+//);
 
 // Create test iframe content from a blob
 const getHtmlBlobUrl = (
     options: url.SessionUrlOptions,
-    script: string
+    script: string,
 ): string => {
     const html = `
 <script type="text/javascript">
@@ -54,122 +49,116 @@ const getHtmlBlobUrl = (
 };
 
 describe("dintero.redirect", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
     it("redirects to session", () => {
-        const windowLocationAssignStub = sinon.stub(
-            url,
-            "windowLocationAssign"
-        );
+        vi.spyOn(url, "windowLocationAssign").mockImplementationOnce(() => {
+            // do nothing
+        });
         dintero.redirect({ sid: "<session_id>" });
-        sinon.assert.alwaysCalledWithExactly(
-            windowLocationAssignStub,
-            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`
+        expect(url.windowLocationAssign).toBeCalledWith(
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}`,
         );
-        windowLocationAssignStub.restore();
     });
 
     it("redirects to session with language parameter", () => {
-        const windowLocationAssignStub = sinon.stub(
-            url,
-            "windowLocationAssign"
-        );
+        vi.spyOn(url, "windowLocationAssign").mockImplementationOnce(() => {
+            // do nothing
+        });
         dintero.redirect({ sid: "<session_id>", language: "no" });
-        sinon.assert.alwaysCalledWithExactly(
-            windowLocationAssignStub,
-            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no`
+        expect(url.windowLocationAssign).toBeCalledWith(
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no`,
         );
-        windowLocationAssignStub.restore();
     });
 });
 
 describe("dintero.embed", () => {
+    let checkout: dintero.DinteroCheckoutInstance | undefined = undefined;
+    let container: HTMLDivElement | undefined = undefined;
+    const endpoint = "http://localhost:5173";
+    const sid = "session-id";
+
+    beforeEach(() => {
+        container = document.createElement("p");
+        document.body.appendChild(container);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        checkout?.destroy();
+
+        if (container) {
+            container.remove();
+        }
+    });
+
     it("creates iframe added to container", async () => {
         let iframeSrc: string | undefined;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options) => {
+        const getSessionUrl = vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementationOnce((options) => {
                 iframeSrc = getHtmlBlobUrl(options, ``);
                 return iframeSrc;
             });
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
-        });
+        checkout = await dintero.embed({ sid, container });
+
         expect(checkout.iframe.parentElement.parentElement).to.equal(container);
         expect(checkout.iframe).to.be.instanceOf(HTMLIFrameElement);
         expect(checkout.iframe.src).to.equal(iframeSrc);
-        sinon.assert.calledOnce(getSessionUrlStub);
-        getSessionUrlStub.restore();
+        expect(getSessionUrl).toBeCalledTimes(1);
     });
 
     it("can be destroyed", async () => {
         let iframeSrc: string | undefined;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options) => {
-                iframeSrc = getHtmlBlobUrl(options, ``);
-                return iframeSrc;
-            });
-
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
+        vi.spyOn(url, "getSessionUrl").mockImplementationOnce((options) => {
+            iframeSrc = getHtmlBlobUrl(options, ``);
+            return iframeSrc;
         });
+
+        checkout = await dintero.embed({ sid, container });
         checkout.destroy();
+
         expect(checkout.iframe.parentElement).to.equal(null);
         expect(container.innerHTML).to.equal("");
-        getSessionUrlStub.restore();
     });
 
     it("multiple destroy calls do not throw exceptions", async () => {
         let iframeSrc: string | undefined;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options) => {
-                iframeSrc = getHtmlBlobUrl(options, ``);
-                return iframeSrc;
-            });
-
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
+        vi.spyOn(url, "getSessionUrl").mockImplementationOnce((options) => {
+            iframeSrc = getHtmlBlobUrl(options, ``);
+            return iframeSrc;
         });
+
+        checkout = await dintero.embed({ sid, container });
         checkout.destroy();
         checkout.destroy();
+
         expect(checkout.iframe.parentElement).to.equal(null);
         expect(container.innerHTML).to.equal("");
-        getSessionUrlStub.restore();
     });
 
     it("listens to onSession messages for SessionLoaded", async () => {
         const script = `
-            emit({
-                type: "SessionLoaded",
+            emit({type: "SessionLoaded",
                 session: {},
-            });
+            })
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
+        } = await new Promise(async (resolve) => {
+            await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -177,9 +166,8 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionLoaded
+            CheckoutEvents.SessionLoaded,
         );
-        getSessionUrlStub.restore();
     });
 
     it("listens to onSession messages for SessionUpdated", async () => {
@@ -189,22 +177,19 @@ describe("dintero.embed", () => {
                 session: {},
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -212,34 +197,30 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionUpdated
+            CheckoutEvents.SessionUpdated,
         );
-        getSessionUrlStub.restore();
     });
 
     it("listens to SessionNotFound messages", async () => {
         const script = `
-            emit({
-                type: "SessionNotFound",
-                session: {},
-            });
-        `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+           emit({
+               type: "SessionNotFound",
+               session: {},
+           });
+       `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionNotFound;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSessionNotFound: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -247,34 +228,30 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionNotFound
+            CheckoutEvents.SessionNotFound,
         );
-        getSessionUrlStub.restore();
     });
 
     it("listens to SessionCancel messages", async () => {
         const script = `
-            emit({
-                type: "SessionCancel",
-                session: {},
-            });
-        `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+             emit({
+                 type: "SessionCancel",
+                 session: {},
+             });
+         `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionCancel;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSessionCancel: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -282,17 +259,13 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionCancel
+            CheckoutEvents.SessionCancel,
         );
-        getSessionUrlStub.restore();
     });
 
     ["SessionPaymentAuthorized", "SessionPaymentOnHold"].forEach((type) => {
         it(`listens to ${type} messages`, async () => {
-            const windowLocationAssignStub = sinon.stub(
-                url,
-                "windowLocationAssign"
-            );
+            const windowLocationAssign = vi.spyOn(url, "windowLocationAssign");
             const script = `
             emit({
                 type: "${type}",
@@ -301,39 +274,24 @@ describe("dintero.embed", () => {
                 merchant_reference: "test-1",
             });
         `;
-            const getSessionUrlStub = sinon
-                .stub(url, "getSessionUrl")
-                .callsFake((options: url.SessionUrlOptions) =>
-                    getHtmlBlobUrl(options, script)
-                );
 
-            await new Promise((resolve) => {
-                windowLocationAssignStub.callsFake(() => {
-                    resolve(undefined);
-                });
-                const container = document.createElement("p");
-                document.body.appendChild(container);
-                dintero.embed({
-                    sid: "<session_id>",
-                    container,
-                    endpoint: "http://localhost:9999",
-                });
+            vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
             });
 
-            sinon.assert.alwaysCalledWithExactly(
-                windowLocationAssignStub,
-                "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>"
+            await new Promise((resolve) => {
+                windowLocationAssign.mockImplementation(resolve);
+                dintero.embed({ sid, container, endpoint });
+            });
+
+            expect(windowLocationAssign).toBeCalledWith(
+                "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
             );
-            getSessionUrlStub.restore();
-            windowLocationAssignStub.restore();
         });
     });
 
     it("listens to onSessionPaymentError messages", async () => {
-        const windowLocationAssignStub = sinon.stub(
-            url,
-            "windowLocationAssign"
-        );
+        const windowLocationAssign = vi.spyOn(url, "windowLocationAssign");
         const script = `
             emit({
                 type: "SessionPaymentError",
@@ -341,31 +299,19 @@ describe("dintero.embed", () => {
                 merchant_reference: "test-1",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        await new Promise((resolve) => {
-            windowLocationAssignStub.callsFake(() => {
-                resolve(undefined);
-            });
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            });
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
         });
 
-        sinon.assert.alwaysCalledWithExactly(
-            windowLocationAssignStub,
-            "http://redirct_url.test.com?merchant_reference=test-1&error=failed"
+        await new Promise((resolve) => {
+            windowLocationAssign.mockImplementation(resolve);
+            dintero.embed({ sid, container, endpoint });
+        });
+
+        expect(windowLocationAssign).toBeCalledWith(
+            "http://redirct_url.test.com?merchant_reference=test-1&error=failed",
         );
-        getSessionUrlStub.restore();
-        windowLocationAssignStub.restore();
     });
 
     it("listens to onSession messages for SessionLocked", async () => {
@@ -375,23 +321,20 @@ describe("dintero.embed", () => {
                 pay_lock_id: "plid",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionLocked;
             checkout: dintero.DinteroCheckoutInstance;
             callback: () => void;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSessionLocked: (event, checkout, callback) => {
                     resolve({ event, checkout, callback });
                 },
@@ -399,12 +342,11 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionLocked
+            CheckoutEvents.SessionLocked,
         );
 
-        expect(onSessionResult.callback).to.be.a('function');
+        expect(onSessionResult.callback).to.be.a("function");
         expect(onSessionResult.event.pay_lock_id).to.equal("plid");
-        getSessionUrlStub.restore();
     });
 
     it("listens to onSession messages for SessionLockFailed", async () => {
@@ -413,22 +355,19 @@ describe("dintero.embed", () => {
                 type: "SessionLockFailed"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: SessionLockFailed;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSessionLockFailed: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -436,9 +375,8 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.SessionLockFailed
+            CheckoutEvents.SessionLockFailed,
         );
-        getSessionUrlStub.restore();
     });
 
     it("listens to onSession messages for ActivePaymentProductType", async () => {
@@ -448,22 +386,19 @@ describe("dintero.embed", () => {
                 payment_product_type: "vipps",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const onSessionResult: {
             event: ActivePaymentProductType;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onActivePaymentType: (event, checkout) => {
                     resolve({ event, checkout });
                 },
@@ -471,30 +406,25 @@ describe("dintero.embed", () => {
         });
 
         expect(onSessionResult.event.type).to.equal(
-            CheckoutEvents.ActivePaymentProductType
+            CheckoutEvents.ActivePaymentProductType,
         );
         expect(onSessionResult.event.payment_product_type).to.equal("vipps");
-        getSessionUrlStub.restore();
     });
 
     it("ignores messages from wrong origin", async () => {
         const script = ``;
 
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
-        const onSession = sinon.fake();
+        const onSession = vi.fn();
         await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero
                 .embed({
-                    sid: "<session_id>",
+                    sid,
                     container,
-                    endpoint: "http://localhost:9999",
+                    endpoint,
                     onSession,
                 })
                 .then(() => {
@@ -505,14 +435,13 @@ describe("dintero.embed", () => {
                             session: {},
                             sid: "<session_id>",
                         },
-                        "*"
+                        "*",
                     );
                 });
-
             sleep(100).then(resolve);
         });
-        sinon.assert.notCalled(onSession);
-        getSessionUrlStub.restore();
+
+        expect(onSession).not.toBeCalled();
     });
 
     it("ignores messages with wrong/unknown type", async () => {
@@ -522,20 +451,17 @@ describe("dintero.embed", () => {
                 session: {},
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const fakeHandler = sinon.fake();
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const fakeHandler = vi.fn();
         await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: fakeHandler,
                 onSessionNotFound: fakeHandler,
                 onSessionCancel: fakeHandler,
@@ -544,8 +470,8 @@ describe("dintero.embed", () => {
             });
             sleep(100).then(resolve);
         });
-        sinon.assert.notCalled(fakeHandler);
-        getSessionUrlStub.restore();
+
+        expect(fakeHandler).not.toBeCalled();
     });
 
     it("ignores messages with wrong sid", async () => {
@@ -556,26 +482,23 @@ describe("dintero.embed", () => {
                 sid: "overriding correct id from emit",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const onSession = sinon.fake();
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onSession = vi.fn();
         await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession,
             });
             sleep(100).then(resolve);
         });
-        sinon.assert.notCalled(onSession);
-        getSessionUrlStub.restore();
+
+        expect(onSession).not.toBeCalled();
     });
 
     it("changes height when iframe changes height", async () => {
@@ -585,26 +508,16 @@ describe("dintero.embed", () => {
                 height: 3003,
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
-            endpoint: "http://localhost:9999",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
         });
 
+        const checkout = await dintero.embed({ sid, container, endpoint });
         await sleep(10);
-        expect(checkout.iframe.style.height).to.equal("3003px");
-        getSessionUrlStub.restore();
-    });
 
+        expect(checkout.iframe.style.height).to.equal("3003px");
+    });
 
     it("changes scrolls to top of iframe when iframe tells it to", async () => {
         const script = `
@@ -612,23 +525,15 @@ describe("dintero.embed", () => {
                 type: "ScrollToTop",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
-            endpoint: "http://localhost:9999",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
         });
+
+        const checkout = await dintero.embed({ sid, container, endpoint });
         await sleep(10);
+
         expect(checkout).to.not.be.undefined;
-        getSessionUrlStub.restore();
     });
 
     it("changes language when iframe changes language", async () => {
@@ -638,29 +543,20 @@ describe("dintero.embed", () => {
                 language: "no",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-
-        const checkout = await dintero.embed({
-            sid: "<session_id>",
-            container,
-            endpoint: "http://localhost:9999",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
         });
 
+        const checkout = await dintero.embed({ sid, container, endpoint });
         await sleep(10);
+
         expect(checkout.language).to.equal("no");
-        getSessionUrlStub.restore();
     });
 
     type Callback = {
-        event: unknown,
-        checkout: dintero.DinteroCheckoutInstance,
+        event: unknown;
+        checkout: dintero.DinteroCheckoutInstance;
     };
 
     ["SessionPaymentAuthorized", "SessionPaymentOnHold"].forEach((type) => {
@@ -673,28 +569,25 @@ describe("dintero.embed", () => {
                 merchant_reference: "test-1",
             });
             `;
-            const getSessionUrlStub = sinon
-                .stub(url, "getSessionUrl")
-                .callsFake((options: url.SessionUrlOptions) =>
-                    getHtmlBlobUrl(options, script)
-                );
+
+            vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
+            });
 
             const { checkout } = await new Promise<Callback>((resolve) => {
-                const container = document.createElement("div");
-                document.body.appendChild(container);
                 dintero.embed({
-                    sid: "session-id",
+                    sid,
                     container,
-                    endpoint: "http://localhost:9999",
+                    endpoint,
                     onPayment: (event, checkout) => {
                         resolve({ event, checkout });
                     },
                 });
             });
+
             expect(checkout.iframe.src).to.equal(
-                `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`
+                `${endpoint}/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`,
             );
-            getSessionUrlStub.restore();
         });
     });
 
@@ -707,28 +600,25 @@ describe("dintero.embed", () => {
                 merchant_reference: "test-1",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const { checkout } = await new Promise<Callback>((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "session-id",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onPaymentAuthorized: (event, checkout) => {
                     resolve({ event, checkout });
                 },
             });
         });
+
         expect(checkout.iframe.src).to.equal(
-            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`
+            `${endpoint}/embedResult/?sid=session-id&merchant_reference=test-1&transaction_id=txn-id&sdk=${pkg.version}`,
         );
-        getSessionUrlStub.restore();
     });
 
     it("shows embedResult onPaymentError message if handler is defined", async () => {
@@ -740,29 +630,26 @@ describe("dintero.embed", () => {
                 error: "failed"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const { checkout } = await new Promise<Callback>((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "session-id",
+                sid,
                 container,
                 language: "no",
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onPaymentError: (event, checkout) => {
                     resolve({ event, checkout });
                 },
             });
         });
+
         expect(checkout.iframe.src).to.equal(
-            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&error=failed&language=no&sdk=${pkg.version}`
+            `${endpoint}/embedResult/?sid=session-id&merchant_reference=test-1&error=failed&language=no&sdk=${pkg.version}`,
         );
-        getSessionUrlStub.restore();
     });
 
     it("shows embedResult onSessionCancel message if handler is defined", async () => {
@@ -773,29 +660,26 @@ describe("dintero.embed", () => {
                 merchant_reference: "test-1",
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const { checkout } = await new Promise<Callback>((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "session-id",
+                sid,
                 container,
                 language: "no",
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSessionCancel: (event, checkout) => {
                     resolve({ event, checkout });
                 },
             });
         });
+
         expect(checkout.iframe.src).to.equal(
-            `http://localhost:9999/embedResult/?sid=session-id&merchant_reference=test-1&error=cancelled&language=no&sdk=${pkg.version}`
+            `${endpoint}/embedResult/?sid=session-id&merchant_reference=test-1&error=cancelled&language=no&sdk=${pkg.version}`,
         );
-        getSessionUrlStub.restore();
     });
 
     it("should handle validation", async () => {
@@ -805,30 +689,35 @@ describe("dintero.embed", () => {
                 session: {},
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        const getSessionUrl = vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
+            });
+
         const onSessionResult: {
             event: ValidateSession;
             checkout: dintero.DinteroCheckoutInstance;
             callback: (result: SessionValidationCallback) => void;
         } = await new Promise((resolve) => {
-            const container = document.createElement("div");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onValidateSession: (event, checkout, callback) => {
                     resolve({ event, checkout, callback });
                 },
             });
         });
+
         expect(onSessionResult.callback).to.not.be.undefined;
-        expect(getSessionUrlStub.getCall(0).args[0].shouldCallValidateSession).to.be.true;
-        getSessionUrlStub.restore();
+        expect(getSessionUrl).toBeCalledWith({
+            endpoint,
+            shouldCallValidateSession: true,
+            sid,
+            ui: "inline",
+        });
     });
 
     it("should not handle validation in onValidateSession is not defined", async () => {
@@ -838,26 +727,23 @@ describe("dintero.embed", () => {
                 session: {},
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        const getSessionUrl = vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
+            });
 
         await new Promise((resolve) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            }).then(() => {
-                resolve({});
-            });
+            dintero.embed({ sid, container, endpoint }).then(() => resolve({}));
         });
 
-        expect(getSessionUrlStub.getCall(0).args[0].shouldCallValidateSession).to.be.false;
-        getSessionUrlStub.restore();
+        expect(getSessionUrl).toBeCalledWith({
+            endpoint,
+            shouldCallValidateSession: false,
+            sid,
+            ui: "inline",
+        });
     });
 
     it("should return a promise that resolves when calling lockSession and the SessionLocked is received", async () => {
@@ -869,64 +755,51 @@ describe("dintero.embed", () => {
                 });
             }, 10);
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const event: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            }).then((checkout) => {
-                checkout.lockSession().then((lockedEvent)=> {
-                    resolve(lockedEvent);
-                }).catch(() =>{
-                    reject('lockSession() raised unexpected exception')
-                });
+            dintero.embed({ sid, container, endpoint }).then((checkout) => {
+                checkout
+                    .lockSession()
+                    .then(resolve)
+                    .catch(() => {
+                        reject("lockSession() raised unexpected exception");
+                    });
             });
         });
-        getSessionUrlStub.restore();
+
         expect(event).to.not.be.not.undefined;
     });
+
     it("should raise an exception when calling lockSession and the SessionLocked is received", async () => {
         const script = `
-            window.setTimeout(function(){
-                emit({
-                    type: "SessionLockFailed",
-                });
-            }, 10);
-        `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+                window.setTimeout(function(){
+                    emit({
+                        type: "SessionLockFailed",
+                    });
+                }, 10);
+            `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const error: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            }).then((checkout) => {
-                checkout.lockSession().then((_)=> {
-                    reject('lockSession() did not raise exception');
-                }).catch(err => {
-                    resolve(err);
-                });
+            dintero.embed({ sid, container, endpoint }).then((checkout) => {
+                checkout
+                    .lockSession()
+                    .then((_) =>
+                        reject("lockSession() did not raise exception"),
+                    )
+                    .catch(resolve);
             });
         });
-        console.log(error);
-        expect(error).to.not.be.undefined;
-        getSessionUrlStub.restore();
-    });
 
+        expect(error).toEqual("Received unexpected event: SessionLockFailed");
+    });
 
     it("should return a promise that resolves when calling refreshSession and the SessionUpdated is received", async () => {
         const script = `
@@ -936,30 +809,25 @@ describe("dintero.embed", () => {
                 });
             }, 10);
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const event: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            }).then((checkout) => {
-                checkout.refreshSession().then((sessionUpdatedEvent)=> {
-                    resolve(sessionUpdatedEvent);
-                }).catch(() =>{
-                    reject('refreshSession() raised unexpected exception')
-                });
+            dintero.embed({ sid, container, endpoint }).then((checkout) => {
+                checkout
+                    .refreshSession()
+                    .then(resolve)
+                    .catch(() => {
+                        reject("refreshSession() raised unexpected exception");
+                    });
             });
         });
-        getSessionUrlStub.restore();
+
         expect(event).to.not.be.not.undefined;
     });
+
     it("should raise an exception when calling refreshSession and the SessionNotFound is received", async () => {
         const script = `
             window.setTimeout(function(){
@@ -968,32 +836,24 @@ describe("dintero.embed", () => {
                 });
             }, 10);
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
         const error: any = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            dintero.embed({
-                sid: "<session_id>",
-                container,
-                endpoint: "http://localhost:9999",
-            }).then((checkout) => {
-                checkout.refreshSession().then((_)=> {
-                    reject('refreshSession() did not raise exception');
-                }).catch(err => {
-                    resolve(err);
-                });
+            dintero.embed({ sid, container, endpoint }).then((checkout) => {
+                checkout
+                    .refreshSession()
+                    .then((_) => {
+                        reject("refreshSession() did not raise exception");
+                    })
+                    .catch(resolve);
             });
         });
-        console.log(error);
-        expect(error).to.not.be.undefined;
-        getSessionUrlStub.restore();
-    });
 
+        expect(error).toEqual("Received unexpected event: SessionNotFound");
+    });
 
     it("posts ack for received messages", async () => {
         const mid = Math.floor(Math.random() * 1000000000000000);
@@ -1012,25 +872,20 @@ describe("dintero.embed", () => {
                 });
             }, "*");
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onSessionHandler = vi.fn();
         const result: {
             event: SessionPaymentAuthorized;
             checkout: dintero.DinteroCheckoutInstance;
         } = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
             dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 onPaymentAuthorized: (event, checkout) => {
                     resolve({ event, checkout });
@@ -1038,14 +893,13 @@ describe("dintero.embed", () => {
             });
             sleep(100).then(reject);
         });
+
         expect(result.event.type).to.equal(
-            CheckoutEvents.SessionPaymentAuthorized
+            CheckoutEvents.SessionPaymentAuthorized,
         );
         expect(result.event.transaction_id).to.equal(mid);
-        sinon.assert.calledOnce(onSessionHandler);
-        getSessionUrlStub.restore();
+        expect(onSessionHandler).toHaveBeenCalledOnce();
     });
-
 
     it("Adds button to DOM when a ShowPopOutButton message is received", async () => {
         const script = `
@@ -1064,29 +918,26 @@ describe("dintero.embed", () => {
                 disabled: "false"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onSessionHandler = vi.fn();
         let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
         const result: HTMLElement = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
             checkout = dintero.embed({
-                sid: "<session_id>",
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created.
             sleep(50).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 if (button) {
                     resolve(button);
                 } else {
@@ -1094,12 +945,11 @@ describe("dintero.embed", () => {
                 }
             });
         });
+
         expect(result).to.not.be.undefined;
         result.remove();
-        getSessionUrlStub.restore();
         (await checkout).destroy();
     });
-
 
     it("Removes button from DOM when a HidePopOutButton message is received", async () => {
         const script = `
@@ -1123,42 +973,29 @@ describe("dintero.embed", () => {
                 });
             }, 50);
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
 
-        // const removePopOutButtonStub = sinon
-        //     .stub(popOutButton, "removePopOutButton");
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
-        const result: HTMLElement = await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            checkout = dintero.embed({
-                sid: "<session_id>",
+        const onSessionHandler = vi.fn();
+        const result: HTMLElement = await new Promise(async (resolve) => {
+            checkout = await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created and removed
             sleep(100).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 resolve(button);
             });
         });
         expect(result).to.be.null;
-        // expect(removePopOutButtonStub.calledOnce).to.be.true;
-        const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
-        // button.remove();s
-        getSessionUrlStub.restore();
-        // removePopOutButtonStub.restore();
-        (await checkout).destroy();
     });
 
     it("Adds backdrop to DOM and opens modal when open button is clicked", async () => {
@@ -1178,39 +1015,35 @@ describe("dintero.embed", () => {
                 disabled: "false"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
-        const closeFake = sinon.fake();
-        const focusFake = sinon.fake();
-        const popOutWindow = {};
-        const openPopOutStub = sinon
-            .stub(popOut, "openPopOut")
-            .callsFake((options: any) => ({
-                close: closeFake,
-                focus: focusFake,
-                popOutWindow
-            }));
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
-        await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            checkout = dintero.embed({
-                sid: "<session_id>",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOut, "openPopOut").mockResolvedValue({
+            close: closeFake,
+            focus: focusFake,
+            popOutWindow,
+        });
+
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created.
             sleep(50).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 if (button) {
                     button.click();
                     resolve(null);
@@ -1220,15 +1053,13 @@ describe("dintero.embed", () => {
             });
         });
 
-        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
-        expect(backdrop).to.not.be.undefined;
-        expect(closeFake.called).to.be.false;
-        expect(focusFake.called).to.be.false;
+        const backdrop = document.getElementById(
+            "dintero-checkout-sdk-backdrop",
+        );
 
-        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
-        getSessionUrlStub.restore();
-        openPopOutStub.restore();
-        (await checkout).destroy();
+        expect(backdrop).to.not.be.undefined;
+        expect(closeFake).not.toBeCalled();
+        expect(focusFake).not.toBeCalled();
     });
 
     it("Removes backdrop and closes pop out when close is clicked", async () => {
@@ -1248,51 +1079,47 @@ describe("dintero.embed", () => {
                 disabled: "false"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
-        const closeFake = sinon.fake();
-        const focusFake = sinon.fake();
-        const popOutWindow = {};
-        const openPopOutStub = sinon
-            .stub(popOut, "openPopOut")
-            .callsFake((options: any) => {
-                const unsubscribe = options.onOpen();
-                return {
-                    close: () => {
-                        unsubscribe();
-                        closeFake();
-                        options.onClose();
-                    },
-                    focus: focusFake,
-                    popOutWindow
-                }
-            });
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
-        await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            checkout = dintero.embed({
-                sid: "<session_id>",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created.
             sleep(50).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 if (button) {
                     button.click();
                     // Wait for close button to be created.
                     sleep(50).then(() => {
-                        const button = document.getElementById('dintero-checkout-sdk-backdrop-close');
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-backdrop-close",
+                        );
                         if (button) {
                             button.click();
                             resolve(null);
@@ -1304,23 +1131,16 @@ describe("dintero.embed", () => {
                     reject();
                 }
             });
-
         });
         await sleep(50);
 
-        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
+        const backdrop = document.getElementById(
+            "dintero-checkout-sdk-backdrop",
+        );
         expect(backdrop).to.be.null;
-        console.log({ backdrop, closeFake: closeFake.callCount, focusFake: focusFake.callCount });
-        expect(closeFake.called).to.be.true;
-        expect(focusFake.called).to.be.false;
-
-
-        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
-        getSessionUrlStub.restore();
-        openPopOutStub.restore();
-        (await checkout).destroy();
+        expect(closeFake).toBeCalled();
+        expect(focusFake).not.toBeCalled();
     });
-
 
     it("Focuses pop out when focus is clicked", async () => {
         const script = `
@@ -1339,51 +1159,47 @@ describe("dintero.embed", () => {
                 disabled: "false"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
-        const closeFake = sinon.fake();
-        const focusFake = sinon.fake();
-        const popOutWindow = {};
-        const openPopOutStub = sinon
-            .stub(popOut, "openPopOut")
-            .callsFake((options: any) => {
-                const unsubscribe = options.onOpen();
-                return {
-                    close: () => {
-                        unsubscribe();
-                        closeFake();
-                        options.onClose();
-                    },
-                    focus: focusFake,
-                    popOutWindow
-                }
-            });
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
-        await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            checkout = dintero.embed({
-                sid: "<session_id>",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created.
             sleep(50).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 if (button) {
                     button.click();
                     // Wait for focus button to be created.
                     sleep(50).then(() => {
-                        const button = document.getElementById('dintero-checkout-sdk-backdrop-focus');
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-backdrop-focus",
+                        );
                         if (button) {
                             button.click();
                             resolve(null);
@@ -1395,19 +1211,12 @@ describe("dintero.embed", () => {
                     reject();
                 }
             });
-
         });
         await sleep(50);
 
-        expect(closeFake.called).to.be.false;
-        expect(focusFake.called).to.be.true;
-
-        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
-        getSessionUrlStub.restore();
-        openPopOutStub.restore();
-        (await checkout).destroy();
+        expect(closeFake).not.toBeCalled();
+        expect(focusFake).toBeCalled();
     });
-
 
     it("Focuses pop out when backdrop is clicked", async () => {
         const script = `
@@ -1426,51 +1235,47 @@ describe("dintero.embed", () => {
                 disabled: "false"
             });
         `;
-        const getSessionUrlStub = sinon
-            .stub(url, "getSessionUrl")
-            .callsFake((options: url.SessionUrlOptions) =>
-                getHtmlBlobUrl(options, script)
-            );
-        const closeFake = sinon.fake();
-        const focusFake = sinon.fake();
-        const popOutWindow = {};
-        const openPopOutStub = sinon
-            .stub(popOut, "openPopOut")
-            .callsFake((options: any) => {
-                const unsubscribe = options.onOpen();
-                return {
-                    close: () => {
-                        unsubscribe();
-                        closeFake();
-                        options.onClose();
-                    },
-                    focus: focusFake,
-                    popOutWindow
-                }
-            });
 
-        const container = document.createElement("p");
-        document.body.appendChild(container);
-        const onSessionHandler = sinon.fake();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
-        await new Promise((resolve, reject) => {
-            const container = document.createElement("p");
-            document.body.appendChild(container);
-            checkout = dintero.embed({
-                sid: "<session_id>",
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
                 container,
-                endpoint: "http://localhost:9999",
+                endpoint,
                 onSession: onSessionHandler,
                 popOut: true,
             });
             // Wait for button to be created.
             sleep(50).then(() => {
-                const button = document.getElementById('dintero-checkout-sdk-launch-pop-out');
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
                 if (button) {
                     button.click();
                     // Wait for focus button to be created.
                     sleep(50).then(() => {
-                        const backdrop = document.getElementById('dintero-checkout-sdk-backdrop');
+                        const backdrop = document.getElementById(
+                            "dintero-checkout-sdk-backdrop",
+                        );
                         if (backdrop) {
                             backdrop.click();
                             resolve(null);
@@ -1482,17 +1287,11 @@ describe("dintero.embed", () => {
                     reject();
                 }
             });
-
         });
         await sleep(50);
 
-        expect(closeFake.called).to.be.false;
-        expect(focusFake.called).to.be.true;
-
-        document.getElementById('dintero-checkout-sdk-launch-pop-out').remove();
-        getSessionUrlStub.restore();
-        openPopOutStub.restore();
-        (await checkout).destroy();
+        expect(closeFake).not.toBeCalled();
+        expect(focusFake).toBeCalled();
     });
 });
 
