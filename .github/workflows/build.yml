@@ -2,23 +2,23 @@ name: CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 'lts/*'
-        cache: npm
-    - name: yarn install, build and test
-      run: |
-        yarn install --immutable
-        yarn run test
-        yarn run build
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+          cache: npm
+      - name: yarn install, build, test and lint
+        run: |
+          yarn install --immutable
+          yarn run test
+          yarn run build
+          yarn run lint

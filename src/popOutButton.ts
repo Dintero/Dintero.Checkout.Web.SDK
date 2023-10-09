@@ -7,20 +7,22 @@ type PopOutButtonOptions = {
     top: string;
     left: string;
     right: string;
-    styles: { [key: string]: string }
+    styles: { [key: string]: string };
     onClick: () => void;
-}
+};
 
-
-const configureButton = (button: HTMLElement, { label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions) => {
-    button.setAttribute('id', OPEN_POP_OUT_BUTTON_ID);
-    button.setAttribute('type', 'button');
+const configureButton = (
+    button: HTMLElement,
+    { label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions,
+) => {
+    button.setAttribute("id", OPEN_POP_OUT_BUTTON_ID);
+    button.setAttribute("type", "button");
 
     // Is clickable
-    if (disabled === 'true') {
-        button.setAttribute('disabled', disabled);
+    if (disabled === "true") {
+        button.setAttribute("disabled", disabled);
     } else {
-        button.removeAttribute('disabled')
+        button.removeAttribute("disabled");
     }
 
     // Click handler
@@ -30,60 +32,58 @@ const configureButton = (button: HTMLElement, { label, disabled, top, left, righ
         event.stopPropagation();
 
         // Update look
-        button.style.boxShadow = 'inset 0 0 10px rgba(34, 84, 65, 0.9)';
+        button.style.boxShadow = "inset 0 0 10px rgba(34, 84, 65, 0.9)";
 
         // Invoke handler
         onClick();
 
         // Reset look
         window.setTimeout(() => {
-            button.style.boxShadow = 'none';
+            button.style.boxShadow = "none";
         }, 200);
-    }
+    };
 
     // Label
     button.innerText = label;
 
     // Position
-    button.style.position = 'absolute';
-    button.style.top = top + 'px';
-    button.style.left = left + 'px';
-    button.style.right = right + 'px';
+    button.style.position = "absolute";
+    button.style.top = top + "px";
+    button.style.left = left + "px";
+    button.style.right = right + "px";
 
     // Appearance from checkout
     for (const [key, value] of Object.entries(styles)) {
         button.style[key] = value;
     }
-
-}
+};
 
 export const addPopOutButton = (options: PopOutButtonOptions) => {
     // Will add or update existing button
     const { container } = options;
     const exists = document.getElementById(OPEN_POP_OUT_BUTTON_ID);
-    const button = exists || document.createElement('button');
+    const button = exists || document.createElement("button");
     configureButton(button, options);
     if (!exists) {
         container.appendChild(button);
     }
-}
-
+};
 
 export const setPopOutButtonDisabled = (disabled: boolean) => {
     try {
         const button = document.getElementById(OPEN_POP_OUT_BUTTON_ID);
         if (button) {
             if (disabled) {
-                button.setAttribute('disabled', disabled.toString())
+                button.setAttribute("disabled", disabled.toString());
             } else {
-                button.removeAttribute('disabled');
+                button.removeAttribute("disabled");
             }
         }
     } catch (e) {
         // Ignore error and continue
         console.error(e);
     }
-}
+};
 
 export const removePopOutButton = () => {
     try {
@@ -95,4 +95,4 @@ export const removePopOutButton = () => {
         // Ignore error and continue
         console.error(e);
     }
-}
+};

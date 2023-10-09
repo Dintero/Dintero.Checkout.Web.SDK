@@ -25,11 +25,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*'
-      - name: Install dependencies and test
+          node-version: "lts/*"
+      - name: Install dependencies, test and lint
         run: |
           yarn install --immutable
           yarn run test
+          yarn run lint
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -11,7 +11,7 @@ import { DinteroCheckoutInstance } from ".";
  */
 export type SubscriptionHandler = (
     sessionEvent: SessionEvent,
-    checkout: DinteroCheckoutInstance
+    checkout: DinteroCheckoutInstance,
 ) => void;
 
 interface SubscriptionOptions {
@@ -35,10 +35,7 @@ export type Subscription = {
  */
 const postAck = (source: Window, event: MessageEvent) => {
     if (event.data.mid && source) {
-        source.postMessage(
-            { ack: event.data.mid },
-            event.origin || "*"
-        );
+        source.postMessage({ ack: event.data.mid }, event.origin || "*");
     }
 };
 
@@ -54,9 +51,16 @@ export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
 /**
  * Post the validation result to the checkout iframe
  */
-export const postValidationResult = (iframe: HTMLIFrameElement, sid: string, result: SessionValidationCallback) => {
+export const postValidationResult = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    result: SessionValidationCallback,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "ValidationResult", sid, ...result }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "ValidationResult", sid, ...result },
+            "*",
+        );
     }
 };
 
@@ -72,11 +76,19 @@ export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
 /**
  * Post SetActivePaymentProductType-event to the checkout iframe.
  */
-export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: string, paymentProductType?: string) => {
+export const postActivePaymentProductType = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    paymentProductType?: string,
+) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
-            { type: "SetActivePaymentProductType", sid, payment_product_type:paymentProductType },
-            "*"
+            {
+                type: "SetActivePaymentProductType",
+                sid,
+                payment_product_type: paymentProductType,
+            },
+            "*",
         );
     }
 };
@@ -84,24 +96,29 @@ export const postActivePaymentProductType = (iframe: HTMLIFrameElement, sid: str
 /**
  * Post ClosePopOut-event to the checkout iframe.
  */
-export const postValidatePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+export const postValidatePopOutEvent = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "ValidatingPopOut", sid },
-            "*"
+            "*",
         );
     }
 };
 
-
 /**
  * Post OpenPopOutFailed-event to the checkout iframe.
  */
-export const postOpenPopOutFailedEvent = (iframe: HTMLIFrameElement, sid: string) => {
+export const postOpenPopOutFailedEvent = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "OpenPopOutFailed", sid },
-            "*"
+            "*",
         );
     }
 };
@@ -111,34 +128,37 @@ export const postOpenPopOutFailedEvent = (iframe: HTMLIFrameElement, sid: string
  */
 export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
-            { type: "OpenedPopOut", sid },
-            "*"
-        );
+        iframe.contentWindow.postMessage({ type: "OpenedPopOut", sid }, "*");
     }
 };
 
 /**
  * Post ClosePopOut-event to the checkout iframe.
  */
-export const postClosePopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+export const postClosePopOutEvent = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage(
-            { type: "ClosedPopOut", sid },
-            "*"
-        );
+        iframe.contentWindow.postMessage({ type: "ClosedPopOut", sid }, "*");
     }
 };
 
 /**
  * Post SetLanguage-event to the checkout iframe.
  */
-export const postSetLanguage = (iframe: HTMLIFrameElement, sid: string, language: string) => {
+export const postSetLanguage = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    language: string,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "SetLanguage", sid, language }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "SetLanguage", sid, language },
+            "*",
+        );
     }
 };
-
 
 /**
  * Subscribe to events from an iframe given a handler and a set

@@ -1,38 +1,40 @@
 ## [0.6.0]
+
 ### Changed
 
-- Changes iframe to also have `allow="payment"` property to support Apple Pay when embedded
+-   Changes iframe to also have `allow="payment"` property to support Apple Pay when embedded
 
 ## [0.4.0]
 
 ### Changed
 
--  Changes `lockSession` to return a promise that resolves when the following `SessionLocked` event is returned from the checkout.
--  Changes `refreshSession` to return a promise that resolves when the following `SessionUpdated` event is returned from the checkout.
+-   Changes `lockSession` to return a promise that resolves when the following `SessionLocked` event is returned from the checkout.
+-   Changes `refreshSession` to return a promise that resolves when the following `SessionUpdated` event is returned from the checkout.
 
 ## [0.3.1]
 
 ### Bug Fixes
-* Add correct package version to url
+
+-   Add correct package version to url
 
 ## [0.3.0]
 
 ### Features
 
-* **lock:** Add callback function to `onSessionLocked`
+-   **lock:** Add callback function to `onSessionLocked`
 
 ## [0.2.0]
 
 ### Features
 
-* Handling of session validation when embedded
+-   Handling of session validation when embedded
 
 ## [0.0.17]
 
 ### Changed
 
--  Adds `onActivePaymentProductType` callback.
--  Adds `setActivePaymentProductType` function.
+-   Adds `onActivePaymentProductType` callback.
+-   Adds `setActivePaymentProductType` function.
 
 ## [0.0.16]
 
@@ -44,7 +46,7 @@
 
 ### Changed
 
-- Added `lockSession` and `refreshSession` functions
+-   Added `lockSession` and `refreshSession` functions
 
 ## [0.0.14]
 

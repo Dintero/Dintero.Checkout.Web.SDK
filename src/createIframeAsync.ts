@@ -7,7 +7,7 @@
 export const createIframeAsync = (
     container: HTMLDivElement,
     endpoint: string,
-    url: string
+    url: string,
 ): { iframe: HTMLIFrameElement; initiate: () => void } => {
     if (!container || !container.appendChild) {
         throw new Error("Invalid container");
@@ -32,7 +32,7 @@ export const createIframeAsync = (
     // allow popups is needed to open terms in new window
     iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+        "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox",
     );
 
     // Needed for to allow apple pay from iframe
