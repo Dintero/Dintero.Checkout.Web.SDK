@@ -48,7 +48,7 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
     // custom endpoints like localhost and PR builds does not support the
     // serverside view flow.
     params.append("sid", sid);
-    return `${endpoint}/?${params.toString()}`;
+    return `${padTralingSlash(endpoint)}?${params.toString()}`;
 };
 
 const padTralingSlash = (endpoint: string) =>
@@ -60,9 +60,6 @@ export const getPopOutUrl = ({
     language,
     shouldCallValidateSession,
 }: SessionUrlOptions) => {
-    if (shouldCallValidateSession) {
-        return `${padTralingSlash(endpoint)}?loader=true`;
-    }
     const params = new URLSearchParams();
     params.append("ui", "fullscreen");
     params.append("role", "pop_out_payment");
@@ -71,5 +68,9 @@ export const getPopOutUrl = ({
     if (language) {
         params.append("language", language);
     }
-    return `${endpoint}/?${params.toString()}`;
+    if (shouldCallValidateSession) {
+        params.append("loader", 'true');
+        return `${padTralingSlash(endpoint)}?${params.toString()}`;
+    }
+    return `${padTralingSlash(endpoint)}?${params.toString()}`;
 };
