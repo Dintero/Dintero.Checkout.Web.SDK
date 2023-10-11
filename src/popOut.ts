@@ -4,7 +4,12 @@ const WIDTH = Math.min(480, window.screen.width);
 const HEIGHT = Math.min(840, window.screen.height);
 let popOutWindow: undefined | Window;
 
-const createPopOutWindow = (sid:string, url: string, width: number, height: number) => {
+const createPopOutWindow = (
+    sid: string,
+    url: string,
+    width: number,
+    height: number,
+) => {
     return new Promise<Window | undefined>((resolve) => {
         try {
             // Creates a centered pop up window
@@ -17,13 +22,20 @@ const createPopOutWindow = (sid:string, url: string, width: number, height: numb
             const handleAppLoaded = (event: MessageEvent) => {
                 const correctSource = event.source === popOut;
                 const correctOrigin = event.origin === new URL(url).origin;
-                const correctMessage = event.data && event.data.type === "AppLoaded";
+                const correctMessage =
+                    event.data && event.data.type === "AppLoaded";
                 const correctContext = event.data.context === "popOut";
                 const correctSid = event.data.sid === sid;
-                if(correctSource && correctOrigin && correctMessage && correctContext && correctSid) {
+                if (
+                    correctSource &&
+                    correctOrigin &&
+                    correctMessage &&
+                    correctContext &&
+                    correctSid
+                ) {
                     clearTimeout(timeout);
                     resolve(popOut);
-                    window.removeEventListener('message', handleAppLoaded);
+                    window.removeEventListener("message", handleAppLoaded);
                 }
             };
             window.addEventListener("message", handleAppLoaded);
@@ -40,7 +52,6 @@ const createPopOutWindow = (sid:string, url: string, width: number, height: numb
                 console.log("createPopOutWindow timeout");
                 resolve(undefined);
             }, 3000);
-
         } catch (err) {
             resolve(undefined);
         }

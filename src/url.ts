@@ -69,7 +69,7 @@ export const getPopOutUrl = ({
         params.append("language", language);
     }
     if (shouldCallValidateSession) {
-        params.append("loader", 'true');
+        params.append("loader", "true");
         return `${padTralingSlash(endpoint)}?${params.toString()}`;
     }
     return `${padTralingSlash(endpoint)}?${params.toString()}`;
