@@ -4,28 +4,54 @@ const WIDTH = Math.min(480, window.screen.width);
 const HEIGHT = Math.min(840, window.screen.height);
 let popOutWindow: undefined | Window;
 
-const createPopOutWindow = (url: string, width: number, height: number) => {
+const createPopOutWindow = (
+    sid: string,
+    url: string,
+    width: number,
+    height: number,
+) => {
     return new Promise<Window | undefined>((resolve) => {
         try {
-            // Opens a centered pop up window
+            // Creates a centered pop up window
             const left = window.screenX + (window.outerWidth - width) / 2;
             const top = window.screenY + (window.outerHeight - height) / 2;
             const features = `width=${width},height=${height},left=${left},top=${top},location=no,menubar=no,toolbar=no,status=no`;
-            const popOut = window.open(url, "dintero-checkout", features);
+            let popOut: undefined | Window;
+            let timeout = -1;
+            // Set up listener for application loaded message from pop out window
+            const handleAppLoaded = (event: MessageEvent) => {
+                const correctSource = event.source === popOut;
+                const correctOrigin = event.origin === new URL(url).origin;
+                const correctMessage =
+                    event.data && event.data.type === "AppLoaded";
+                const correctContext = event.data.context === "popOut";
+                const correctSid = event.data.sid === sid;
+                if (
+                    correctSource &&
+                    correctOrigin &&
+                    correctMessage &&
+                    correctContext &&
+                    correctSid
+                ) {
+                    clearTimeout(timeout);
+                    resolve(popOut);
+                    window.removeEventListener("message", handleAppLoaded);
+                }
+            };
+            window.addEventListener("message", handleAppLoaded);
+            // Open pop out
+            popOut = window.open(url, "dintero-checkout", features);
+            // Check that pop out was opened
             if (!popOut) {
                 console.log("createPopOutWindow no popOut");
                 resolve(undefined);
                 return;
             }
-            const timeout = window.setTimeout(() => {
+            // Trigger timeout if pop out is not loaded
+            timeout = window.setTimeout(() => {
                 console.log("createPopOutWindow timeout");
                 resolve(undefined);
             }, 3000);
-            popOut.addEventListener("load", (event) => {
-                console.log("createPopOutWindow loaded", { popOut, event });
-                clearTimeout(timeout);
-                resolve(popOut);
-            });
         } catch (err) {
             resolve(undefined);
         }
@@ -49,7 +75,7 @@ export const openPopOut = async (options: PopOutOptions) => {
 
     // Open popup window
     const url = getPopOutUrl(options);
-    popOutWindow = await createPopOutWindow(url, WIDTH, HEIGHT);
+    popOutWindow = await createPopOutWindow(options.sid, url, WIDTH, HEIGHT);
 
     const focusPopOut = () => {
         if (popOutWindow) {
