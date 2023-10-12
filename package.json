@@ -11,10 +11,10 @@
         "umdName": "dintero"
     },
     "scripts": {
-        "postinstall": "patch -u node_modules/vitest/dist/vendor-node.a7c48fe1.js -i patches/vitest+0.34.6.patch --forward || true",
+        "patch-vitest": "patch -u node_modules/vitest/dist/vendor-node.a7c48fe1.js -i patches/vitest+0.34.6.patch --forward || true",
         "build": "preconstruct build",
         "lint": "prettier --cache --log-level warn -c --config .prettierrc.yml .",
-        "test": "$(yarn bin)/vitest --browser.name=chrome --browser.headless",
+        "test": "yarn patch-vitest && $(yarn bin)/vitest --browser.name=chrome --browser.headless",
         "semantic-release": "semantic-release",
         "prepublishOnly": "yarn run build"
     },
