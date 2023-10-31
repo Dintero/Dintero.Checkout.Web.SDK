@@ -36,7 +36,7 @@
         "@semantic-release/git": "10.0.1",
         "@vitest/browser": "0.34.6",
         "prettier": "3.0.3",
-        "semantic-release": "22.0.5",
+        "semantic-release": "22.0.6",
         "typescript": "5.2.2",
         "vitest": "0.34.6",
         "webdriverio": "8.20.4"
