@@ -30,7 +30,7 @@
         "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
     },
     "devDependencies": {
-        "@babel/core": "7.23.2",
+        "@babel/core": "7.23.3",
         "@babel/preset-typescript": "7.23.2",
         "@preconstruct/cli": "2.8.1",
         "@semantic-release/git": "10.0.1",
