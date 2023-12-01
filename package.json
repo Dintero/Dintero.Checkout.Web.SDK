@@ -37,7 +37,7 @@
         "@vitest/browser": "0.34.6",
         "prettier": "3.1.0",
         "semantic-release": "22.0.8",
-        "typescript": "5.2.2",
+        "typescript": "5.3.2",
         "vitest": "0.34.6",
         "webdriverio": "8.24.6"
     },
