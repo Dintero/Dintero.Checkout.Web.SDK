@@ -5877,10 +5877,10 @@ webdriver@8.24.12:
     ky "^0.33.0"
     ws "^8.8.0"
 
-webdriverio@8.24.12:
-  version "8.24.12"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.24.12.tgz#05a2107ae8a3927e1a01503a05fc2050fa4e06bd"
-  integrity sha512-Ddu0NNRMVkTzRzqvm3m0wt2eLUn+Plz2Cj+1QXDnVpddYJvk9J3elZC2hqNyscEtecQ+h2y3r36OcJqkl9jPag==
+webdriverio@8.26.1:
+  version "8.26.1"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.26.1.tgz#0c2d8a695e89c4fc009884ba471899901fa8e8b7"
+  integrity sha512-KnM92UPqk7FmPJpZf3krHrqn0ydjSdyAMn+i4uENxLBqm1OyQ12gSKtIatt8FOP9/C+UrFXATSOd+jRkU2xMkw==
   dependencies:
     "@types/node" "^20.1.0"
     "@wdio/config" "8.24.12"
