@@ -1,4 +1,4 @@
-import { getPopOutUrl, SessionUrlOptions } from "./url";
+import { url, type SessionUrlOptions } from "./url";
 
 const WIDTH = Math.min(480, window.screen.width);
 const HEIGHT = Math.min(840, window.screen.height);
@@ -74,8 +74,13 @@ export const openPopOut = async (options: PopOutOptions) => {
     }
 
     // Open popup window
-    const url = getPopOutUrl(options);
-    popOutWindow = await createPopOutWindow(options.sid, url, WIDTH, HEIGHT);
+    const popOutUrl = url.getPopOutUrl(options);
+    popOutWindow = await createPopOutWindow(
+        options.sid,
+        popOutUrl,
+        WIDTH,
+        HEIGHT,
+    );
 
     const focusPopOut = () => {
         if (popOutWindow) {
@@ -122,3 +127,5 @@ export const openPopOut = async (options: PopOutOptions) => {
         popOutWindow,
     };
 };
+
+export const popOut = { openPopOut };

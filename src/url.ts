@@ -3,13 +3,12 @@ import pkg from "../package.json";
 /**
  * Wraps window.location.assign()
  */
-export const windowLocationAssign = (url: string) => {
+const windowLocationAssign = (url: string) => {
     window.location.assign(url);
 };
 
 /**
- * Get the url for the session./yarn-error.log
-.DS_Store
+ * Get the url for the session
  */
 export interface SessionUrlOptions {
     sid: string;
@@ -20,7 +19,7 @@ export interface SessionUrlOptions {
     popOut?: boolean;
 }
 
-export const getSessionUrl = (options: SessionUrlOptions): string => {
+const getSessionUrl = (options: SessionUrlOptions): string => {
     const { sid, endpoint, language, ui, shouldCallValidateSession, popOut } =
         options;
     if (!endpoint) {
@@ -54,7 +53,7 @@ export const getSessionUrl = (options: SessionUrlOptions): string => {
 const padTralingSlash = (endpoint: string) =>
     endpoint.endsWith("/") ? endpoint : `${endpoint}/`;
 
-export const getPopOutUrl = ({
+const getPopOutUrl = ({
     sid,
     endpoint,
     language,
@@ -73,4 +72,10 @@ export const getPopOutUrl = ({
         return `${padTralingSlash(endpoint)}?${params.toString()}`;
     }
     return `${padTralingSlash(endpoint)}?${params.toString()}`;
+};
+
+export const url = {
+    getPopOutUrl,
+    getSessionUrl,
+    windowLocationAssign,
 };

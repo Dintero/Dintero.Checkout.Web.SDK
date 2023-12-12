@@ -11,9 +11,9 @@
         "umdName": "dintero"
     },
     "scripts": {
-        "build": "preconstruct build",
+        "build": "yarn tsc --noEmit && preconstruct build",
         "lint": "prettier --cache --log-level warn -c --config .prettierrc.yml .",
-        "test": "yarn patch-vitest && $(yarn bin)/vitest --browser.name=chrome --browser.headless",
+        "test": "vitest --browser.name=chrome --browser.headless",
         "semantic-release": "semantic-release",
         "prepublishOnly": "yarn run build"
     },
