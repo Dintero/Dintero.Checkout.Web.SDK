@@ -3,8 +3,21 @@ updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
     commit-message:
       prefix: fix
       prefix-development: chore
       include: scope
+    groups:
+      babel:
+        patterns:
+          - "@babel/*"
+      semantic-release:
+        patterns:
+          - "@semantic-release/*"
+          - "semantic-release"
+      vitest-webdriverio:
+        patterns:
+          - "@vitest/*"
+          - "vitest"
+          - "webdriverio"
