@@ -34,11 +34,11 @@
         "@babel/preset-typescript": "7.23.3",
         "@preconstruct/cli": "2.8.2",
         "@semantic-release/git": "10.0.1",
-        "@vitest/browser": "0.34.6",
+        "@vitest/browser": "1.0.4",
         "prettier": "3.1.1",
         "semantic-release": "22.0.12",
         "typescript": "5.3.3",
-        "vitest": "0.34.6",
+        "vitest": "1.0.4",
         "webdriverio": "8.26.1"
     },
     "dependencies": {
