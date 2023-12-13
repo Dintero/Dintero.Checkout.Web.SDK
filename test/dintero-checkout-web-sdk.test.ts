@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as dintero from "../src";
-import * as url from "../src/url";
-import * as popOut from "../src/popOut";
+import { url, type SessionUrlOptions } from "../src/url";
+import { popOut } from "../src/popOut";
 import pkg from "../package.json";
 
 import {
@@ -28,10 +28,7 @@ import {
 //);
 
 // Create test iframe content from a blob
-const getHtmlBlobUrl = (
-    options: url.SessionUrlOptions,
-    script: string,
-): string => {
+const getHtmlBlobUrl = (options: SessionUrlOptions, script: string): string => {
     const html = `
 <script type="text/javascript">
         const sid = "${options.sid}";

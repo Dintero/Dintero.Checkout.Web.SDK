@@ -2,6 +2,7 @@
     "compilerOptions": {
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "skipLibCheck": true
     }
 }

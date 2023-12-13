@@ -19,7 +19,7 @@ import {
     SessionEvent,
     ShowPopOutButton,
 } from "./checkout";
-import { getPopOutUrl, getSessionUrl, windowLocationAssign } from "./url";
+import { url } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
 import {
     subscribe,
@@ -45,7 +45,7 @@ import {
     removePopOutButton,
     setPopOutButtonDisabled,
 } from "./popOutButton";
-import { openPopOut } from "./popOut";
+import { popOut } from "./popOut";
 import { Session } from "./session";
 
 export interface DinteroCheckoutInstance {
@@ -144,7 +144,7 @@ const followHref: SubscriptionHandler = (
 ): void => {
     cleanUpPopOut(checkout);
     if (event.href) {
-        windowLocationAssign(event.href);
+        url.windowLocationAssign(event.href);
     }
 };
 
@@ -300,7 +300,7 @@ const showPopOut = async (
     event: ShowPopOutButton,
     checkout: DinteroCheckoutInstance,
 ) => {
-    const { close, focus, popOutWindow } = await openPopOut({
+    const { close, focus, popOutWindow } = await popOut.openPopOut({
         sid: checkout.options.sid,
         endpoint: checkout.options.endpoint,
         shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
@@ -341,7 +341,7 @@ const createPopOutValidationCallback = (
         postValidationResult(checkout.iframe, checkout.options.sid, result);
         if (result.success && checkout.popOutWindow) {
             // Redirect user to session in pop out window
-            checkout.popOutWindow.location.href = getPopOutUrl({
+            checkout.popOutWindow.location.href = url.getPopOutUrl({
                 sid: checkout.options.sid,
                 endpoint: checkout.options.endpoint,
                 shouldCallValidateSession: false,
@@ -497,7 +497,7 @@ export const embed = async (
     const { iframe, initiate } = createIframeAsync(
         innerContainer,
         endpoint,
-        getSessionUrl({
+        url.getSessionUrl({
             sid,
             endpoint,
             language,
@@ -817,8 +817,8 @@ export const redirect = (options: DinteroCheckoutOptions) => {
         endpoint = "https://checkout.dintero.com",
     } = options;
     // Redirect the current browser window to the checkout session url.
-    windowLocationAssign(
-        getSessionUrl({
+    url.windowLocationAssign(
+        url.getSessionUrl({
             sid,
             endpoint,
             language,
