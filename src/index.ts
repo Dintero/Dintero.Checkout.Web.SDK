@@ -454,10 +454,10 @@ const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
     }
 };
 
-const composeUrl = (base:string, path:string, query: string) => {
-    const slash = base.endsWith('/')? '': '/';
+const composeUrl = (base: string, path: string, query: string) => {
+    const slash = base.endsWith("/") ? "" : "/";
     return `${base}${slash}${path}?${query}`;
-}
+};
 
 /**
  * Show a dintero payment session in an embedded iframe.
@@ -642,7 +642,7 @@ export const embed = async (
                     .join("&");
                 checkout.iframe.setAttribute(
                     "src",
-                    composeUrl(endpoint, 'embedResult/', urlQuery),
+                    composeUrl(endpoint, "embedResult/", urlQuery),
                 );
                 handler(event, checkout);
             }
@@ -718,7 +718,7 @@ export const embed = async (
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentOnHold],
-            handler: handleWithResult(sid, endpoint, onPayment || followHref)
+            handler: handleWithResult(sid, endpoint, onPayment || followHref),
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
@@ -726,14 +726,22 @@ export const embed = async (
                 sid,
                 endpoint,
                 onPaymentAuthorized || onPayment || followHref,
-            )
+            ),
         },
         {
-            handler: handleWithResult(sid, endpoint, onSessionCancel || followHref),
+            handler: handleWithResult(
+                sid,
+                endpoint,
+                onSessionCancel || followHref,
+            ),
             eventTypes: [CheckoutEvents.SessionCancel],
         },
         {
-            handler: handleWithResult(sid, endpoint, onPaymentError || followHref),
+            handler: handleWithResult(
+                sid,
+                endpoint,
+                onPaymentError || followHref,
+            ),
             eventTypes: [CheckoutEvents.SessionPaymentError],
         },
         {
