@@ -7,13 +7,17 @@ type PopOutButtonOptions = {
     top: string;
     left: string;
     right: string;
-    styles: { [key: string]: string };
+    styles: {
+        [key: string]: string
+    };
+    stylesHover?: { [key: string]: string };
+    stylesFocusVisible?: { [key: string]: string };
     onClick: () => void;
 };
 
 const configureButton = (
     button: HTMLElement,
-    { label, disabled, top, left, right, styles, onClick }: PopOutButtonOptions,
+    { label, disabled, top, left, right, styles, onClick, stylesHover, stylesFocusVisible}: PopOutButtonOptions,
 ) => {
     button.setAttribute("id", OPEN_POP_OUT_BUTTON_ID);
     button.setAttribute("type", "button");
@@ -53,10 +57,71 @@ const configureButton = (
     button.style.right = right + "px";
 
     // Appearance from checkout
-    for (const [key, value] of Object.entries(styles)) {
+    const {
+        ...directStyles
+    } = styles;
+
+    for (const [key, value] of Object.entries(directStyles)) {
         button.style[key] = value;
     }
+
+    // Add hover and focus-visible styles
+    try{
+        addHoverAndFocusVisibleStyles(stylesHover, stylesFocusVisible);
+    } catch (e) {
+        console.error(e);
+    }
 };
+
+const addHoverAndFocusVisibleStyles = (stylesHover?: { [key: string]: string }, stylesFocusVisible?: { [key: string]: string })=>{
+    if(!stylesHover && !stylesFocusVisible){
+        return;
+    }
+    const styleId = `${OPEN_POP_OUT_BUTTON_ID}-styles`;
+    const hasStyles = document.getElementById(styleId);
+    if(hasStyles ){
+        return;
+    }
+    const style = document.createElement('style');
+    style.setAttribute('id', styleId);
+    let content = []
+    if(stylesHover){
+        content.push(
+            toCssEntity(
+                `#${OPEN_POP_OUT_BUTTON_ID}:hover`,
+                stylesHover
+            )
+        );
+    }
+    if(stylesFocusVisible){
+        content.push(
+            toCssEntity(
+                `#${OPEN_POP_OUT_BUTTON_ID}:focus-visible`,
+                stylesFocusVisible
+            )
+        );
+    }
+    style.textContent = content.join('\n');
+    document.head.appendChild(style);
+}
+
+const toCssEntity = (selector:string, keyValues: { [key: string]: string }) =>{
+    return [
+        `${selector} {`,
+        toCssParameters(keyValues),
+        `}`
+    ].join('\n')
+}
+
+const toCssParameters = (keyValues: { [key: string]: string })=>{
+    return Object.entries(keyValues)
+        .map(([key, value])=>`    ${slugify(key)}: ${value} !important;`)
+        .join('\n');
+}
+
+const slugify = (str:string) => {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
 
 export const addPopOutButton = (options: PopOutButtonOptions) => {
     // Will add or update existing button

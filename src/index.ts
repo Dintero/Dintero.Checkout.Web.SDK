@@ -420,6 +420,8 @@ const handleShowButton: SubscriptionHandler = (
             left: event.left,
             right: event.right,
             styles: event.styles,
+            stylesHover: event.stylesHover,
+            stylesFocusVisible: event.stylesFocusVisible,
             disabled: event.disabled,
             onClick: () => handlePopOutButtonClick(event, checkout),
         });
