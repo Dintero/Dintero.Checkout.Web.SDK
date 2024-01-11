@@ -88,7 +88,7 @@ const addHoverAndFocusVisibleStyles = (stylesHover?: { [key: string]: string }, 
     if(stylesHover){
         content.push(
             toCssEntity(
-                `#${OPEN_POP_OUT_BUTTON_ID}:hover`,
+                `#${OPEN_POP_OUT_BUTTON_ID}:hover:not(:disabled)`,
                 stylesHover
             )
         );
