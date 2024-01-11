@@ -77,7 +77,7 @@ export type ShowPopOutButton = {
         lineHeight: string;
         transition: string;
         outline: string;
-    },
+    };
     stylesHover?: { [key: string]: string };
     stylesFocusVisible?: { [key: string]: string };
     openLabel: string;
