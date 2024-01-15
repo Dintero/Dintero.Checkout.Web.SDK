@@ -1223,67 +1223,67 @@
   dependencies:
     "@types/node" "*"
 
-"@vitest/browser@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/browser/-/browser-1.1.3.tgz#2808a39d84b55f2cd8290d1153d142bfc1cc8e63"
-  integrity sha512-ksI0V8YqonFYfjVYMPTvDR84i7ix7QPL2Sc8G2mHirVGAf4jJS3uC/CsifRLe5/E2r8QUhHbAdZQpvMCqBJV5w==
+"@vitest/browser@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/browser/-/browser-1.2.0.tgz#2493faf12da25f4cd9e89e4d05f220064223816e"
+  integrity sha512-egA2juStgiDDiHSjw5dloOj9pG+Au1azleKBxEs8E8dafkfQbr5FxswhsAryXdT29kb8EU479wET0KQz3NUSsQ==
   dependencies:
-    "@vitest/utils" "1.1.3"
+    "@vitest/utils" "1.2.0"
     magic-string "^0.30.5"
     sirv "^2.0.4"
 
-"@vitest/expect@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-1.1.3.tgz#9667719dffa82e7350dcca7b95f9ec30426d037e"
-  integrity sha512-MnJqsKc1Ko04lksF9XoRJza0bGGwTtqfbyrsYv5on4rcEkdo+QgUdITenBQBUltKzdxW7K3rWh+nXRULwsdaVg==
+"@vitest/expect@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/expect/-/expect-1.2.0.tgz#de93f5c32c2781c41415a8c3a6e48e1c023d6613"
+  integrity sha512-H+2bHzhyvgp32o7Pgj2h9RTHN0pgYaoi26Oo3mE+dCi1PAqV31kIIVfTbqMO3Bvshd5mIrJLc73EwSRrbol9Lw==
   dependencies:
-    "@vitest/spy" "1.1.3"
-    "@vitest/utils" "1.1.3"
+    "@vitest/spy" "1.2.0"
+    "@vitest/utils" "1.2.0"
     chai "^4.3.10"
 
-"@vitest/runner@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/runner/-/runner-1.1.3.tgz#c71e0ab6aad0a6a75c804e060c295852dc052beb"
-  integrity sha512-Va2XbWMnhSdDEh/OFxyUltgQuuDRxnarK1hW5QNN4URpQrqq6jtt8cfww/pQQ4i0LjoYxh/3bYWvDFlR9tU73g==
+"@vitest/runner@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/runner/-/runner-1.2.0.tgz#84775f0f5c48620ff1943a45c19863355791c6d9"
+  integrity sha512-vaJkDoQaNUTroT70OhM0NPznP7H3WyRwt4LvGwCVYs/llLaqhoSLnlIhUClZpbF5RgAee29KRcNz0FEhYcgxqA==
   dependencies:
-    "@vitest/utils" "1.1.3"
+    "@vitest/utils" "1.2.0"
     p-limit "^5.0.0"
     pathe "^1.1.1"
 
-"@vitest/snapshot@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/snapshot/-/snapshot-1.1.3.tgz#94f321f80c9fb9e10b83dabb83a0d09f034a74b0"
-  integrity sha512-U0r8pRXsLAdxSVAyGNcqOU2H3Z4Y2dAAGGelL50O0QRMdi1WWeYHdrH/QWpN1e8juWfVKsb8B+pyJwTC+4Gy9w==
+"@vitest/snapshot@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/snapshot/-/snapshot-1.2.0.tgz#2fcddb5c6e8a9d2fc9f18ea2f8fd39b1b6e691b4"
+  integrity sha512-P33EE7TrVgB3HDLllrjK/GG6WSnmUtWohbwcQqmm7TAk9AVHpdgf7M3F3qRHKm6vhr7x3eGIln7VH052Smo6Kw==
   dependencies:
     magic-string "^0.30.5"
     pathe "^1.1.1"
     pretty-format "^29.7.0"
 
-"@vitest/spy@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-1.1.3.tgz#244e4e049cd0a5b126a475af327df8b7ffa6b3b5"
-  integrity sha512-Ec0qWyGS5LhATFQtldvChPTAHv08yHIOZfiNcjwRQbFPHpkih0md9KAbs7TfeIfL7OFKoe7B/6ukBTqByubXkQ==
+"@vitest/spy@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/spy/-/spy-1.2.0.tgz#61104de4c19a3addefff021d884c9e20dc17ebcd"
+  integrity sha512-MNxSAfxUaCeowqyyGwC293yZgk7cECZU9wGb8N1pYQ0yOn/SIr8t0l9XnGRdQZvNV/ZHBYu6GO/W3tj5K3VN1Q==
   dependencies:
     tinyspy "^2.2.0"
 
-"@vitest/utils@1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-1.1.3.tgz#1f82122f916b0b6feb5e85fc854cfa1fbd522b55"
-  integrity sha512-Dyt3UMcdElTll2H75vhxfpZu03uFpXRCHxWnzcrFjZxT1kTbq8ALUYIeBgGolo1gldVdI0YSlQRacsqxTwNqwg==
+"@vitest/utils@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vitest/utils/-/utils-1.2.0.tgz#deb9bdc3d094bf47f93a592a6a0b3946aa575e7a"
+  integrity sha512-FyD5bpugsXlwVpTcGLDf3wSPYy8g541fQt14qtzo8mJ4LdEpDKZ9mQy2+qdJm2TZRpjY5JLXihXCgIxiRJgi5g==
   dependencies:
     diff-sequences "^29.6.3"
     estree-walker "^3.0.3"
     loupe "^2.3.7"
     pretty-format "^29.7.0"
 
-"@wdio/config@8.27.0":
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-8.27.0.tgz#c738d8108b5161cf3f80bb34d0e1f4d700b1a9ce"
-  integrity sha512-zYM5daeiBVVAbQj0ASymAt0RUsocLVIwKiUHNa8gg/1GsZnztGjetXExSp1gXlxtMVM5xWUSKjh6ceFK79gWDQ==
+"@wdio/config@8.27.2":
+  version "8.27.2"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-8.27.2.tgz#387f7dbcb431c3350a2fa308e5520201ae295195"
+  integrity sha512-qR1r7K7/jsQhi9g5NiW40lgbvbzCcwwk8nz07hzTj6m8fQ8TXkQPob2fnrlDaNrXjzbZC4od0uv0a5fimK9YOQ==
   dependencies:
     "@wdio/logger" "8.24.12"
-    "@wdio/types" "8.27.0"
-    "@wdio/utils" "8.27.0"
+    "@wdio/types" "8.27.2"
+    "@wdio/utils" "8.27.2"
     decamelize "^6.0.0"
     deepmerge-ts "^5.0.0"
     glob "^10.2.2"
@@ -1311,21 +1311,21 @@
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/types@8.27.0":
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/types/-/types-8.27.0.tgz#ef2e3a9ae083f08ee5fe5bf9e5dfc70cc55cebcb"
-  integrity sha512-LbP9FKh8r0uW9/dKhTIUCC1Su8PsP9TmzGKXkWt6/IMacgJiB/zW3u1CgyaLw9lG0UiQORHGoeJX9zB2HZAh4w==
+"@wdio/types@8.27.2":
+  version "8.27.2"
+  resolved "https://registry.yarnpkg.com/@wdio/types/-/types-8.27.2.tgz#8adfe9610e3473b23e52038f73ca3e857edb2585"
+  integrity sha512-z/TtSQysEtAUNh+DooOs22G7xotTsJC2RcIZKaVtHY4Gl6lF+tn8kLRXD79jem2ta1byB1TpW62K366k1vzcLw==
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/utils@8.27.0":
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-8.27.0.tgz#6cb9b29649b4e301a959a8e8aea831edec635d55"
-  integrity sha512-4BY+JBQssVn003P5lA289uDMie3LtGinHze5btkcW9timB6VaU+EeZS4eKTPC0pziizLhteVvXYxv3YTpeeRfA==
+"@wdio/utils@8.27.2":
+  version "8.27.2"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-8.27.2.tgz#4b2a83fa902d81cb18132e5b2dc21be1652a6abb"
+  integrity sha512-jWxUhGjlZ4L3uOsP96oLKWjkITpoH/KPTtKzU7xdoVGhd1LXK4d/Fr8cTFTNkDBXM7yuM7C+EMmQ8HJHR55KTA==
   dependencies:
     "@puppeteer/browsers" "^1.6.0"
     "@wdio/logger" "8.24.12"
-    "@wdio/types" "8.27.0"
+    "@wdio/types" "8.27.2"
     decamelize "^6.0.0"
     deepmerge-ts "^5.1.0"
     edgedriver "^5.3.5"
@@ -2208,10 +2208,10 @@ devtools-protocol@0.0.1147663:
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1147663.tgz#4ec5610b39a6250d1f87e6b9c7e16688ed0ac78e"
   integrity sha512-hyWmRrexdhbZ1tcJUGpO95ivbRhWXz++F4Ko+n21AY5PNln2ovoJw+8ZMNDTtip+CNFQfrtLVh/w4009dXO/eQ==
 
-devtools-protocol@^0.0.1237913:
-  version "0.0.1237913"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1237913.tgz#ac0208ff0cbe9c53646753576b5c1d788e3caa38"
-  integrity sha512-Pxtmz2ZIqBkpU82HaIdsvCQBG94yTC4xajrEsWx9p38QKEfBCJktSazsHkrjf9j3dVVNPhg5LR21F6KWeXpjiQ==
+devtools-protocol@^0.0.1239539:
+  version "0.0.1239539"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1239539.tgz#6af1570fc467b340c0373289c1c2a184710742c1"
+  integrity sha512-uS7hZVqZxGyZwR8lX/8wWyNLGEYs1wWWxN7qeRC+wBZ4VM5JXYwCJg8hofEna5yX0W2cavpjHOE4ukHXLHlEaA==
 
 diff-sequences@^29.6.3:
   version "29.6.3"
@@ -5713,10 +5713,10 @@ validate-npm-package-name@^5.0.0:
   dependencies:
     builtins "^5.0.0"
 
-vite-node@1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/vite-node/-/vite-node-1.1.3.tgz#196de20a7c2e0467a07da0dd1fe67994f5b79695"
-  integrity sha512-BLSO72YAkIUuNrOx+8uznYICJfTEbvBAmWClY3hpath5+h1mbPS5OMn42lrTxXuyCazVyZoDkSRnju78GiVCqA==
+vite-node@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vite-node/-/vite-node-1.2.0.tgz#9a359804469203a54ac49daad3065f2fd0bfb9c3"
+  integrity sha512-ETnQTHeAbbOxl7/pyBck9oAPZZZo+kYnFt1uQDD+hPReOc+wCjXw4r4jHriBRuVDB5isHmPXxrfc1yJnfBERqg==
   dependencies:
     cac "^6.7.14"
     debug "^4.3.4"
@@ -5735,16 +5735,16 @@ vite@^5.0.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest@1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/vitest/-/vitest-1.1.3.tgz#c911bcbcfd2266d44db6ecb08273b91e0ec20dc7"
-  integrity sha512-2l8om1NOkiA90/Y207PsEvJLYygddsOyr81wLQ20Ra8IlLKbyQncWsGZjnbkyG2KwwuTXLQjEPOJuxGMG8qJBQ==
+vitest@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vitest/-/vitest-1.2.0.tgz#2ddff4a32ed992339655f243525c0e187b5af6d9"
+  integrity sha512-Ixs5m7BjqvLHXcibkzKRQUvD/XLw0E3rvqaCMlrm/0LMsA0309ZqYvTlPzkhh81VlEyVZXFlwWnkhb6/UMtcaQ==
   dependencies:
-    "@vitest/expect" "1.1.3"
-    "@vitest/runner" "1.1.3"
-    "@vitest/snapshot" "1.1.3"
-    "@vitest/spy" "1.1.3"
-    "@vitest/utils" "1.1.3"
+    "@vitest/expect" "1.2.0"
+    "@vitest/runner" "1.2.0"
+    "@vitest/snapshot" "1.2.0"
+    "@vitest/spy" "1.2.0"
+    "@vitest/utils" "1.2.0"
     acorn-walk "^8.3.1"
     cac "^6.7.14"
     chai "^4.3.10"
@@ -5759,7 +5759,7 @@ vitest@1.1.3:
     tinybench "^2.5.1"
     tinypool "^0.8.1"
     vite "^5.0.0"
-    vite-node "1.1.3"
+    vite-node "1.2.0"
     why-is-node-running "^2.2.2"
 
 wait-port@^1.0.4:
@@ -5788,40 +5788,40 @@ web-streams-polyfill@^3.0.3:
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz#71c2718c52b45fd49dbeee88634b3a60ceab42a6"
   integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
 
-webdriver@8.27.0:
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-8.27.0.tgz#27e936a03c08b2d72ed6bd01a6a46f8189ef0abf"
-  integrity sha512-n1IA+rR3u84XxU9swiKUM06BkEC0GDimfZkBML57cny+utQOUbdM/mBpqCUnkWX/RBz/p2EfHdKNyOs3/REaog==
+webdriver@8.27.2:
+  version "8.27.2"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-8.27.2.tgz#cec0495c93907b87473f786ec67bac348eddcd12"
+  integrity sha512-vY2Lr0ZNr83n0v8PjLCXtJwR9E7QGycJVS+ev2G72gI54/rFwLv58HMSbJNn8CtE27VkhtewMUPlDpSkj5wGPQ==
   dependencies:
     "@types/node" "^20.1.0"
     "@types/ws" "^8.5.3"
-    "@wdio/config" "8.27.0"
+    "@wdio/config" "8.27.2"
     "@wdio/logger" "8.24.12"
     "@wdio/protocols" "8.24.12"
-    "@wdio/types" "8.27.0"
-    "@wdio/utils" "8.27.0"
+    "@wdio/types" "8.27.2"
+    "@wdio/utils" "8.27.2"
     deepmerge-ts "^5.1.0"
     got "^12.6.1"
     ky "^0.33.0"
     ws "^8.8.0"
 
-webdriverio@8.27.0:
-  version "8.27.0"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.27.0.tgz#4068b0164ab66bfb62d6eb6b8d97df2d140922d5"
-  integrity sha512-Qh5VCiBjEmxnmXcL1QEFoDzFqTtaWKrXriuU5G0yHKCModGAt2G7IHTkAok3CpmkVJfZpEvY630aP1MvgDtFhw==
+webdriverio@8.27.2:
+  version "8.27.2"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-8.27.2.tgz#b4ddbbb6c474ba45c543d23445e5aa26d914830b"
+  integrity sha512-X6PhKE8e8XsB33Q/KSS1zYKP2Rqkq2Nef0YKOhQO+5OTlTkeqMCjnEtyRcfmdtfAwT0DEFqMnGnUKEbTajFC4Q==
   dependencies:
     "@types/node" "^20.1.0"
-    "@wdio/config" "8.27.0"
+    "@wdio/config" "8.27.2"
     "@wdio/logger" "8.24.12"
     "@wdio/protocols" "8.24.12"
     "@wdio/repl" "8.24.12"
-    "@wdio/types" "8.27.0"
-    "@wdio/utils" "8.27.0"
+    "@wdio/types" "8.27.2"
+    "@wdio/utils" "8.27.2"
     archiver "^6.0.0"
     aria-query "^5.0.0"
     css-shorthand-properties "^1.1.1"
     css-value "^0.0.1"
-    devtools-protocol "^0.0.1237913"
+    devtools-protocol "^0.0.1239539"
     grapheme-splitter "^1.0.2"
     import-meta-resolve "^4.0.0"
     is-plain-obj "^4.1.0"
@@ -5833,7 +5833,7 @@ webdriverio@8.27.0:
     resq "^1.9.1"
     rgb2hex "0.2.5"
     serialize-error "^11.0.1"
-    webdriver "8.27.0"
+    webdriver "8.27.2"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
