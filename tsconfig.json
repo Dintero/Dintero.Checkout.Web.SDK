@@ -3,6 +3,6 @@
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
-        "skipLibCheck": true,
-    },
+        "skipLibCheck": true
+    }
 }
