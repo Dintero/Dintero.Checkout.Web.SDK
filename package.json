@@ -7,6 +7,9 @@
     "umd:main": "dist/dintero-checkout-web-sdk.umd.min.js",
     "unpkg": "dist/dintero-checkout-web-sdk.umd.min.js",
     "types": "dist/dintero-checkout-web-sdk.cjs.d.ts",
+    "files": [
+        "dist"
+    ],
     "preconstruct": {
         "umdName": "dintero"
     },
