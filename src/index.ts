@@ -83,6 +83,7 @@ export interface DinteroCheckoutOptions {
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     container: HTMLDivElement;
     popOut?: boolean;
+    ui?: "inline" | "fullscreen";
     onPayment?: (
         event: SessionPaymentAuthorized | SessionPaymentOnHold,
         checkout: DinteroCheckoutInstance,
@@ -508,7 +509,7 @@ export const embed = async (
             sid,
             endpoint,
             language,
-            ui: "inline",
+            ui: options.ui || "inline",
             shouldCallValidateSession: onValidateSession !== undefined,
             popOut,
         }),
