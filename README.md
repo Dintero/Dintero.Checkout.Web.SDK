@@ -7,7 +7,7 @@ Use this SDK in your frontend application to
 
 _Note that this SDK is for redirecting or embedding existing payment sessions. You cannot use this SDK to send requests to the Checkout API or to crate new payment sessions._
 
-[Learn more about the Dintero Checkout at docs.dintero.com](https://docs.dintero.com/docs/checkout-getting-started.html)
+[Learn more about the Dintero Checkout at docs.dintero.com](https://docs.dintero.com/docs/checkout/getting-started/)
 
 ## Before you start
 
@@ -294,7 +294,7 @@ const checkout = redirect({
 
 ## Bugs
 
-Bugs can be reported to https://github.com/dintero/checkout-web-sdk/issues
+Bugs can be reported to https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues
 
 ## Security
 
