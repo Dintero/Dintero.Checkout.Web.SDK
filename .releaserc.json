@@ -7,7 +7,7 @@
         [
             "@semantic-release/exec",
             {
-                "publish": "npm pack"
+                "publishCmd": "npm pack"
             }
         ],
         [
