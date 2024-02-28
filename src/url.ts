@@ -21,8 +21,15 @@ export interface SessionUrlOptions {
 }
 
 const getSessionUrl = (options: SessionUrlOptions): string => {
-    const { sid, endpoint, language, ui, shouldCallValidateSession, popOut, hideTestMessage } =
-        options;
+    const {
+        sid,
+        endpoint,
+        language,
+        ui,
+        shouldCallValidateSession,
+        popOut,
+        hideTestMessage,
+    } = options;
     if (!endpoint) {
         throw new Error("Invalid endpoint");
     }
