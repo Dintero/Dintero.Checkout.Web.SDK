@@ -17,10 +17,11 @@ export interface SessionUrlOptions {
     ui?: "fullscreen" | "inline";
     shouldCallValidateSession: boolean;
     popOut?: boolean;
+    hideTestMessage?: boolean;
 }
 
 const getSessionUrl = (options: SessionUrlOptions): string => {
-    const { sid, endpoint, language, ui, shouldCallValidateSession, popOut } =
+    const { sid, endpoint, language, ui, shouldCallValidateSession, popOut, hideTestMessage } =
         options;
     if (!endpoint) {
         throw new Error("Invalid endpoint");
@@ -38,6 +39,9 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     }
     if (popOut) {
         params.append("role", "pop_out_launcher");
+    }
+    if (hideTestMessage) {
+        params.append("hide_test_message", "true");
     }
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
