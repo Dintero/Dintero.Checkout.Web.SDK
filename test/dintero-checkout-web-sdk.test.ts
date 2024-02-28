@@ -711,7 +711,6 @@ describe("dintero.embed", () => {
         expect(onSessionResult.callback).to.not.be.undefined;
         expect(getSessionUrl).toBeCalledWith({
             endpoint,
-            hideTestMessage: false,
             shouldCallValidateSession: true,
             sid,
             ui: "inline",
@@ -738,7 +737,6 @@ describe("dintero.embed", () => {
 
         expect(getSessionUrl).toBeCalledWith({
             endpoint,
-            hideTestMessage: false,
             shouldCallValidateSession: false,
             sid,
             ui: "inline",

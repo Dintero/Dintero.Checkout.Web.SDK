@@ -84,7 +84,6 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
     container: HTMLDivElement;
     popOut?: boolean;
     ui?: "inline" | "fullscreen";
-    hideTestMessage?: boolean;
     onPayment?: (
         event: SessionPaymentAuthorized | SessionPaymentOnHold,
         checkout: DinteroCheckoutInstance,
@@ -513,7 +512,9 @@ export const embed = async (
             ui: options.ui || "inline",
             shouldCallValidateSession: onValidateSession !== undefined,
             popOut,
-            hideTestMessage: options.hideTestMessage || false,
+            ...(options.hasOwnProperty("hideTestMessage") && {
+                hideTestMessage: options["hideTestMessage"],
+            }),
         }),
     );
 
