@@ -512,6 +512,9 @@ export const embed = async (
             ui: options.ui || "inline",
             shouldCallValidateSession: onValidateSession !== undefined,
             popOut,
+            ...(options.hasOwnProperty("hideTestMessage") && {
+                hideTestMessage: options["hideTestMessage"],
+            }),
         }),
     );
 

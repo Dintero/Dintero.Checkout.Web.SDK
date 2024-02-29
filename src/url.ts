@@ -39,6 +39,13 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     if (popOut) {
         params.append("role", "pop_out_launcher");
     }
+    if (
+        options.hasOwnProperty("hideTestMessage") &&
+        options["hideTestMessage"] !== undefined &&
+        options["hideTestMessage"] === true
+    ) {
+        params.append("hide_test_message", "true");
+    }
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
         return `${endpoint}/v1/view/${sid}?${params.toString()}`;
