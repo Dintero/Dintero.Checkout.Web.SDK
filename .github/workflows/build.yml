@@ -33,5 +33,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_S3_ASSETS_DEPLOY_ROLE }}
           aws-region: eu-west-1
 
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
       - name: Deploy app build to S3 bucket
-        run: aws s3 cp ./dist/ s3://assets.dintero.com/pkg/checkout-web-sdk/ --recursive  --exclude "*" --include "*.tgz" --acl public-read
+        run: aws s3 cp ./dist/ s3://assets.dintero.com/pkg/checkout-web-sdk/ --recursive  --exclude "*" --include "*.tgz" --include "*.js" --acl public-read
