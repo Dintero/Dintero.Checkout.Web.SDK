@@ -34,7 +34,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Set version number
-        run: echo "VERSION=${npm pkg get version --workspaces=false}" >> $GITHUB_ENV
+        run: echo "VERSION=$(npm pkg get version --workspaces=false)" >> $GITHUB_ENV
 
       - name: Deploy app build to S3 bucket
         run: aws s3 cp ./dist/ s3://assets.dintero.com/pkg/checkout-web-sdk/$VERSION/ --recursive  --exclude "*" --include "*.tgz" --include "*.js" --include "*.js.map" --acl public-read
