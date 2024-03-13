@@ -36,5 +36,8 @@ jobs:
       - name: Set version number
         run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
 
+      - name: Get hash of the dintero-checkout-web-sdk.umd.min.js
+        run: echo "HASH=$(shasum -a 256 ./dist/dintero-checkout-web-sdk.umd.min.js | awk '{print $1}')" >> $GITHUB_ENV
+
       - name: Deploy app build to S3 bucket
-        run: aws s3 cp ./dist/ s3://assets.dintero.com/pkg/checkout-web-sdk/$VERSION/ --recursive  --exclude "*" --include "*.tgz" --include "*.js" --include "*.js.map" --acl public-read
+        run: aws s3 cp ./dist/ s3://assets.dintero.com/pkg/checkout-web-sdk/$VERSION/ --recursive  --exclude "*" --include "*.tgz" --include "*.umd.min.js" --include "*.js.map" --acl public-read
