@@ -1,6 +1,11 @@
 name: "Hello World"
 description: "Greet someone"
 inputs:
+  files:
+    description: "Files to upload"
+    required: true
+    type: array
+
   who-to-greet: # id of input
     description: "Who to greet"
     required: true
@@ -29,6 +34,6 @@ runs:
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
-    - name: Run goodbye.sh
-      run: goodbye.sh
+    - name: execute
+      run: execute.sh
       shell: bash
