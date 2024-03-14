@@ -21,23 +21,14 @@ inputs:
     description: "Version of the package"
     required: true
 
-  who-to-greet: # id of input
-    description: "Who to greet"
-    required: true
-    default: "World"
 outputs:
   random-number:
     description: "Random number"
     value: ${{ steps.random-number-generator.outputs.random-number }}
+
 runs:
   using: "composite"
   steps:
-    - name: Set Greeting
-      run: echo "Hello $INPUT_WHO_TO_GREET."
-      shell: bash
-      env:
-        INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
-
     - name: Set version number
       run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
       shell: bash
