@@ -1,10 +1,9 @@
 name: "Hello World"
 description: "Greet someone"
 inputs:
-  files:
-    description: "Files to upload"
+  file:
+    description: "File to upload"
     required: true
-    type: array
 
   s3-bucket:
     description: "S3 bucket"
@@ -38,6 +37,14 @@ runs:
       shell: bash
       env:
         INPUT_WHO_TO_GREET: ${{ inputs.who-to-greet }}
+
+    - name: Set version number
+      run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Get hash of the file
+      run: echo "HASH=$(openssl dgst -sha384 -binary ${{ inputs.file }} | openssl base64 -A)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Random Number Generator
       id: random-number-generator
