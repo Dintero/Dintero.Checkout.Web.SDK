@@ -6,6 +6,22 @@ inputs:
     required: true
     type: array
 
+  s3-bucket:
+    description: "S3 bucket"
+    required: true
+
+  version-prefix:
+    description: "The prefix in the bucket for where to place the files. Should contain version number"
+    required: true
+
+  latest-prefix:
+    description: "The prefix in the bucket for where to place the files. Should contain latest"
+    required: false
+
+  version:
+    description: "Version of the package"
+    required: true
+
   who-to-greet: # id of input
     description: "Who to greet"
     required: true
@@ -35,5 +51,5 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Deploy app build to S3 bucket for version
-      run: aws s3 cp ./dist/ s3://${{ secrets.S3_BUCKET }}/pkg/checkout-web-sdk/${VERSION}/ --recursive  --exclude "*" --include "*.tgz" --include "*.umd.min.js" --include "*.js.map" --acl public-read
+      run: aws s3 cp ./dist/ s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/ --recursive  --exclude "*" --include "*.tgz" --include "*.umd.min.js" --include "*.js.map" --acl public-read
       shell: bash

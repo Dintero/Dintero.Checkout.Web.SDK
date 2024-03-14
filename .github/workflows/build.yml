@@ -49,6 +49,8 @@ jobs:
         uses: ./.github/actions/cdn
         with:
           who-to-greet: "Mona the Octocat"
+          s3-bucket: ${{ secrets.S3_BUCKET }}
+          version-prefix: "pkg/checkout-web-sdk/${VERSION}"
 
       - run: echo random-number "$RANDOM_NUMBER"
         shell: bash
