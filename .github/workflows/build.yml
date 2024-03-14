@@ -38,7 +38,9 @@ jobs:
         with:
           file: "dist/dintero-checkout-web-sdk.umd.min.js"
           s3-bucket: ${{ secrets.S3_BUCKET }}
-          version-prefix: "pkg/checkout-web-sdk/${VERSION}"
+          s3-prefix: "pkg/checkout-web-sdk"
+          version: ${VERSION}
+          set-as-latest: false
 
       - run: echo random-number "$RANDOM_NUMBER"
         shell: bash
