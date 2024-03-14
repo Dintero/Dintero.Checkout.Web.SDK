@@ -40,7 +40,7 @@ jobs:
           s3-bucket: ${{ secrets.S3_BUCKET }}
           s3-prefix: "pkg/checkout-web-sdk"
           version: ${VERSION}
-          set-as-latest: false
+          set-as-latest: true
 
       - run: echo random-number "$RANDOM_NUMBER"
         shell: bash
