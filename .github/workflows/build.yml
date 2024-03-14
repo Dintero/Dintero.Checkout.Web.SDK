@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   id-token: write
@@ -48,7 +48,7 @@ jobs:
       - id: foo
         uses: ./.github/actions/cdn
         with:
-          who-to-greet: 'Mona the Octocat'
+          who-to-greet: "Mona the Octocat"
 
       - run: echo random-number "$RANDOM_NUMBER"
         shell: bash
