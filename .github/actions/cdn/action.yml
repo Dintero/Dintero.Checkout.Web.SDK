@@ -69,6 +69,7 @@ runs:
         echo "  crossorigin=\"anonymous\">" >> $env.SCRIPT_IMPORT 
         echo "</script>" >> $env.SCRIPT_IMPORT
         echo "```" >> $env.SCRIPT_IMPORT
+        echo $env.SCRIPT_IMPORT >> $GITHUB_ENV
       shell: bash
 
     - name: Update latest Github release with script import
