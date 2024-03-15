@@ -62,7 +62,7 @@ runs:
       if: ${{ inputs.update-github-release == 'true'}}
       run: |
         bash update_github_release.sh "**Use from CDN** <br /><br />
-        
+
         ```
         <script
           src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.version }}/dintero-checkout-web-sdk.umd.min.js'
