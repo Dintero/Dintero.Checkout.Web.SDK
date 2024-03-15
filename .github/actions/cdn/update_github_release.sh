@@ -7,4 +7,4 @@ latest_tag=$(gh release list --json 'isLatest,tagName' --jq '.[] | select(.isLat
 current_body=$(gh release view "$latest_tag" --json body --jq '.body')
 amended_body="$current_body<br /><br />$1"
 
-echo "$amended_body" | gh release edit "$latest_tag" --notes-file -
+echo -e "$amended_body" | gh release edit "$latest_tag" --notes-file -
