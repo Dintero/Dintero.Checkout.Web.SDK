@@ -39,7 +39,7 @@ jobs:
       - name: Upload to CDN
         uses: ./.github/actions/cdn
         with:
-          file: "dist/dintero-checkout-web-sdk.umd.min.js"
+          file: "dintero-checkout-web-sdk.umd.min.js"
           s3-bucket: ${{ secrets.S3_BUCKET }}
           s3-prefix: "pkg/checkout-web-sdk"
           set-as-latest: true
