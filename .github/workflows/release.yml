@@ -45,4 +45,3 @@ jobs:
           s3-prefix: "pkg/checkout-web-sdk"
           set-as-latest: true
           update-github-release: true
-

@@ -45,7 +45,7 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Upload to version path
-      run: | 
+      run: |
         aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }} --acl public-read
         aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}.map --acl public-read
       shell: bash
