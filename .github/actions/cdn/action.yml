@@ -51,7 +51,13 @@ runs:
         aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
       shell: bash
 
+    - name: Set GitHub Path
+      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: bash update_github_release.sh "**Use from CDN** <br /><br /> <script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}' integrity=\"sha-384-${{ env.HASH }}\" crossorigin=\"anonymous\"> </script>"
+      run: update_github_release.sh "**Use from CDN** <br /><br /> <script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}' integrity=\"sha-384-${{ env.HASH }}\" crossorigin=\"anonymous\"> </script>"
       shell: bash
