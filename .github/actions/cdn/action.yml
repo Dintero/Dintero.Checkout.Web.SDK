@@ -1,5 +1,5 @@
-name: "Hello World"
-description: "Greet someone"
+name: "S3 Asset Upload"
+description: "Upload asset to S3 and optionally update a GitHub release with the new version"
 inputs:
   source-dir:
     description: "Folder to read files from"
@@ -37,12 +37,6 @@ runs:
       id: hash
       run: echo "HASH=$(openssl dgst -sha384 -binary ${{ inputs.source-dir }}/${{ inputs.file }} | openssl base64 -A)" >> $GITHUB_ENV
       shell: bash
-
-    - name: Set GitHub Path
-      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-      shell: bash
-      env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Upload to version path
       run: |
