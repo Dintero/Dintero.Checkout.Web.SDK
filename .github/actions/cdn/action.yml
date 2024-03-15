@@ -60,6 +60,5 @@ runs:
 
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: |
-        bash update_github_release.sh "**Use from CDN** <br /><br /> ```<script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.version }}/dintero-checkout-web-sdk.umd.min.js' integrity="sha-384-${{ env.HASH }}" crossorigin="anonymous"> </script>```"
+      run: bash update_github_release.sh "**Use from CDN** <br /><br /> ```<script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.version }}/dintero-checkout-web-sdk.umd.min.js' integrity=\"sha-384-${{ env.HASH }}\" crossorigin=\"anonymous\"> </script>```"
       shell: bash
