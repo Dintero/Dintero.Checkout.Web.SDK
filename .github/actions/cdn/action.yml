@@ -57,24 +57,7 @@ runs:
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
-    - name: Generate release text
-      id: release-text
-      if: ${{ inputs.update-github-release == 'true'}}
-      run: |
-        markdown_content="## Use from CDN:"
-        markdown_content="$markdown_content\n"
-        markdown_content="$markdown_content```html\n"
-        markdown_content="$markdown_content<script\n"
-        markdown_content="$markdown_content  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"\n"
-        markdown_content="$markdown_content  integrity=\"sha-384-${{ env.HASH }}\"\n"
-        markdown_content="$markdown_content  crossorigin=\"anonymous\">\n"
-        markdown_content="$markdown_content</script>\n"
-        markdown_content="$markdown_content```\n"
-        echo $markdown_content
-        echo -e "markdown-content=$markdown_content" >> "$GITHUB_OUTPUT"
-      shell: bash
-
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: update_github_release.sh "${{ steps.release-text.outputs.markdown-content }}"
+      run: update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}"
       shell: bash
