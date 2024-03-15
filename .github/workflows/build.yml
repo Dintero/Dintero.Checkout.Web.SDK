@@ -42,6 +42,5 @@ jobs:
           file: "dist/dintero-checkout-web-sdk.umd.min.js"
           s3-bucket: ${{ secrets.S3_BUCKET }}
           s3-prefix: "pkg/checkout-web-sdk"
-          version: ${VERSION}
           set-as-latest: true
           update-github-release: true
