@@ -37,6 +37,12 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
         run: yarn run semantic-release
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_S3_ASSETS_DEPLOY_ROLE }}
+          aws-region: eu-west-1
+
       - name: Upload to CDN
         uses: ./.github/actions/cdn
         with:
