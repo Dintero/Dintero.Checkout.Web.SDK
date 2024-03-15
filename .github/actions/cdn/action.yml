@@ -62,14 +62,14 @@ runs:
       if: ${{ inputs.update-github-release == 'true'}}
       run: |
         markdown_content="## Use from CDN:"
-        echo "" >> "$markdown_content"
-        echo "```html" >> "$markdown_content"
-        echo "<script" >> "$markdown_content"
-        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> "$markdown_content"
-        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> "$markdown_content"
-        echo "  crossorigin=\"anonymous\">" >> "$markdown_content" 
-        echo "</script>" >> "$markdown_content"
-        echo "```" >> "$markdown_content"
+        markdown_content="$markdown_content\n"
+        markdown_content="$markdown_content```html\n"
+        markdown_content="$markdown_content<script\n"
+        markdown_content="$markdown_content  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"\n"
+        markdown_content="$markdown_content    integrity=\"sha-384-${{ env.HASH }}\"\n"
+        markdown_content="$markdown_content    crossorigin=\"anonymous\">"\n"
+        markdown_content="$markdown_content</script>\n"
+        markdown_content="$markdown_content```\n"
         echo "markdown-content=$markdown_content" >> "$GITHUB_OUTPUT"
       shell: bash
 
