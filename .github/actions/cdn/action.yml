@@ -61,8 +61,7 @@ runs:
       id: release-text
       if: ${{ inputs.update-github-release == 'true'}}
       run: |
-        markdown_content=""
-        echo "## Use from CDN:" >> "$markdown_content"
+        markdown_content="## Use from CDN:"
         echo "" >> "$markdown_content"
         echo "```html" >> "$markdown_content"
         echo "<script" >> "$markdown_content"
