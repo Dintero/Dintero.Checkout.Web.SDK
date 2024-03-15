@@ -73,5 +73,5 @@ runs:
 
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: update_github_release.sh ${{ env.SCRIPT_IMPORT }}
+      run: update_github_release.sh "${{ env.SCRIPT_IMPORT }}"
       shell: bash
