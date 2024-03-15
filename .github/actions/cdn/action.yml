@@ -58,21 +58,23 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Generate release text
+      id: release-text
       if: ${{ inputs.update-github-release == 'true'}}
       run: |
-        echo "## Use from CDN:" >> $SCRIPT_IMPORT
-        echo "" >> $SCRIPT_IMPORT
-        echo "```html" >> $SCRIPT_IMPORT
-        echo "<script" >> $SCRIPT_IMPORT
-        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> $SCRIPT_IMPORT
-        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> $SCRIPT_IMPORT
-        echo "  crossorigin=\"anonymous\">" >> $SCRIPT_IMPORT 
-        echo "</script>" >> $SCRIPT_IMPORT
-        echo "```" >> $SCRIPT_IMPORT
-        echo "SCRIPT_IMPORT=$SCRIPT_IMPORT" >> $GITHUB_ENV
+        markdown_content=""
+        echo "## Use from CDN:" >> "$markdown_content"
+        echo "" >> "$markdown_content"
+        echo "```html" >> "$markdown_content"
+        echo "<script" >> "$markdown_content"
+        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> "$markdown_content"
+        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> "$markdown_content"
+        echo "  crossorigin=\"anonymous\">" >> "$markdown_content" 
+        echo "</script>" >> "$markdown_content"
+        echo "```" >> "$markdown_content"
+        echo "markdown-content=$markdown_content" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: update_github_release.sh "${{ env.SCRIPT_IMPORT }}"
+      run: update_github_release.sh "${{ steps.release-text.outputs.markdown-content }}"
       shell: bash
