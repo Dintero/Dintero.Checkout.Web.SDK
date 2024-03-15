@@ -60,15 +60,15 @@ runs:
     - name: Generate release text
       if: ${{ inputs.update-github-release == 'true'}}
       run: |
-        echo "## Use from CDN:" >> $SCRIPT_IMPORT
-        echo "" >> $SCRIPT_IMPORT
-        echo "```html" >> $SCRIPT_IMPORT
-        echo "<script" >> $SCRIPT_IMPORT
-        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> $SCRIPT_IMPORT
-        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> $SCRIPT_IMPORT
-        echo "  crossorigin=\"anonymous\">" >> $SCRIPT_IMPORT 
-        echo "</script>" >> $SCRIPT_IMPORT
-        echo "```" >> $SCRIPT_IMPORT
+        echo "## Use from CDN:" >> $env.SCRIPT_IMPORT
+        echo "" >> $env.SCRIPT_IMPORT
+        echo "```html" >> $env.SCRIPT_IMPORT
+        echo "<script" >> $env.SCRIPT_IMPORT
+        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> $env.SCRIPT_IMPORT
+        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> $env.SCRIPT_IMPORT
+        echo "  crossorigin=\"anonymous\">" >> $env.SCRIPT_IMPORT 
+        echo "</script>" >> $env.SCRIPT_IMPORT
+        echo "```" >> $env.SCRIPT_IMPORT
       shell: bash
 
     - name: Update latest Github release with script import
