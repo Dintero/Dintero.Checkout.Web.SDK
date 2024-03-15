@@ -42,4 +42,3 @@ jobs:
           version: ${VERSION}
           set-as-latest: true
           update-github-release: true
-
