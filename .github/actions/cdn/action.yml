@@ -1,0 +1,57 @@
+name: "S3 Asset Upload"
+description: "Upload asset to S3 and optionally update a GitHub release with the new version"
+inputs:
+  source-dir:
+    description: "Folder to read files from"
+    required: false
+    default: "dist"
+
+  file:
+    description: "File to upload"
+    required: true
+
+  s3-bucket:
+    description: "S3 bucket"
+    required: true
+
+  s3-prefix:
+    description: "The prefix in the bucket for where to place the files. Should contain version number"
+    required: true
+
+  set-as-latest:
+    description: "Whether to set the uploaded files as latest in the bucket"
+    required: false
+
+  update-github-release:
+    description: "Whether to update the latest release with the new version"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set version number
+      run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Get hash of the file
+      id: hash
+      run: echo "HASH=$(openssl dgst -sha384 -binary ${{ inputs.source-dir }}/${{ inputs.file }} | openssl base64 -A)" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Upload to version path
+      run: |
+        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }} --acl public-read
+        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}.map --acl public-read
+      shell: bash
+
+    - name: Upload to latest path
+      if: ${{ inputs.set-as-latest == 'true'}}
+      run: |
+        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }} --acl public-read
+        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
+      shell: bash
+
+    - name: Update latest Github release with script import
+      if: ${{ inputs.update-github-release == 'true'}}
+      run: bash update_github_release.sh "**Use from CDN** <br /><br /> <script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}' integrity=\"sha-384-${{ env.HASH }}\" crossorigin=\"anonymous\"> </script>"
+      shell: bash

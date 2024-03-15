@@ -36,3 +36,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
         run: yarn run semantic-release
+
+      - name: Upload to CDN
+        uses: ./.github/actions/cdn
+        with:
+          file: "dintero-checkout-web-sdk.umd.min.js"
+          s3-bucket: ${{ secrets.S3_BUCKET }}
+          s3-prefix: "pkg/checkout-web-sdk"
+          set-as-latest: true
+          update-github-release: true
