@@ -6,7 +6,10 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build:
@@ -40,4 +43,4 @@ jobs:
           s3-bucket: ${{ secrets.S3_BUCKET }}
           s3-prefix: "pkg/checkout-web-sdk"
           set-as-latest: false
-          update-github-release: false
+          update-github-release: true

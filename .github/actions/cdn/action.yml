@@ -57,7 +57,21 @@ runs:
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
+    - name: Generate release text
+      if: ${{ inputs.update-github-release == 'true'}}
+      run: |
+        echo "## Use from CDN:" >> $SCRIPT_IMPORT
+        echo "" >> $SCRIPT_IMPORT
+        echo "```html" >> $SCRIPT_IMPORT
+        echo "<script" >> $SCRIPT_IMPORT
+        echo "  src=\"https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}\"" >> $SCRIPT_IMPORT
+        echo "  integrity=\"sha-384-${{ env.HASH }}\"" >> $SCRIPT_IMPORT
+        echo "  crossorigin=\"anonymous\">" >> $SCRIPT_IMPORT 
+        echo "</script>" >> $SCRIPT_IMPORT
+        echo "```" >> $SCRIPT_IMPORT
+      shell: bash
+
     - name: Update latest Github release with script import
       if: ${{ inputs.update-github-release == 'true'}}
-      run: update_github_release.sh "**Use from CDN** <br /><br /> <script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}' integrity=\"sha-384-${{ env.HASH }}\" crossorigin=\"anonymous\"> </script>"
+      run: update_github_release.sh ${{ env.SCRIPT_IMPORT }}
       shell: bash
