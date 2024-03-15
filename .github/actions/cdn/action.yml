@@ -17,6 +17,10 @@ inputs:
     description: "Whether to set the uploaded files as latest in the bucket"
     required: false
 
+  update-github-release:
+    description: "Whether to update the latest release with the new version"
+    required: false
+
   version:
     description: "Version of the package"
     required: true
@@ -55,4 +59,9 @@ runs:
     - name: Upload to latest path
       if: ${{ inputs.set-as-latest == 'true'}}
       run: aws s3 cp ./dist/ s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/ --recursive  --exclude "*" --include "*.tgz" --include "*.umd.min.js" --include "*.js.map" --acl public-read
+      shell: bash
+
+    - name: Update latest Github release with script import
+      if: ${{ inputs.update-github-release == 'true'}}
+      run: ./update_github_release.sh "Use from CDN: <br /><script src='https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ inputs.version }}/dintero-checkout-web-sdk.umd.min.js' integrity="${ HASH }" crossorigin="anonymous"></script>"
       shell: bash

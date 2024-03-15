@@ -41,8 +41,5 @@ jobs:
           s3-prefix: "pkg/checkout-web-sdk"
           version: ${VERSION}
           set-as-latest: true
+          update-github-release: true
 
-      - run: echo random-number "$RANDOM_NUMBER"
-        shell: bash
-        env:
-          RANDOM_NUMBER: ${{ steps.foo.outputs.random-number }}
