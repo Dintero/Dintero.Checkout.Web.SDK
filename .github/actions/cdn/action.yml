@@ -35,7 +35,7 @@ runs:
 
     - name: Get hash of the file
       id: hash
-      run: echo "HASH=$(openssl dgst -sha384 -binary ${{ inputs.file }} | openssl base64 -A)" >> $GITHUB_ENV
+      run: echo "HASH=$(openssl dgst -sha384 -binary ${{ inputs.source-dir }}/${{ inputs.file }} | openssl base64 -A)" >> $GITHUB_ENV
       shell: bash
 
     - name: Set GitHub Path
