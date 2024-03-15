@@ -70,7 +70,7 @@ runs:
         markdown_content="$markdown_content  crossorigin=\"anonymous\">\n"
         markdown_content="$markdown_content</script>\n"
         markdown_content="$markdown_content```\n"
-        echo "markdown-content=$markdown_content" >> "$GITHUB_OUTPUT"
+        echo -e "markdown-content=$markdown_content" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Update latest Github release with script import
