@@ -28,12 +28,14 @@ jobs:
           yarn run lint
 
       - name: Configure AWS credentials
+        if: github.actor != 'dependabot[bot]'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_S3_ASSETS_DEPLOY_ROLE }}
           aws-region: eu-west-1
 
       - name: Upload to CDN
+        if: github.actor != 'dependabot[bot]'
         uses: ./.github/actions/cdn
         with:
           file: "dintero-checkout-web-sdk.umd.min.js"
