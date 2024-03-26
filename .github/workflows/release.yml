@@ -35,6 +35,7 @@ jobs:
           yarn install --immutable
           yarn run test
           yarn run lint
+          yarn run build
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
