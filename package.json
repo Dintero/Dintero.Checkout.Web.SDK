@@ -34,7 +34,7 @@
     "devDependencies": {
         "@babel/core": "7.24.4",
         "@babel/preset-typescript": "7.24.1",
-        "@preconstruct/cli": "2.8.3",
+        "@preconstruct/cli": "2.8.4",
         "@semantic-release/exec": "6.0.3",
         "@semantic-release/git": "10.0.1",
         "@vitest/browser": "1.5.2",
