@@ -45,7 +45,7 @@ import {
     removePopOutButton,
     setPopOutButtonDisabled,
 } from "./popOutButton";
-import { popOut } from "./popOut";
+import { popOutModule } from "./popOut";
 import { Session } from "./session";
 
 export interface DinteroCheckoutInstance {
@@ -301,7 +301,7 @@ const showPopOut = async (
     event: ShowPopOutButton,
     checkout: DinteroCheckoutInstance,
 ) => {
-    const { close, focus, popOutWindow } = await popOut.openPopOut({
+    const { close, focus, popOutWindow } = await popOutModule.openPopOut({
         sid: checkout.options.sid,
         endpoint: checkout.options.endpoint,
         shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
@@ -588,6 +588,7 @@ export const embed = async (
         return promisifyAction(
             () => {
                 postSessionLock(iframe, sid);
+                popOutModule.postPopOutSessionLock(checkout?.popOutWindow, sid);
             },
             CheckoutEvents.SessionLocked,
             CheckoutEvents.SessionLockFailed,
@@ -598,6 +599,10 @@ export const embed = async (
         return promisifyAction(
             () => {
                 postSessionRefresh(iframe, sid);
+                popOutModule.postPopOutSessionRefresh(
+                    checkout?.popOutWindow,
+                    sid,
+                );
             },
             CheckoutEvents.SessionUpdated,
             CheckoutEvents.SessionNotFound,
@@ -605,11 +610,21 @@ export const embed = async (
     };
 
     const setActivePaymentProductType = (paymentProductType?: string) => {
-        postActivePaymentProductType(iframe, sid, paymentProductType);
+        // Send to either embed or pop out
+        if (options.popOut) {
+            popOutModule.postPopOutActivePaymentProductType(
+                checkout?.popOutWindow,
+                sid,
+                paymentProductType,
+            );
+        } else {
+            postActivePaymentProductType(iframe, sid, paymentProductType);
+        }
     };
 
     const submitValidationResult = (result: SessionValidationCallback) => {
         postValidationResult(iframe, sid, result);
+        // For pop out we do validation when opening the pop out
     };
 
     /**
@@ -836,7 +851,6 @@ export const redirect = (options: DinteroCheckoutOptions) => {
         }),
     );
 };
-
 export type {
     SessionNotFound,
     SessionLoaded,
