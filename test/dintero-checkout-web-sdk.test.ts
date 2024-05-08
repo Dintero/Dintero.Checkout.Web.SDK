@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as dintero from "../src";
 import { url, type SessionUrlOptions } from "../src/url";
-import { popOut } from "../src/popOut";
+import { popOutModule } from "../src/popOut";
 import pkg from "../package.json";
 
 import {
@@ -1021,7 +1021,7 @@ describe("dintero.embed", () => {
         const focusFake = vi.fn();
         const popOutWindow = { close: vi.fn() as unknown } as Window;
 
-        vi.spyOn(popOut, "openPopOut").mockResolvedValue({
+        vi.spyOn(popOutModule, "openPopOut").mockResolvedValue({
             close: closeFake,
             focus: focusFake,
             popOutWindow,
@@ -1085,7 +1085,7 @@ describe("dintero.embed", () => {
         const focusFake = vi.fn();
         const popOutWindow = { close: vi.fn() as unknown } as Window;
 
-        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
             Promise.resolve({
                 close: closeFake.mockImplementation(() => {
                     options.onOpen(popOutWindow);
@@ -1165,7 +1165,7 @@ describe("dintero.embed", () => {
         const focusFake = vi.fn();
         const popOutWindow = { close: vi.fn() as unknown } as Window;
 
-        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
             Promise.resolve({
                 close: closeFake.mockImplementation(() => {
                     options.onOpen(popOutWindow);
@@ -1241,7 +1241,7 @@ describe("dintero.embed", () => {
         const focusFake = vi.fn();
         const popOutWindow = { close: vi.fn() as unknown } as Window;
 
-        vi.spyOn(popOut, "openPopOut").mockImplementation((options) =>
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
             Promise.resolve({
                 close: closeFake.mockImplementation(() => {
                     options.onOpen(popOutWindow);
@@ -1289,6 +1289,238 @@ describe("dintero.embed", () => {
 
         expect(closeFake).not.toBeCalled();
         expect(focusFake).toBeCalled();
+    });
+
+    it("locks pop out when lock is called", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        vi.spyOn(popOutModule, "postPopOutSessionLock").mockImplementation(
+            (options) => Promise.resolve(),
+        );
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
+                if (button) {
+                    button.click();
+                    // Wait for focus button to be created.
+                    sleep(50).then(() => {
+                        checkout.lockSession();
+                        sleep(50).then(() => {
+                            resolve(null);
+                        });
+                    });
+                } else {
+                    reject();
+                }
+            });
+        });
+        await sleep(50);
+
+        expect(popOutModule.postPopOutSessionLock).toBeCalledWith(
+            popOutWindow,
+            sid,
+        );
+    });
+
+    it("refreshes pop out when refresh is called", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        vi.spyOn(popOutModule, "postPopOutSessionRefresh").mockImplementation(
+            (options) => Promise.resolve(),
+        );
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
+                if (button) {
+                    button.click();
+                    // Wait for focus button to be created.
+                    sleep(50).then(() => {
+                        checkout.refreshSession();
+                        sleep(50).then(() => {
+                            resolve(null);
+                        });
+                    });
+                } else {
+                    reject();
+                }
+            });
+        });
+        await sleep(50);
+
+        expect(popOutModule.postPopOutSessionRefresh).toBeCalledWith(
+            popOutWindow,
+            sid,
+        );
+    });
+
+    it("set active payment type in pop out when active payment type is called", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const closeFake = vi.fn();
+        const focusFake = vi.fn();
+        const popOutWindow = { close: vi.fn() as unknown } as Window;
+
+        vi.spyOn(popOutModule, "openPopOut").mockImplementation((options) =>
+            Promise.resolve({
+                close: closeFake.mockImplementation(() => {
+                    options.onOpen(popOutWindow);
+                    options.onClose();
+                }),
+                focus: focusFake,
+                popOutWindow,
+            }),
+        );
+
+        vi.spyOn(
+            popOutModule,
+            "postPopOutActivePaymentProductType",
+        ).mockImplementation((options) => Promise.resolve());
+        const onSessionHandler = vi.fn();
+        await new Promise(async (resolve, reject) => {
+            checkout = await dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onSession: onSessionHandler,
+                popOut: true,
+            });
+            // Wait for button to be created.
+            sleep(50).then(() => {
+                const button = document.getElementById(
+                    "dintero-checkout-sdk-launch-pop-out",
+                );
+                if (button) {
+                    button.click();
+                    // Wait for focus button to be created.
+                    sleep(50).then(() => {
+                        checkout.setActivePaymentProductType(
+                            "generic.creditcard",
+                        );
+                        sleep(50).then(() => {
+                            resolve(null);
+                        });
+                    });
+                } else {
+                    reject();
+                }
+            });
+        });
+        await sleep(50);
+
+        expect(popOutModule.postPopOutActivePaymentProductType).toBeCalledWith(
+            popOutWindow,
+            sid,
+            "generic.creditcard",
+        );
     });
 });
 

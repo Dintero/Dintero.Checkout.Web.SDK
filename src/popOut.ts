@@ -2,7 +2,6 @@ import { url, type SessionUrlOptions } from "./url";
 
 const WIDTH = Math.min(480, window.screen.width);
 const HEIGHT = Math.min(840, window.screen.height);
-let popOutWindow: undefined | Window;
 
 const createPopOutWindow = (
     sid: string,
@@ -65,9 +64,11 @@ type PopOutOptions = SessionUrlOptions & {
     onClose: () => void;
 };
 
-export const openPopOut = async (options: PopOutOptions) => {
+const openPopOut = async (options: PopOutOptions) => {
     let unsubscribe: undefined | Unsubscribe;
     let intervalId = -1;
+    let popOutWindow: undefined | Window;
+
     if (popOutWindow && !popOutWindow.closed) {
         // Skip if already open.
         return;
@@ -128,4 +129,56 @@ export const openPopOut = async (options: PopOutOptions) => {
     };
 };
 
-export const popOut = { openPopOut };
+const postPopOutSessionLock = (
+    popOutWindow: undefined | Window,
+    sid: string,
+) => {
+    try {
+        if (popOutWindow) {
+            popOutWindow.postMessage({ type: "LockSession", sid }, "*");
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const postPopOutSessionRefresh = (
+    popOutWindow: undefined | Window,
+    sid: string,
+) => {
+    try {
+        if (popOutWindow) {
+            popOutWindow.postMessage({ type: "RefreshSession", sid }, "*");
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const postPopOutActivePaymentProductType = (
+    popOutWindow: undefined | Window,
+    sid: string,
+    paymentProductType: string,
+) => {
+    try {
+        if (popOutWindow) {
+            popOutWindow.postMessage(
+                {
+                    type: "SetActivePaymentProductType",
+                    sid,
+                    payment_product_type: paymentProductType,
+                },
+                "*",
+            );
+        }
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+export const popOutModule = {
+    openPopOut,
+    postPopOutSessionLock,
+    postPopOutSessionRefresh,
+    postPopOutActivePaymentProductType,
+};
