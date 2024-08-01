@@ -32,7 +32,7 @@ export const createIframeAsync = (
     // allow popups is needed to open terms in new window
     iframe.setAttribute(
         "sandbox",
-        "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox",
+        "allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation",
     );
 
     // Needed for to allow apple pay from iframe
