@@ -16,7 +16,7 @@
     "scripts": {
         "build": "yarn tsc --noEmit && preconstruct build",
         "lint": "prettier --cache --log-level warn -c --config .prettierrc.yml .",
-        "test": "vitest --config .vitest.config.mts --browser.name=chrome --browser.headless",
+        "test": "vitest --config .vitest.config.mts",
         "semantic-release": "semantic-release",
         "prepublishOnly": "yarn run build"
     },

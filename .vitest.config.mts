@@ -5,6 +5,8 @@ export default defineConfig({
         browser: {
             provider: "webdriverio",
             name: "chrome",
+            enabled: true,
+            headless: true,
         },
     },
 });
