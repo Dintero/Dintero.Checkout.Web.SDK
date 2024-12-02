@@ -2,59 +2,59 @@
 
 ### Changed
 
--   Changes iframe to also have `allow="payment"` property to support Apple Pay when embedded
+- Changes iframe to also have `allow="payment"` property to support Apple Pay when embedded
 
 ## [0.4.0]
 
 ### Changed
 
--   Changes `lockSession` to return a promise that resolves when the following `SessionLocked` event is returned from the checkout.
--   Changes `refreshSession` to return a promise that resolves when the following `SessionUpdated` event is returned from the checkout.
+- Changes `lockSession` to return a promise that resolves when the following `SessionLocked` event is returned from the checkout.
+- Changes `refreshSession` to return a promise that resolves when the following `SessionUpdated` event is returned from the checkout.
 
 ## [0.3.1]
 
 ### Bug Fixes
 
--   Add correct package version to url
+- Add correct package version to url
 
 ## [0.3.0]
 
 ### Features
 
--   **lock:** Add callback function to `onSessionLocked`
+- **lock:** Add callback function to `onSessionLocked`
 
 ## [0.2.0]
 
 ### Features
 
--   Handling of session validation when embedded
+- Handling of session validation when embedded
 
 ## [0.0.17]
 
 ### Changed
 
--   Adds `onActivePaymentProductType` callback.
--   Adds `setActivePaymentProductType` function.
+- Adds `onActivePaymentProductType` callback.
+- Adds `setActivePaymentProductType` function.
 
 ## [0.0.16]
 
 ### Changed
 
--   Changed build tool from microbundle to preconstruct, should fix exported types, updated/fixed documentation
+- Changed build tool from microbundle to preconstruct, should fix exported types, updated/fixed documentation
 
 ## [0.0.15]
 
 ### Changed
 
--   Added `lockSession` and `refreshSession` functions
+- Added `lockSession` and `refreshSession` functions
 
 ## [0.0.14]
 
 ### Changed
 
--   Added `onSessionLocked` and `onSessionLockFailed` callbacks
--   Bumped dev dependencies to fix security issues with some of the
-    dev dependencies
+- Added `onSessionLocked` and `onSessionLockFailed` callbacks
+- Bumped dev dependencies to fix security issues with some of the
+  dev dependencies
 
 ## [0.0.13]
 
@@ -66,23 +66,23 @@
 
 ### Added
 
--   Support embed with `onPayment` event handler.
--   _Deprecate_ support for embed with `onPaymentAuthorized` event handler.
+- Support embed with `onPayment` event handler.
+- _Deprecate_ support for embed with `onPaymentAuthorized` event handler.
 
 ## [0.0.11]
 
 ### Added
 
--   Support for language updates and embedResult page
+- Support for language updates and embedResult page
 
 ## [0.0.10]
 
 ### Changed
 
--   Use correct callback names in README examples
+- Use correct callback names in README examples
 
 ## [0.0.9]
 
 ### Added
 
--   sdk version as url query parameter
+- sdk version as url query parameter

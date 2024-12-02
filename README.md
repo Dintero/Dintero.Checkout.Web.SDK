@@ -2,8 +2,8 @@
 
 Use this SDK in your frontend application to
 
--   embed an existing Dintero Checkout payment session in an iframe on your website
--   redirect the end user to the full page version of the Dintero Checkout for an existing payment session
+- embed an existing Dintero Checkout payment session in an iframe on your website
+- redirect the end user to the full page version of the Dintero Checkout for an existing payment session
 
 _Note that this SDK is for redirecting or embedding existing payment sessions. You cannot use this SDK to send requests to the Checkout API or to crate new payment sessions._
 
