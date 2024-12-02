@@ -36,7 +36,7 @@ export const createIframeAsync = (
     );
 
     // Needed for to allow apple pay from iframe
-    iframe.setAttribute("allow", "payment");
+    iframe.setAttribute("allow", "payment; clipboard-write *");
 
     // The download priority of the resource in the <iframe>'s src attribute.
     iframe.setAttribute("importance", "high");
