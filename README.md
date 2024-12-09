@@ -318,5 +318,4 @@ The Dintero Checkout SDK is built with [microbundle](https://github.com/developi
 ## Creating a new release
 
 1. Enforce all commits to the master branch to be formatted according to the [Angular Commit Message Format](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
-2. Remember that the PR title is not used as the commit message if the PR is merged with the "Squash and merge" option and it only contains a single commit.
-3. When merged to master, it will automatically be released with [semantic-release](https://github.com/semantic-release/semantic-release)
+2. When merged to master, it will automatically be released with [semantic-release](https://github.com/semantic-release/semantic-release)
