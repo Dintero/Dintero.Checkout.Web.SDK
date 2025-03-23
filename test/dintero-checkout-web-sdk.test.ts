@@ -74,12 +74,13 @@ describe("dintero.redirect", () => {
 describe("dintero.embed", () => {
     let checkout: dintero.DinteroCheckoutInstance | undefined = undefined;
     let container: HTMLDivElement | undefined = undefined;
-    const endpoint = "http://localhost:5173";
+    let endpoint = "http://localhost:5173";
     const sid = "session-id";
 
     beforeEach(() => {
         container = document.createElement("p");
         document.body.appendChild(container);
+        endpoint = document.location.href;
     });
 
     afterEach(() => {
