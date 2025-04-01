@@ -37,12 +37,12 @@
         "@preconstruct/cli": "2.8.12",
         "@semantic-release/exec": "7.0.3",
         "@semantic-release/git": "10.0.1",
-        "@vitest/browser": "3.0.9",
+        "@vitest/browser": "3.1.1",
         "prettier": "3.5.3",
         "semantic-release": "24.2.3",
         "typescript": "5.8.2",
-        "vitest": "3.0.9",
-        "webdriverio": "9.12.1"
+        "vitest": "3.1.1",
+        "webdriverio": "9.12.2"
     },
     "dependencies": {
         "native-promise-only": "0.8.1"
