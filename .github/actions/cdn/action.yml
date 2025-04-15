@@ -45,10 +45,13 @@ runs:
       shell: bash
 
     - name: Upload to latest path
-      if: ${{ inputs.set-as-latest == 'true'}}
       run: |
-        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }} --acl public-read
-        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
+        if [ "${{ inputs.set-as-latest }}" = "true" ]; then
+          aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }} --acl public-read
+          aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
+        else
+          echo "Skipping upload to latest path"
+        fi
       shell: bash
 
     - name: Set GitHub Path
@@ -58,6 +61,10 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
 
     - name: Update latest Github release with script import
-      if: ${{ inputs.update-github-release == 'true'}}
-      run: update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}"
+      run: |
+        if [ "${{ inputs.update-github-release }}" = "true" ]; then
+          update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}"
+        else
+          echo "Skipping GitHub release update"
+        fi
       shell: bash
