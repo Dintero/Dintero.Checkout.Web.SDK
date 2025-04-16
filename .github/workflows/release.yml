@@ -48,11 +48,15 @@ jobs:
           role-to-assume: ${{ secrets.AWS_S3_ASSETS_DEPLOY_ROLE }}
           aws-region: eu-west-1
 
+      - name: Set version number
+        run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
+        shell: bash
+
       - name: Upload to CDN
         uses: ./.github/actions/cdn
         with:
           file: "dintero-checkout-web-sdk.umd.min.js"
           s3-bucket: ${{ secrets.S3_BUCKET }}
           s3-prefix: "pkg/checkout-web-sdk"
-          set-as-latest: true
-          update-github-release: true
+          set-as-latest: ${{ env.VERSION != '0.0.0-development' }}
+          update-github-release: ${{ env.VERSION != '0.0.0-development' }}
