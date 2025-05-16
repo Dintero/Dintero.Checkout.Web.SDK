@@ -50,7 +50,7 @@ const createPopOutWindow = (
             timeout = window.setTimeout(() => {
                 console.log("createPopOutWindow timeout");
                 resolve(undefined);
-            }, 3000);
+            }, 10000);
         } catch (err) {
             resolve(undefined);
         }
