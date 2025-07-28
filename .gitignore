@@ -9,3 +9,4 @@ yarn-error.log
 .rts2_cache_umd/
 .idea/
 __screenshots__
+.zed/
