@@ -54,10 +54,10 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     // custom endpoints like localhost and PR builds does not support the
     // serverside view flow.
     params.append("sid", sid);
-    return `${padTralingSlash(endpoint)}?${params.toString()}`;
+    return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
 
-const padTralingSlash = (endpoint: string) =>
+const padTrailingSlash = (endpoint: string) =>
     endpoint.endsWith("/") ? endpoint : `${endpoint}/`;
 
 const getPopOutUrl = ({
@@ -76,9 +76,8 @@ const getPopOutUrl = ({
     }
     if (shouldCallValidateSession) {
         params.append("loader", "true");
-        return `${padTralingSlash(endpoint)}?${params.toString()}`;
     }
-    return `${padTralingSlash(endpoint)}?${params.toString()}`;
+    return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
 
 export const url = {
