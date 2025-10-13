@@ -49,10 +49,10 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
         params.append("hide_test_message", "true");
     }
     const hostname = getHostname();
-    if(hostname) {
+    if (hostname) {
         params.append("sdk_hostname", hostname);
     }
-    if(!redirect && !canValidatePaymentWithHostname()) {
+    if (!redirect && !canValidatePaymentWithHostname()) {
         params.append("sdk_not_top_level", "false");
     }
     if (endpoint === "https://checkout.dintero.com") {
@@ -87,7 +87,7 @@ const getPopOutUrl = ({
         params.append("loader", "true");
     }
     const hostname = getHostname();
-    if(hostname) {
+    if (hostname) {
         params.append("sdk_hostname", hostname);
     }
     return `${padTrailingSlash(endpoint)}?${params.toString()}`;
@@ -104,12 +104,12 @@ const getHostname = (): string => {
 
 const canValidatePaymentWithHostname = (): boolean => {
     try {
-        if(window.self === window.top){
+        if (window.self === window.top) {
             return true;
         }
-        const hostname = getHostname()
+        const hostname = getHostname();
         const topHostname = window.top.location.hostname;
-        if(topHostname && hostname && hostname === topHostname){
+        if (topHostname && hostname && hostname === topHostname) {
             // Current runtime is embedded in a frame, but the hostname is the same;
             return true;
         }
@@ -117,7 +117,6 @@ const canValidatePaymentWithHostname = (): boolean => {
         return false;
     }
 };
-
 
 export const url = {
     getPopOutUrl,
