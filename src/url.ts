@@ -1,3 +1,4 @@
+import { redirect } from ".";
 import pkg from "../package.json";
 
 /**
@@ -17,6 +18,7 @@ export interface SessionUrlOptions {
     ui?: "fullscreen" | "inline";
     shouldCallValidateSession: boolean;
     popOut?: boolean;
+    redirect?: boolean;
 }
 
 const getSessionUrl = (options: SessionUrlOptions): string => {
@@ -45,6 +47,13 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
         options["hideTestMessage"] === true
     ) {
         params.append("hide_test_message", "true");
+    }
+    const hostname = getHostname();
+    if(hostname) {
+        params.append("sdk_hostname", hostname);
+    }
+    if(!redirect && !canValidatePaymentWithHostname()) {
+        params.append("sdk_not_top_level", "false");
     }
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
@@ -77,8 +86,38 @@ const getPopOutUrl = ({
     if (shouldCallValidateSession) {
         params.append("loader", "true");
     }
+    const hostname = getHostname();
+    if(hostname) {
+        params.append("sdk_hostname", hostname);
+    }
     return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
+
+const getHostname = (): string => {
+    try {
+        const { hostname } = window.location;
+        return hostname;
+    } catch (error) {
+        return undefined;
+    }
+};
+
+const canValidatePaymentWithHostname = (): boolean => {
+    try {
+        if(window.self === window.top){
+            return true;
+        }
+        const hostname = getHostname()
+        const topHostname = window.top.location.hostname;
+        if(topHostname && hostname && hostname === topHostname){
+            // Current runtime is embedded in a frame, but the hostname is the same;
+            return true;
+        }
+    } catch (error) {
+        return false;
+    }
+};
+
 
 export const url = {
     getPopOutUrl,
