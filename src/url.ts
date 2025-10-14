@@ -52,7 +52,7 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     if (hostname) {
         params.append("sdk_hostname", hostname);
     }
-    if (!redirect && !canValidatePaymentWithHostname()) {
+    if (!redirect && !hostnameIsTop()) {
         params.append("sdk_not_top_level", "false");
     }
     if (endpoint === "https://checkout.dintero.com") {
@@ -102,17 +102,14 @@ const getHostname = (): string => {
     }
 };
 
-const canValidatePaymentWithHostname = (): boolean => {
+const hostnameIsTop = (): boolean => {
     try {
         if (window.self === window.top) {
             return true;
         }
         const hostname = getHostname();
         const topHostname = window.top.location.hostname;
-        if (topHostname && hostname && hostname === topHostname) {
-            // Current runtime is embedded in a frame, but the hostname is the same;
-            return true;
-        }
+        return topHostname && hostname && hostname === topHostname;
     } catch (error) {
         return false;
     }
