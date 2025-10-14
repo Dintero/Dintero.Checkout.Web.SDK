@@ -1,3 +1,4 @@
+import { redirect } from ".";
 import pkg from "../package.json";
 
 /**
@@ -17,6 +18,7 @@ export interface SessionUrlOptions {
     ui?: "fullscreen" | "inline";
     shouldCallValidateSession: boolean;
     popOut?: boolean;
+    redirect?: boolean;
 }
 
 const getSessionUrl = (options: SessionUrlOptions): string => {
@@ -46,6 +48,13 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     ) {
         params.append("hide_test_message", "true");
     }
+    const hostname = getHostname();
+    if (hostname) {
+        params.append("sdk_hostname", hostname);
+    }
+    if (!redirect && !hostnameIsTop()) {
+        params.append("sdk_not_top_level", "false");
+    }
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
         return `${endpoint}/v1/view/${sid}?${params.toString()}`;
@@ -54,10 +63,10 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     // custom endpoints like localhost and PR builds does not support the
     // serverside view flow.
     params.append("sid", sid);
-    return `${padTralingSlash(endpoint)}?${params.toString()}`;
+    return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
 
-const padTralingSlash = (endpoint: string) =>
+const padTrailingSlash = (endpoint: string) =>
     endpoint.endsWith("/") ? endpoint : `${endpoint}/`;
 
 const getPopOutUrl = ({
@@ -76,9 +85,34 @@ const getPopOutUrl = ({
     }
     if (shouldCallValidateSession) {
         params.append("loader", "true");
-        return `${padTralingSlash(endpoint)}?${params.toString()}`;
     }
-    return `${padTralingSlash(endpoint)}?${params.toString()}`;
+    const hostname = getHostname();
+    if (hostname) {
+        params.append("sdk_hostname", hostname);
+    }
+    return `${padTrailingSlash(endpoint)}?${params.toString()}`;
+};
+
+const getHostname = (): string => {
+    try {
+        const { hostname } = window.location;
+        return hostname;
+    } catch (error) {
+        return undefined;
+    }
+};
+
+const hostnameIsTop = (): boolean => {
+    try {
+        if (window.self === window.top) {
+            return true;
+        }
+        const hostname = getHostname();
+        const topHostname = window.top.location.hostname;
+        return topHostname && hostname && hostname === topHostname;
+    } catch (error) {
+        return false;
+    }
 };
 
 export const url = {

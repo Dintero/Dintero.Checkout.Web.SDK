@@ -848,6 +848,7 @@ export const redirect = (options: DinteroCheckoutOptions) => {
             endpoint,
             language,
             shouldCallValidateSession: false,
+            redirect: true,
         }),
     );
 };
