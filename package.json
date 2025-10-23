@@ -23,7 +23,7 @@
     "private": false,
     "repository": {
         "type": "git",
-        "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK.git"
+        "url": "git+https://github.com/Dintero/Dintero.Checkout.Web.SDK.git"
     },
     "homepage": "https://github.com/Dintero/Dintero.Checkout.Web.SDK#readme",
     "author": "Sven Nicolai Viig <sven@dintero.com> (http://dintero.com)",

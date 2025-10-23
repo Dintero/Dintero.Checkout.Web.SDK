@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   release:
     name: Release
@@ -17,9 +20,6 @@ jobs:
       issues: write
       pull-requests: write
 
-    env:
-      GH_TOKEN: ${{ github.token }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,9 +27,12 @@ jobs:
           fetch-depth: 5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org/"
+          scope: "@dintero"
+
       - name: Install dependencies, test and lint
         run: |
           yarn install --immutable
@@ -39,7 +42,6 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
         run: yarn run semantic-release
 
       - name: Configure AWS credentials
@@ -54,6 +56,8 @@ jobs:
 
       - name: Upload to CDN
         uses: ./.github/actions/cdn
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: "dintero-checkout-web-sdk.umd.min.js"
           s3-bucket: ${{ secrets.S3_BUCKET }}
