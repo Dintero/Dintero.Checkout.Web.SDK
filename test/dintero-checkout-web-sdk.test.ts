@@ -56,7 +56,7 @@ describe("dintero.redirect", () => {
         });
         dintero.redirect({ sid: "<session_id>" });
         expect(url.windowLocationAssign).toBeCalledWith(
-            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&sdk_hostname=localhost`,
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&sdk_hostname=127.0.0.1`,
         );
     });
 
@@ -66,7 +66,7 @@ describe("dintero.redirect", () => {
         });
         dintero.redirect({ sid: "<session_id>", language: "no" });
         expect(url.windowLocationAssign).toBeCalledWith(
-            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no&sdk_hostname=localhost`,
+            `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no&sdk_hostname=127.0.0.1`,
         );
     });
 });
