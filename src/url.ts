@@ -1,5 +1,5 @@
-import { redirect } from ".";
 import pkg from "../package.json";
+import { redirect } from ".";
 
 /**
  * Wraps window.location.assign()
@@ -42,9 +42,12 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
         params.append("role", "pop_out_launcher");
     }
     if (
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: test
         options.hasOwnProperty("hideTestMessage") &&
-        options["hideTestMessage"] !== undefined &&
-        options["hideTestMessage"] === true
+        (options as unknown as { hideTestMessage: unknown }).hideTestMessage !==
+            undefined &&
+        (options as unknown as { hideTestMessage: unknown }).hideTestMessage ===
+            true
     ) {
         params.append("hide_test_message", "true");
     }
@@ -93,11 +96,11 @@ const getPopOutUrl = ({
     return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
 
-const getHostname = (): string => {
+const getHostname = (): string | undefined => {
     try {
         const { hostname } = window.location;
         return hostname;
-    } catch (error) {
+    } catch (_) {
         return undefined;
     }
 };
@@ -110,7 +113,7 @@ const hostnameIsTop = (): boolean => {
         const hostname = getHostname();
         const topHostname = window.top.location.hostname;
         return topHostname && hostname && hostname === topHostname;
-    } catch (error) {
+    } catch (_) {
         return false;
     }
 };

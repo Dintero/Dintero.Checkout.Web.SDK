@@ -1,4 +1,4 @@
-import { ShowPopOutButton } from "./checkout";
+import type { ShowPopOutButton } from "./checkout";
 
 type BackdropOptions = {
     close: () => void;
@@ -14,8 +14,8 @@ const getBackdropZIndex = () => {
             const zIndexStr = document.defaultView
                 .getComputedStyle(element, null)
                 .getPropertyValue("z-index");
-            const zIndex = parseInt(zIndexStr || "0");
-            if (!isNaN(zIndex) && zIndex > acc) {
+            const zIndex = Number.parseInt(zIndexStr || "0", 10);
+            if (!Number.isNaN(zIndex) && zIndex > acc) {
                 return zIndex;
             }
         } catch (e) {

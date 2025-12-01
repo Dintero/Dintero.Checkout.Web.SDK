@@ -6,7 +6,6 @@
  */
 export const createIframeAsync = (
     container: HTMLDivElement,
-    endpoint: string,
     url: string,
 ): { iframe: HTMLIFrameElement; initiate: () => void } => {
     if (!container || !container.appendChild) {

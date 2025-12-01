@@ -62,9 +62,9 @@ const configureButton = (
 
     // Position
     button.style.position = "absolute";
-    button.style.top = top + "px";
-    button.style.left = left + "px";
-    button.style.right = right + "px";
+    button.style.top = `${top}px`;
+    button.style.left = `${left}px`;
+    button.style.right = `${right}px`;
 
     // Appearance from checkout
     const { ...directStyles } = styles;
@@ -95,7 +95,7 @@ const addHoverAndFocusVisibleStyles = (
     }
     const style = document.createElement("style");
     style.setAttribute("id", styleId);
-    let content = [];
+    const content = [];
     if (stylesHover) {
         content.push(
             toCssEntity(
