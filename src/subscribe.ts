@@ -1,10 +1,10 @@
-import {
+import type { DinteroCheckoutInstance } from ".";
+import type {
     CheckoutEvents,
     InternalCheckoutEvents,
     SessionEvent,
     SessionValidationCallback,
 } from "./checkout";
-import { DinteroCheckoutInstance } from ".";
 
 /**
  * Unsubscribe handler from event(s).
@@ -175,8 +175,7 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
         const correctOrigin = event.origin === endpointUrl.origin;
         const correctWindow = event.source === checkout.iframe.contentWindow;
         const correctSid = event.data && event.data.sid === sid;
-        const correctMessageType =
-            eventTypes.indexOf(event.data && event.data.type) !== -1;
+        const correctMessageType = eventTypes.indexOf(event.data?.type) !== -1;
 
         if (
             correctOrigin &&
@@ -190,11 +189,11 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
     };
 
     // Add event listener to the iframe.
-    window.addEventListener("message", wrappedHandler as any, false);
+    window.addEventListener("message", wrappedHandler, false);
 
     // Function to remove the event listener from the iframe.
     const unsubscribe = () => {
-        window.removeEventListener("message", wrappedHandler as any, false);
+        window.removeEventListener("message", wrappedHandler, false);
     };
 
     // Return object with unsubscribe function.
