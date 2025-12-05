@@ -2,39 +2,25 @@ import "native-promise-only";
 
 import pkg from "../package.json";
 import {
+    type ActivePaymentProductType,
     CheckoutEvents,
     InternalCheckoutEvents,
-    SessionNotFound,
-    SessionLoaded,
-    SessionUpdated,
-    SessionCancel,
-    SessionPaymentOnHold,
-    SessionPaymentAuthorized,
-    SessionPaymentError,
-    SessionLocked,
-    SessionLockFailed,
-    ActivePaymentProductType,
-    ValidateSession,
-    SessionValidationCallback,
-    SessionEvent,
-    ShowPopOutButton,
+    type SessionCancel,
+    type SessionEvent,
+    type SessionLoaded,
+    type SessionLocked,
+    type SessionLockFailed,
+    type SessionNotFound,
+    type SessionPaymentAuthorized,
+    type SessionPaymentError,
+    type SessionPaymentOnHold,
+    type SessionUpdated,
+    type SessionValidationCallback,
+    type ShowPopOutButton,
+    type ValidateSession,
 } from "./checkout";
-import { url } from "./url";
 import { createIframeAsync } from "./createIframeAsync";
-import {
-    subscribe,
-    SubscriptionHandler,
-    Subscription,
-    postSessionLock,
-    postSessionRefresh,
-    postActivePaymentProductType,
-    postValidationResult,
-    postSetLanguage,
-    postOpenPopOutEvent,
-    postClosePopOutEvent,
-    postValidatePopOutEvent,
-    postOpenPopOutFailedEvent,
-} from "./subscribe";
+import { popOutModule } from "./popOut";
 import {
     createBackdrop,
     removeBackdrop,
@@ -45,8 +31,22 @@ import {
     removePopOutButton,
     setPopOutButtonDisabled,
 } from "./popOutButton";
-import { popOutModule } from "./popOut";
-import { Session } from "./session";
+import type { Session } from "./session";
+import {
+    postActivePaymentProductType,
+    postClosePopOutEvent,
+    postOpenPopOutEvent,
+    postOpenPopOutFailedEvent,
+    postSessionLock,
+    postSessionRefresh,
+    postSetLanguage,
+    postValidatePopOutEvent,
+    postValidationResult,
+    type Subscription,
+    type SubscriptionHandler,
+    subscribe,
+} from "./subscribe";
+import { url } from "./url";
 
 export interface DinteroCheckoutInstance {
     /**
@@ -169,7 +169,7 @@ const setIframeHeight: SubscriptionHandler = (
  * is navigated to another page.
  */
 const scrollToIframeTop: SubscriptionHandler = (
-    event: any,
+    _event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
     try {
@@ -237,7 +237,7 @@ const createPopOutMessageHandler = (
     const popOutCompletedHandler = {
         internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
-        handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
+        handler: (eventData: any, _checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
                 // Remove open pop out button rendered by SDK
                 removePopOutButton();
@@ -263,14 +263,14 @@ const createPopOutMessageHandler = (
             event.data.sid === checkout.options.sid
         ) {
             // Check if handler matches incoming event and trigger the handler if so.
-            [
+            for (const handlerObject of [
                 // SDK events for managing the pop out flow.
                 popOutChangedLanguageHandler,
                 popOutCompletedHandler,
 
                 // Events configured when the checkout was embedded.
                 ...checkout.handlers,
-            ].forEach((handlerObject) => {
+            ]) {
                 if (
                     (handlerObject.eventTypes as string[]).includes(
                         event.data.type,
@@ -282,7 +282,7 @@ const createPopOutMessageHandler = (
                         handlerObject.handler(event.data, checkout);
                     });
                 }
-            });
+            }
         }
     };
     // Add messageRouter event listener to the Pop Out
@@ -435,7 +435,7 @@ const handleShowButton: SubscriptionHandler = (
  */
 const handleRemoveButton: SubscriptionHandler = (
     event: any,
-    checkout: DinteroCheckoutInstance,
+    _checkout: DinteroCheckoutInstance,
 ): void => {
     if (event.type === InternalCheckoutEvents.HidePopOutButton) {
         removePopOutButton();
@@ -504,7 +504,6 @@ export const embed = async (
     container.appendChild(innerContainer);
     const { iframe, initiate } = createIframeAsync(
         innerContainer,
-        endpoint,
         url.getSessionUrl({
             sid,
             endpoint,
@@ -512,8 +511,11 @@ export const embed = async (
             ui: options.ui || "inline",
             shouldCallValidateSession: onValidateSession !== undefined,
             popOut,
+            // biome-ignore lint/suspicious/noPrototypeBuiltins: test
             ...(options.hasOwnProperty("hideTestMessage") && {
-                hideTestMessage: options["hideTestMessage"],
+                hideTestMessage: (
+                    options as unknown as { hideTestMessage: string }
+                ).hideTestMessage,
             }),
         }),
     );
@@ -528,7 +530,9 @@ export const embed = async (
                 // Try to remove backdrop if it exists
                 removeBackdrop();
             }
-            subscriptions.forEach((sub) => sub.unsubscribe());
+            for (const sub of subscriptions) {
+                sub.unsubscribe();
+            }
             if (iframe.parentElement) {
                 innerContainer.removeChild(iframe);
             }
@@ -559,7 +563,9 @@ export const embed = async (
                     sid,
                     endpoint,
                     handler: (sessionEvent) => {
-                        eventSubscriptions.forEach((sub) => sub.unsubscribe());
+                        for (const sub of eventSubscriptions) {
+                            sub.unsubscribe();
+                        }
                         resolve(sessionEvent);
                     },
                     eventTypes: [resolveEvent],
@@ -572,7 +578,9 @@ export const embed = async (
                     sid,
                     endpoint,
                     handler: () => {
-                        eventSubscriptions.forEach((sub) => sub.unsubscribe());
+                        for (const sub of eventSubscriptions) {
+                            sub.unsubscribe();
+                        }
                         reject(`Received unexpected event: ${rejectEvent}`);
                     },
                     eventTypes: [rejectEvent],
@@ -633,7 +641,7 @@ export const embed = async (
      *  If no custom handler is set the followHref handler is used instead.
      */
     const handleWithResult = (
-        sid: string,
+        _sid: string,
         endpoint: string,
         handler: SubscriptionHandler,
     ): SubscriptionHandler => {
@@ -658,7 +666,7 @@ export const embed = async (
                 pairs.push(["language", checkout.language]);
                 pairs.push(["sdk", pkg.version]);
                 const urlQuery = pairs
-                    .filter(([key, value]) => value)
+                    .filter(([_key, value]) => value)
                     .map(([key, value]) => `${key}=${value}`)
                     .join("&");
                 checkout.iframe.setAttribute(
@@ -811,7 +819,7 @@ export const embed = async (
         popOutWindow: undefined,
     };
 
-    handlers.forEach(({ handler, eventTypes }) => {
+    for (const { handler, eventTypes } of handlers) {
         if (handler) {
             subscriptions.push(
                 subscribe({
@@ -824,7 +832,7 @@ export const embed = async (
                 }),
             );
         }
-    });
+    }
 
     // Add iframe to DOM
     await initiate();
@@ -853,16 +861,16 @@ export const redirect = (options: DinteroCheckoutOptions) => {
     );
 };
 export type {
-    SessionNotFound,
-    SessionLoaded,
-    SessionUpdated,
+    ActivePaymentProductType,
     SessionCancel,
-    SessionPaymentOnHold,
-    SessionPaymentAuthorized,
-    SessionPaymentError,
+    SessionLoaded,
     SessionLocked,
     SessionLockFailed,
-    ActivePaymentProductType,
-    ValidateSession,
+    SessionNotFound,
+    SessionPaymentAuthorized,
+    SessionPaymentError,
+    SessionPaymentOnHold,
+    SessionUpdated,
     SessionValidationCallback,
+    ValidateSession,
 } from "./checkout";

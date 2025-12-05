@@ -1,22 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import * as dintero from "../src";
-import { url, type SessionUrlOptions } from "../src/url";
-import { popOutModule } from "../src/popOut";
 import pkg from "../package.json";
-
+import * as dintero from "../src";
 import {
+    type ActivePaymentProductType,
     CheckoutEvents,
-    SessionNotFound,
-    SessionLoaded,
-    SessionUpdated,
-    SessionCancel,
-    SessionPaymentAuthorized,
-    SessionLocked,
-    SessionLockFailed,
-    ActivePaymentProductType,
-    ValidateSession,
-    SessionValidationCallback,
+    type SessionCancel,
+    type SessionLoaded,
+    type SessionLocked,
+    type SessionLockFailed,
+    type SessionNotFound,
+    type SessionPaymentAuthorized,
+    type SessionUpdated,
+    type SessionValidationCallback,
+    type ValidateSession,
 } from "../src/checkout";
+import { popOutModule } from "../src/popOut";
+import { type SessionUrlOptions, url } from "../src/url";
 
 //// Listen to all events emitted, helpful during development
 //window.addEventListener(
@@ -72,8 +71,8 @@ describe("dintero.redirect", () => {
 });
 
 describe("dintero.embed", () => {
-    let checkout: dintero.DinteroCheckoutInstance | undefined = undefined;
-    let container: HTMLDivElement | undefined = undefined;
+    let checkout: dintero.DinteroCheckoutInstance | undefined;
+    let container: HTMLDivElement | undefined;
     let endpoint = "http://localhost:5173";
     const sid = "session-id";
 
@@ -152,15 +151,17 @@ describe("dintero.embed", () => {
         const onSessionResult: {
             event: SessionLoaded | SessionUpdated;
             checkout: dintero.DinteroCheckoutInstance;
-        } = await new Promise(async (resolve) => {
-            await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: (event, checkout) => {
-                    resolve({ event, checkout });
-                },
-            });
+        } = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: (event, checkout) => {
+                        resolve({ event, checkout });
+                    },
+                })
+                .catch(reject);
         });
 
         expect(onSessionResult.event.type).to.equal(
@@ -417,7 +418,7 @@ describe("dintero.embed", () => {
         });
 
         const onSession = vi.fn();
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
             dintero
                 .embed({
                     sid,
@@ -425,6 +426,7 @@ describe("dintero.embed", () => {
                     endpoint,
                     onSession,
                 })
+                .catch(reject)
                 .then(() => {
                     // post from wrong window
                     window.postMessage(
@@ -455,18 +457,20 @@ describe("dintero.embed", () => {
         });
 
         const fakeHandler = vi.fn();
-        await new Promise((resolve) => {
-            dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: fakeHandler,
-                onSessionNotFound: fakeHandler,
-                onSessionCancel: fakeHandler,
-                onPaymentError: fakeHandler,
-                onPaymentAuthorized: fakeHandler,
-            });
-            sleep(100).then(resolve);
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: fakeHandler,
+                    onSessionNotFound: fakeHandler,
+                    onSessionCancel: fakeHandler,
+                    onPaymentError: fakeHandler,
+                    onPaymentAuthorized: fakeHandler,
+                })
+                .catch(reject)
+                .then(resolve);
         });
 
         expect(fakeHandler).not.toBeCalled();
@@ -486,14 +490,16 @@ describe("dintero.embed", () => {
         });
 
         const onSession = vi.fn();
-        await new Promise((resolve) => {
-            dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession,
-            });
-            sleep(100).then(resolve);
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession,
+                })
+                .catch(reject)
+                .then(resolve);
         });
 
         expect(onSession).not.toBeCalled();
@@ -758,7 +764,7 @@ describe("dintero.embed", () => {
             return getHtmlBlobUrl(options, script);
         });
 
-        const event: any = await new Promise((resolve, reject) => {
+        const event = await new Promise((resolve, reject) => {
             dintero.embed({ sid, container, endpoint }).then((checkout) => {
                 checkout
                     .lockSession()
@@ -785,7 +791,7 @@ describe("dintero.embed", () => {
             return getHtmlBlobUrl(options, script);
         });
 
-        const error: any = await new Promise((resolve, reject) => {
+        const error = await new Promise((resolve, reject) => {
             dintero.embed({ sid, container, endpoint }).then((checkout) => {
                 checkout
                     .lockSession()
@@ -812,7 +818,7 @@ describe("dintero.embed", () => {
             return getHtmlBlobUrl(options, script);
         });
 
-        const event: any = await new Promise((resolve, reject) => {
+        const event = await new Promise((resolve, reject) => {
             dintero.embed({ sid, container, endpoint }).then((checkout) => {
                 checkout
                     .refreshSession()
@@ -839,7 +845,7 @@ describe("dintero.embed", () => {
             return getHtmlBlobUrl(options, script);
         });
 
-        const error: any = await new Promise((resolve, reject) => {
+        const error = await new Promise((resolve, reject) => {
             dintero.embed({ sid, container, endpoint }).then((checkout) => {
                 checkout
                     .refreshSession()
@@ -922,31 +928,36 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        let checkout: ReturnType<typeof dintero.embed> | undefined = undefined;
+        let checkout: dintero.DinteroCheckoutInstance;
         const result: HTMLElement = await new Promise((resolve, reject) => {
-            checkout = dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    resolve(button);
-                } else {
-                    reject();
-                }
-            });
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then((instance: dintero.DinteroCheckoutInstance) => {
+                    checkout = instance;
+                    // Wait for button to be created.
+                    sleep(50).then(() => {
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        if (button) {
+                            resolve(button);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
         });
 
         expect(result).to.not.be.undefined;
         result.remove();
-        (await checkout).destroy();
+        checkout.destroy();
     });
 
     it("Removes button from DOM when a HidePopOutButton message is received", async () => {
@@ -977,21 +988,25 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        const result: HTMLElement = await new Promise(async (resolve) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created and removed
-            sleep(100).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                resolve(button);
-            });
+        const result: HTMLElement = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then(() => {
+                    // Wait for button to be created and removed
+                    sleep(100).then(() => {
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        resolve(button);
+                    });
+                });
         });
         expect(result).to.be.null;
     });
@@ -1029,26 +1044,30 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    resolve(null);
-                } else {
-                    reject();
-                }
-            });
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then(() => {
+                    // Wait for button to be created.
+                    sleep(50).then(() => {
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        if (button) {
+                            button.click();
+                            resolve(null);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
         });
 
         const backdrop = document.getElementById(
@@ -1098,43 +1117,47 @@ describe("dintero.embed", () => {
         );
 
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for close button to be created.
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then(() => {
+                    // Wait for button to be created.
                     sleep(50).then(() => {
                         const button = document.getElementById(
-                            "dintero-checkout-sdk-backdrop-close",
+                            "dintero-checkout-sdk-launch-pop-out",
                         );
                         if (button) {
                             button.click();
-                            resolve(null);
+                            // Wait for close button to be created.
+                            sleep(50).then(() => {
+                                const button = document.getElementById(
+                                    "dintero-checkout-sdk-backdrop-close",
+                                );
+                                if (button) {
+                                    button.click();
+                                    resolve(null);
+                                } else {
+                                    reject();
+                                }
+                            });
                         } else {
                             reject();
                         }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         const backdrop = document.getElementById(
             "dintero-checkout-sdk-backdrop",
         );
+
         expect(backdrop).to.be.null;
         expect(closeFake).toBeCalled();
         expect(focusFake).not.toBeCalled();
@@ -1178,39 +1201,42 @@ describe("dintero.embed", () => {
         );
 
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for focus button to be created.
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then(() => {
+                    // Wait for button to be created.
                     sleep(50).then(() => {
                         const button = document.getElementById(
-                            "dintero-checkout-sdk-backdrop-focus",
+                            "dintero-checkout-sdk-launch-pop-out",
                         );
                         if (button) {
                             button.click();
-                            resolve(null);
+                            // Wait for focus button to be created.
+                            sleep(50).then(() => {
+                                const button = document.getElementById(
+                                    "dintero-checkout-sdk-backdrop-focus",
+                                );
+                                if (button) {
+                                    button.click();
+                                    resolve(null);
+                                } else {
+                                    reject();
+                                }
+                            });
                         } else {
                             reject();
                         }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         expect(closeFake).not.toBeCalled();
         expect(focusFake).toBeCalled();
@@ -1254,39 +1280,42 @@ describe("dintero.embed", () => {
         );
 
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for focus button to be created.
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then(() => {
+                    // Wait for button to be created.
                     sleep(50).then(() => {
-                        const backdrop = document.getElementById(
-                            "dintero-checkout-sdk-backdrop",
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
                         );
-                        if (backdrop) {
-                            backdrop.click();
-                            resolve(null);
+                        if (button) {
+                            button.click();
+                            // Wait for focus button to be created.
+                            sleep(50).then(() => {
+                                const backdrop = document.getElementById(
+                                    "dintero-checkout-sdk-backdrop",
+                                );
+                                if (backdrop) {
+                                    backdrop.click();
+                                    resolve(null);
+                                } else {
+                                    reject();
+                                }
+                            });
                         } else {
                             reject();
                         }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         expect(closeFake).not.toBeCalled();
         expect(focusFake).toBeCalled();
@@ -1330,37 +1359,46 @@ describe("dintero.embed", () => {
         );
 
         vi.spyOn(popOutModule, "postPopOutSessionLock").mockImplementation(
-            (options) => Promise.resolve(),
+            (_options) => Promise.resolve(),
         );
+
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for focus button to be created.
+
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then((checkout) => {
+                    // Wait for button to be created.
+                    if (!checkout) {
+                        reject(new Error("checkout instance null"));
+                        return;
+                    }
                     sleep(50).then(() => {
-                        checkout.lockSession();
-                        sleep(50).then(() => {
-                            resolve(null);
-                        });
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        if (button) {
+                            button.click();
+                            // Wait for focus button to be created.
+                            sleep(50).then(() => {
+                                checkout.lockSession();
+                                sleep(50).then(() => {
+                                    resolve(null);
+                                });
+                            });
+                        } else {
+                            reject();
+                        }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         expect(popOutModule.postPopOutSessionLock).toBeCalledWith(
             popOutWindow,
@@ -1406,37 +1444,44 @@ describe("dintero.embed", () => {
         );
 
         vi.spyOn(popOutModule, "postPopOutSessionRefresh").mockImplementation(
-            (options) => Promise.resolve(),
+            (_options) => Promise.resolve(),
         );
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for focus button to be created.
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then((checkout) => {
+                    if (!checkout) {
+                        reject(new Error("checkout instance null"));
+                        return;
+                    }
+                    // Wait for button to be created.
                     sleep(50).then(() => {
-                        checkout.refreshSession();
-                        sleep(50).then(() => {
-                            resolve(null);
-                        });
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        if (button) {
+                            button.click();
+                            // Wait for focus button to be created.
+                            sleep(50).then(() => {
+                                checkout.refreshSession();
+                                sleep(50).then(() => {
+                                    resolve(null);
+                                });
+                            });
+                        } else {
+                            reject();
+                        }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         expect(popOutModule.postPopOutSessionRefresh).toBeCalledWith(
             popOutWindow,
@@ -1484,38 +1529,42 @@ describe("dintero.embed", () => {
         vi.spyOn(
             popOutModule,
             "postPopOutActivePaymentProductType",
-        ).mockImplementation((options) => Promise.resolve());
+        ).mockImplementation((_options) => Promise.resolve());
         const onSessionHandler = vi.fn();
-        await new Promise(async (resolve, reject) => {
-            checkout = await dintero.embed({
-                sid,
-                container,
-                endpoint,
-                onSession: onSessionHandler,
-                popOut: true,
-            });
-            // Wait for button to be created.
-            sleep(50).then(() => {
-                const button = document.getElementById(
-                    "dintero-checkout-sdk-launch-pop-out",
-                );
-                if (button) {
-                    button.click();
-                    // Wait for focus button to be created.
+        await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then((instance: dintero.DinteroCheckoutInstance) => {
+                    // Wait for button to be created.
+                    checkout = instance;
                     sleep(50).then(() => {
-                        checkout.setActivePaymentProductType(
-                            "generic.creditcard",
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
                         );
-                        sleep(50).then(() => {
-                            resolve(null);
-                        });
+                        if (button) {
+                            button.click();
+                            // Wait for focus button to be created.
+                            sleep(50).then(() => {
+                                checkout.setActivePaymentProductType(
+                                    "generic.creditcard",
+                                );
+                                sleep(50).then(() => {
+                                    resolve(null);
+                                });
+                            });
+                        } else {
+                            reject();
+                        }
                     });
-                } else {
-                    reject();
-                }
-            });
+                });
         });
-        await sleep(50);
 
         expect(popOutModule.postPopOutActivePaymentProductType).toBeCalledWith(
             popOutWindow,
