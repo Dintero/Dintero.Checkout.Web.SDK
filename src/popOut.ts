@@ -1,4 +1,4 @@
-import { url, type SessionUrlOptions } from "./url";
+import { type SessionUrlOptions, url } from "./url";
 
 const createPopOutWindow = (
     sid: string,
@@ -48,7 +48,7 @@ const createPopOutWindow = (
                 console.log("createPopOutWindow timeout");
                 resolve(undefined);
             }, 10000);
-        } catch (err) {
+        } catch (_err) {
             resolve(undefined);
         }
     });
@@ -105,7 +105,7 @@ const openPopOut = async (options: PopOutOptions) => {
     };
 
     const checkIfPopupClosed = () => {
-        if (popOutWindow && popOutWindow.closed) {
+        if (popOutWindow?.closed) {
             cleanUpClosed();
         }
     };

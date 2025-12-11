@@ -15,7 +15,7 @@
     },
     "scripts": {
         "build": "yarn tsc --noEmit && preconstruct build",
-        "lint": "prettier --cache --log-level warn -c --config .prettierrc.yml .",
+        "lint": "biome check",
         "test": "vitest --config .vitest.config.mts",
         "semantic-release": "semantic-release",
         "prepublishOnly": "yarn run build"
@@ -34,12 +34,12 @@
     "devDependencies": {
         "@babel/core": "7.28.5",
         "@babel/preset-typescript": "7.28.5",
+        "@biomejs/biome": "2.3.8",
         "@preconstruct/cli": "2.8.12",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "10.0.1",
         "@vitest/browser": "4.0.15",
         "@vitest/browser-webdriverio": "^4.0.4",
-        "prettier": "3.6.2",
         "semantic-release": "25.0.2",
         "typescript": "5.9.3",
         "vitest": "4.0.15",
