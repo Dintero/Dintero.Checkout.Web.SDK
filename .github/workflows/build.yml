@@ -23,9 +23,9 @@ jobs:
       - name: yarn install, build, test and lint
         run: |
           yarn install --immutable
+          yarn run lint
           yarn run test
           yarn run build
-          yarn run lint
 
       - name: Configure AWS credentials
         if: github.actor != 'dependabot[bot]'
