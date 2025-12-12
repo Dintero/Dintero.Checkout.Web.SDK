@@ -36,8 +36,8 @@ jobs:
       - name: Install dependencies, test and lint
         run: |
           yarn install --immutable
-          yarn run test
           yarn run lint
+          yarn run test
           yarn run build
       - name: Release
         env:
