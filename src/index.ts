@@ -737,6 +737,10 @@ export const embed = async (
             eventTypes: [InternalCheckoutEvents.ScrollToTop],
         },
         {
+            handler: followHref,
+            eventTypes: [InternalCheckoutEvents.TopLevelNavigation],
+        },
+        {
             handler: wrappedOnLoadedOrUpdated as
                 | SubscriptionHandler
                 | undefined,
