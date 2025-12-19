@@ -262,7 +262,11 @@ describe("dintero.embed", () => {
         );
     });
 
-    ["SessionPaymentAuthorized", "SessionPaymentOnHold"].forEach((type) => {
+    [
+        "SessionPaymentAuthorized",
+        "SessionPaymentOnHold",
+        "TopLevelNavigation",
+    ].forEach((type) => {
         it(`listens to ${type} messages`, async () => {
             const windowLocationAssign = vi.spyOn(url, "windowLocationAssign");
             const script = `

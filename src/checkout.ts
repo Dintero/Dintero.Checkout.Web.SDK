@@ -19,6 +19,7 @@ export enum InternalCheckoutEvents {
     ScrollToTop = "ScrollToTop",
     ShowPopOutButton = "ShowPopOutButton",
     HidePopOutButton = "HidePopOutButton",
+    TopLevelNavigation = "TopLevelNavigation",
 }
 
 export type SessionNotFound = {
