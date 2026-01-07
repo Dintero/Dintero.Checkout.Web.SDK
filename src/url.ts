@@ -1,5 +1,4 @@
 import pkg from "../package.json";
-import { redirect } from ".";
 
 /**
  * Wraps window.location.assign()
@@ -22,8 +21,15 @@ export interface SessionUrlOptions {
 }
 
 const getSessionUrl = (options: SessionUrlOptions): string => {
-    const { sid, endpoint, language, ui, shouldCallValidateSession, popOut } =
-        options;
+    const {
+        sid,
+        endpoint,
+        language,
+        ui,
+        shouldCallValidateSession,
+        popOut,
+        redirect,
+    } = options;
     if (!endpoint) {
         throw new Error("Invalid endpoint");
     }
@@ -56,7 +62,7 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
         params.append("sdk_hostname", hostname);
     }
     if (!redirect && !hostnameIsTop()) {
-        params.append("sdk_not_top_level", "false");
+        params.append("sdk_not_top_level", "true");
     }
     if (endpoint === "https://checkout.dintero.com") {
         // Default endpoint will redirect via the view endpoint
