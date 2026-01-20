@@ -43,7 +43,7 @@
         "semantic-release": "25.0.2",
         "typescript": "5.9.3",
         "vitest": "4.0.17",
-        "webdriverio": "9.23.0"
+        "webdriverio": "9.23.2"
     },
     "dependencies": {
         "native-promise-only": "0.8.1"
