@@ -414,6 +414,10 @@ const handleShowButton: SubscriptionHandler = (
     checkout: DinteroCheckoutInstance,
 ): void => {
     if (isShowPopOutButton(event)) {
+        if (event.session) {
+            // Update checkout instance session
+            checkout.session = event.session;
+        }
         addPopOutButton({
             container: checkout.options.innerContainer,
             label: event.openLabel,

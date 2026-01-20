@@ -964,6 +964,63 @@ describe("dintero.embed", () => {
         checkout.destroy();
     });
 
+    it("Adds button to DOM when a ShowPopOutButton message with session is received", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false",
+                session: {"id":"session in ShowPopOutButton"}
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onSessionHandler = vi.fn();
+        let checkout: dintero.DinteroCheckoutInstance;
+        const result: HTMLElement = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: onSessionHandler,
+                    popOut: true,
+                })
+                .catch(reject)
+                .then((instance: dintero.DinteroCheckoutInstance) => {
+                    checkout = instance;
+                    // Wait for button to be created.
+                    sleep(50).then(() => {
+                        const button = document.getElementById(
+                            "dintero-checkout-sdk-launch-pop-out",
+                        );
+                        if (button) {
+                            resolve(button);
+                        } else {
+                            reject();
+                        }
+                    });
+                });
+        });
+
+        expect(result).to.not.be.undefined;
+        expect(checkout.session.id).toBe("session in ShowPopOutButton");
+        result.remove();
+        checkout.destroy();
+    });
+
     it("Removes button from DOM when a HidePopOutButton message is received", async () => {
         const script = `
             // Tell the SDK to create the payment button

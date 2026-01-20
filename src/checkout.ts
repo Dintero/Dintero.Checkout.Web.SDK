@@ -90,6 +90,7 @@ export type ShowPopOutButton = {
     right: string;
     language: string;
     disabled: "true" | "false";
+    session?: Session;
 };
 
 export type SessionLockFailed = {
