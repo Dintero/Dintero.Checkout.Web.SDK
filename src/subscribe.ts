@@ -1,5 +1,6 @@
 import type { DinteroCheckoutInstance } from ".";
 import type {
+    AddressCallbackResult,
     CheckoutEvents,
     InternalCheckoutEvents,
     SessionEvent,
@@ -59,6 +60,22 @@ export const postValidationResult = (
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "ValidationResult", sid, ...result },
+            "*",
+        );
+    }
+};
+
+/**
+ * Post the address call back result to the checkout iframe
+ */
+export const postAddressCallbackResult = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    result: AddressCallbackResult,
+) => {
+    if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+            { type: "AddressCallbackResult", sid, ...result },
             "*",
         );
     }

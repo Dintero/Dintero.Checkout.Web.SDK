@@ -12,6 +12,7 @@ export enum CheckoutEvents {
     SessionLockFailed = "SessionLockFailed",
     ActivePaymentProductType = "ActivePaymentProductType",
     ValidateSession = "ValidateSession",
+    AddressCallback = "AddressCallback",
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",
@@ -112,7 +113,19 @@ export interface SessionValidationCallback {
     clientValidationError?: string;
 }
 
+export type AddressCallback = {
+    type: CheckoutEvents.AddressCallback;
+    session: Session;
+    callback: (result: AddressCallbackResult) => void;
+};
+
+export interface AddressCallbackResult {
+    success: boolean;
+    error?: string;
+}
+
 export type WrappedValidateSession = Pick<ValidateSession, "type" | "session">;
+export type WrappedAddressCallback = Pick<AddressCallback, "type" | "session">;
 export type WrappedSessionLocked = Pick<SessionLocked, "type" | "pay_lock_id">;
 
 export type SessionPayment = SessionPaymentAuthorized | SessionPaymentOnHold;
@@ -134,4 +147,5 @@ export type SessionEvent =
     | WrappedSessionLocked
     | SessionLockFailed
     | ActivePaymentProductType
-    | WrappedValidateSession;
+    | WrappedValidateSession
+    | WrappedAddressCallback;

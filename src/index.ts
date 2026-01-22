@@ -3,6 +3,8 @@ import "native-promise-only";
 import pkg from "../package.json";
 import {
     type ActivePaymentProductType,
+    type AddressCallback,
+    type AddressCallbackResult,
     CheckoutEvents,
     InternalCheckoutEvents,
     type SessionCancel,
@@ -34,6 +36,7 @@ import {
 import type { Session } from "./session";
 import {
     postActivePaymentProductType,
+    postAddressCallbackResult,
     postClosePopOutEvent,
     postOpenPopOutEvent,
     postOpenPopOutFailedEvent,
@@ -59,6 +62,7 @@ export interface DinteroCheckoutInstance {
     refreshSession: () => Promise<SessionEvent>;
     setActivePaymentProductType: (paymentProductType: string) => void;
     submitValidationResult: (result: SessionValidationCallback) => void;
+    submitAddressCallbackResult: (result: AddressCallbackResult) => void;
     options: InternalDinteroEmbedCheckoutOptions;
     handlers: (
         | {
@@ -128,6 +132,11 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
         event: ValidateSession,
         checkout: DinteroCheckoutInstance,
         callback: (result: SessionValidationCallback) => void,
+    ) => void;
+    onAddressCallback?: (
+        event: AddressCallback,
+        checkout: DinteroCheckoutInstance,
+        callback: (result: AddressCallbackResult) => void,
     ) => void;
 }
 
@@ -305,6 +314,7 @@ const showPopOut = async (
         sid: checkout.options.sid,
         endpoint: checkout.options.endpoint,
         shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
+        shouldCallAddressCallback: false, // handled by embedded checkout not the pop out window
         language: event.language,
         onOpen: (popOutWindow: Window) =>
             createPopOutMessageHandler(popOutWindow, checkout),
@@ -346,6 +356,7 @@ const createPopOutValidationCallback = (
                 sid: checkout.options.sid,
                 endpoint: checkout.options.endpoint,
                 shouldCallValidateSession: false,
+                shouldCallAddressCallback: false,
                 language: event.language,
             });
         } else {
@@ -497,6 +508,7 @@ export const embed = async (
         onSessionLockFailed,
         onActivePaymentType,
         onValidateSession,
+        onAddressCallback,
         popOut,
     } = internalOptions;
 
@@ -514,6 +526,7 @@ export const embed = async (
             language,
             ui: options.ui || "inline",
             shouldCallValidateSession: onValidateSession !== undefined,
+            shouldCallAddressCallback: onAddressCallback !== undefined,
             popOut,
             // biome-ignore lint/suspicious/noPrototypeBuiltins: test
             ...(options.hasOwnProperty("hideTestMessage") && {
@@ -639,6 +652,11 @@ export const embed = async (
         // For pop out we do validation when opening the pop out
     };
 
+    const submitAddressCallbackResult = (result: AddressCallbackResult) => {
+        postAddressCallbackResult(iframe, sid, result);
+        // For pop out we do validation when opening the pop out
+    };
+
     /**
      *  Internal result event message handler wrapper, to replace the content of the iframe with a success/or
      *  error message. Only used when the embed function in the SDK has a dedicated handler for onPayment, onError etc.
@@ -701,6 +719,30 @@ export const embed = async (
                 submitValidationResult({
                     success: false,
                     clientValidationError: "Validation runtime error",
+                });
+            }
+        }
+    };
+
+    const wrappedOnAddressCallback = (
+        event: AddressCallback,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        if (onAddressCallback) {
+            try {
+                onAddressCallback(
+                    {
+                        ...event,
+                        callback: submitAddressCallbackResult,
+                    },
+                    checkout,
+                    submitAddressCallbackResult,
+                );
+            } catch (e) {
+                console.error(e);
+                submitAddressCallbackResult({
+                    success: false,
+                    error: "Address callback runtime error",
                 });
             }
         }
@@ -804,6 +846,12 @@ export const embed = async (
             eventTypes: [CheckoutEvents.ValidateSession],
         },
         {
+            handler: wrappedOnAddressCallback as
+                | SubscriptionHandler
+                | undefined,
+            eventTypes: [CheckoutEvents.AddressCallback],
+        },
+        {
             handler: handleShowButton as SubscriptionHandler,
             eventTypes: [InternalCheckoutEvents.ShowPopOutButton],
         },
@@ -821,6 +869,7 @@ export const embed = async (
         refreshSession,
         setActivePaymentProductType,
         submitValidationResult,
+        submitAddressCallbackResult,
         options: internalOptions,
         handlers,
         session: undefined,
@@ -864,6 +913,7 @@ export const redirect = (options: DinteroCheckoutOptions) => {
             endpoint,
             language,
             shouldCallValidateSession: false,
+            shouldCallAddressCallback: false,
             redirect: true,
         }),
     );

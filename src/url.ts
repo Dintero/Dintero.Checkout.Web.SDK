@@ -16,6 +16,7 @@ export interface SessionUrlOptions {
     language: string | undefined;
     ui?: "fullscreen" | "inline";
     shouldCallValidateSession: boolean;
+    shouldCallAddressCallback: boolean;
     popOut?: boolean;
     redirect?: boolean;
 }
@@ -27,6 +28,7 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
         language,
         ui,
         shouldCallValidateSession,
+        shouldCallAddressCallback,
         popOut,
         redirect,
     } = options;
@@ -43,6 +45,9 @@ const getSessionUrl = (options: SessionUrlOptions): string => {
     }
     if (shouldCallValidateSession) {
         params.append("client_side_validation", "true");
+    }
+    if (shouldCallAddressCallback) {
+        params.append("client_side_address_callback", "true");
     }
     if (popOut) {
         params.append("role", "pop_out_launcher");

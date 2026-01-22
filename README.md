@@ -91,6 +91,13 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                     event.payment_product_type,
                 );
             },
+            onAddressCallback: function (event, checkout, callback) {
+                console.log("address callback to handle express session address updates", event.session);
+                callback({
+                    success: true,
+                    error: undefined,
+                });
+            },
             onValidateSession: function (event, checkout, callback) {
                 console.log("validating session", event.session);
                 callback({
@@ -161,6 +168,13 @@ const checkout = await embed({
             event.payment_product_type,
         );
     },
+    onAddressCallback: function (event: AddressCallback, checkout, callback) {
+        console.log("address callback to handle express session address updates", event.session);
+        callback({
+            success: true,
+            error: undefined,
+        });
+    },
     onValidateSession: function (event: ValidateSession, checkout, callback) {
         console.log("validating session", event.session);
         callback({
@@ -186,6 +200,53 @@ Resetting selection (so no option is selected in the checkout):
 ```
 checkout.setActivePaymentProductType();
 ```
+
+### Handling Checkout Express address updates using the onAddressCallback
+
+If the `onAddressCallback` is provided the checkout **will not perform the machine to machine address update callback** defined in the payment session
+object at `express.shipping_address_callback_url`. Instead the SDK runtime has to handle the address update flow.
+
+The `onAddressCallback` function is invoked when an end user submits their address details (the shipping and billing addresses) in an embedded Checkout Express session. The callback function is invoked with an updated session that is not yet persisted in the Dintero backend. The checkout will be locked and payment will be paused until the provided callback function is called, or `checkout.submitAddressCallbackResult` is called with the result.
+
+When `onAddressCallback` is invoked you will have to perform a [server-to-server session update](#perform-a-server-to-server-session-update) with shipping options or other details that have changed. Once the
+session has been updated you need to call the provided callback function with a result.
+
+When session has been updated successfully, return a successful result:
+
+```js
+{
+    success: true;
+}
+```
+
+If the session update failed, return the result with an error message:
+
+```js
+{
+   success: false,
+   error: "<reason for session update failure>"
+}
+```
+
+Example implementation:
+
+```
+onAddressCallback: function(event, checkout, callback) {
+     // Perform a server-to-server session update
+     getShippingOptionsForAddressAndUpdateSession(event.session).then(() => {
+        callback({
+            success: true,
+        });
+     }).catch((err) => {
+        callback({
+            success: false,
+            error: toErrorMessage(err), 
+        });
+     });
+},
+```
+
+> **Note:** When implementing the `onAddressCallback`, there is no need to manually lock the session and refresh it. The checkout will automatically lock the payment and refresh the session when the `callback` function is used to return a result.
 
 ### Updating an Checkout Express-session
 

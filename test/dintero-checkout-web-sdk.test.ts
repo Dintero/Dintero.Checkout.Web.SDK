@@ -3,6 +3,7 @@ import pkg from "../package.json";
 import * as dintero from "../src";
 import {
     type ActivePaymentProductType,
+    type AddressCallback,
     CheckoutEvents,
     type SessionCancel,
     type SessionLoaded,
@@ -704,7 +705,7 @@ describe("dintero.embed", () => {
                 return getHtmlBlobUrl(options, script);
             });
 
-        const onSessionResult: {
+        const validateSessionPromise: {
             event: ValidateSession;
             checkout: dintero.DinteroCheckoutInstance;
             callback: (result: SessionValidationCallback) => void;
@@ -719,10 +720,11 @@ describe("dintero.embed", () => {
             });
         });
 
-        expect(onSessionResult.callback).to.not.be.undefined;
+        expect(validateSessionPromise.callback).to.not.be.undefined;
         expect(getSessionUrl).toBeCalledWith({
             endpoint,
             shouldCallValidateSession: true,
+            shouldCallAddressCallback: false,
             sid,
             ui: "inline",
         });
@@ -749,6 +751,73 @@ describe("dintero.embed", () => {
         expect(getSessionUrl).toBeCalledWith({
             endpoint,
             shouldCallValidateSession: false,
+            shouldCallAddressCallback: false,
+            sid,
+            ui: "inline",
+        });
+    });
+
+    it("should handle onAddressCallback invoked", async () => {
+        const script = `
+            emit({
+                type: "AddressCallback",
+                session: {},
+            });
+        `;
+
+        const getSessionUrl = vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
+            });
+
+        const addressCallbackPromise: {
+            event: AddressCallback;
+            checkout: dintero.DinteroCheckoutInstance;
+            callback: (result: SessionValidationCallback) => void;
+        } = await new Promise((resolve) => {
+            dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onAddressCallback: (event, checkout, callback) => {
+                    resolve({ event, checkout, callback });
+                },
+            });
+        });
+
+        expect(addressCallbackPromise.callback).to.not.be.undefined;
+        expect(getSessionUrl).toBeCalledWith({
+            endpoint,
+            shouldCallValidateSession: false,
+            shouldCallAddressCallback: true,
+            sid,
+            ui: "inline",
+        });
+    });
+
+    it("should not handle onAddressCallback if it is not defined", async () => {
+        const script = `
+            emit({
+                type: "AddressCallback",
+                session: {},
+            });
+        `;
+
+        const getSessionUrl = vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementation((options) => {
+                return getHtmlBlobUrl(options, script);
+            });
+
+        await new Promise((resolve) => {
+            dintero.embed({ sid, container, endpoint }).then(() => resolve({}));
+        });
+
+        expect(getSessionUrl).toBeCalledWith({
+            endpoint,
+            shouldCallValidateSession: false,
+            shouldCallAddressCallback: false,
             sid,
             ui: "inline",
         });
