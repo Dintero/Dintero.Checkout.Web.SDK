@@ -8,7 +8,7 @@ export const createIframeAsync = (
     container: HTMLDivElement,
     url: string,
 ): { iframe: HTMLIFrameElement; initiate: () => void } => {
-    if (!container || !container.appendChild) {
+    if (!container?.appendChild) {
         throw new Error("Invalid container");
     }
     const iframe = document.createElement("iframe");

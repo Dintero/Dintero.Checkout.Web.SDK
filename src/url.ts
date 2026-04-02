@@ -122,8 +122,8 @@ const hostnameIsTop = (): boolean => {
             return true;
         }
         const hostname = getHostname();
-        const topHostname = window.top.location.hostname;
-        return topHostname && hostname && hostname === topHostname;
+        const topHostname = window.top?.location.hostname;
+        return Boolean(topHostname && hostname && hostname === topHostname);
     } catch (_) {
         return false;
     }
