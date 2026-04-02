@@ -149,6 +149,7 @@ interface InternalDinteroEmbedCheckoutOptions
  * An event handler that navigates to the href in the event.
  */
 const followHref: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: href is not present on all SessionEvent subtypes
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -162,6 +163,7 @@ const followHref: SubscriptionHandler = (
  * An event handler that sets height of the iframe.
  */
 const setIframeHeight: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal HeightChanged event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -178,7 +180,7 @@ const setIframeHeight: SubscriptionHandler = (
  * is navigated to another page.
  */
 const scrollToIframeTop: SubscriptionHandler = (
-    _event: any,
+    _event: SessionEvent,
     checkout: DinteroCheckoutInstance,
 ): void => {
     try {
@@ -196,6 +198,7 @@ const scrollToIframeTop: SubscriptionHandler = (
  * An event handler that sets language in the iframe.
  */
 const setLanguage: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal LanguageChanged event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -226,6 +229,7 @@ const createPopOutMessageHandler = (
     const popOutChangedLanguageHandler = {
         internalPopOutHandler: true,
         eventTypes: [InternalCheckoutEvents.LanguageChanged],
+        // biome-ignore lint/suspicious/noExplicitAny: internal LanguageChanged event, not part of SessionEvent
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             // Tell the embedded checkout to change language.
             postSetLanguage(
@@ -246,6 +250,7 @@ const createPopOutMessageHandler = (
     const popOutCompletedHandler = {
         internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
+        // biome-ignore lint/suspicious/noExplicitAny: href is not present on all SessionEvent subtypes
         handler: (eventData: any, _checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
                 // Remove open pop out button rendered by SDK
@@ -418,14 +423,20 @@ const handlePopOutButtonClick = async (
 /**
  * Type guard for ShowPopOutButton
  */
-const isShowPopOutButton = (event: any): event is ShowPopOutButton => {
-    return event && event.type === InternalCheckoutEvents.ShowPopOutButton;
+const isShowPopOutButton = (event: unknown): event is ShowPopOutButton => {
+    return (
+        typeof event === "object" &&
+        event !== null &&
+        (event as { type?: unknown }).type ===
+            InternalCheckoutEvents.ShowPopOutButton
+    );
 };
 
 /**
  * Display the SDK rendered pop out button on top of the embedded iframe
  */
 const handleShowButton: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal ShowPopOutButton event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -454,6 +465,7 @@ const handleShowButton: SubscriptionHandler = (
  * Remove the pop out button above the embedded iframe
  */
 const handleRemoveButton: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal HidePopOutButton event, not part of SessionEvent
     event: any,
     _checkout: DinteroCheckoutInstance,
 ): void => {
@@ -675,6 +687,7 @@ export const embed = async (
         endpoint: string,
         handler: SubscriptionHandler,
     ): SubscriptionHandler => {
+        // biome-ignore lint/suspicious/noExplicitAny: requires dynamic key access on event payload
         return (event: any, checkout: DinteroCheckoutInstance) => {
             if (!has_delivered_final_event) {
                 has_delivered_final_event = true;
