@@ -21,7 +21,7 @@ interface SubscriptionOptions {
     handler: SubscriptionHandler;
     eventTypes: (CheckoutEvents | InternalCheckoutEvents)[];
     checkout: DinteroCheckoutInstance;
-    source: Window;
+    source: Window | null;
 }
 
 export type Subscription = {
@@ -34,7 +34,7 @@ export type Subscription = {
 /**
  * Post a message acknowledgement to the checkout iframe.
  */
-const postAck = (source: Window, event: MessageEvent) => {
+const postAck = (source: Window | null, event: MessageEvent) => {
     if (event.data.mid && source) {
         source.postMessage({ ack: event.data.mid }, event.origin || "*");
     }

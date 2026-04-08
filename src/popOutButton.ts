@@ -70,7 +70,9 @@ const configureButton = (
     const { ...directStyles } = styles;
 
     for (const [key, value] of Object.entries(directStyles)) {
-        button.style[key] = value;
+        // TODO: CSSStyleDeclaration lost its string index signature in TS6;
+        // styles from checkout are camelCase property names sent at runtime.
+        (button.style as unknown as Record<string, string>)[key] = value;
     }
 
     // Add hover and focus-visible styles

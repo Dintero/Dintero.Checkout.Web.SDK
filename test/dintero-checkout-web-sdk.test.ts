@@ -73,7 +73,7 @@ describe("dintero.redirect", () => {
 
 describe("dintero.embed", () => {
     let checkout: dintero.DinteroCheckoutInstance | undefined;
-    let container: HTMLDivElement | undefined;
+    let container!: HTMLDivElement;
     let endpoint = "http://localhost:5173";
     const sid = "session-id";
 
@@ -103,7 +103,9 @@ describe("dintero.embed", () => {
 
         checkout = await dintero.embed({ sid, container });
 
-        expect(checkout.iframe.parentElement.parentElement).to.equal(container);
+        expect(checkout.iframe.parentElement?.parentElement).to.equal(
+            container,
+        );
         expect(checkout.iframe).to.be.instanceOf(HTMLIFrameElement);
         expect(checkout.iframe.src).to.equal(iframeSrc);
         expect(getSessionUrl).toBeCalledTimes(1);
@@ -1001,7 +1003,7 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        let checkout: dintero.DinteroCheckoutInstance;
+        let checkout!: dintero.DinteroCheckoutInstance;
         const result: HTMLElement = await new Promise((resolve, reject) => {
             dintero
                 .embed({
@@ -1012,7 +1014,9 @@ describe("dintero.embed", () => {
                     popOut: true,
                 })
                 .catch(reject)
-                .then((instance: dintero.DinteroCheckoutInstance) => {
+                // biome-ignore lint/suspicious/noConfusingVoidType: test
+                .then((instance: dintero.DinteroCheckoutInstance | void) => {
+                    if (!instance) return;
                     checkout = instance;
                     // Wait for button to be created.
                     sleep(50).then(() => {
@@ -1057,7 +1061,7 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        let checkout: dintero.DinteroCheckoutInstance;
+        let checkout!: dintero.DinteroCheckoutInstance;
         const result: HTMLElement = await new Promise((resolve, reject) => {
             dintero
                 .embed({
@@ -1068,7 +1072,9 @@ describe("dintero.embed", () => {
                     popOut: true,
                 })
                 .catch(reject)
-                .then((instance: dintero.DinteroCheckoutInstance) => {
+                // biome-ignore lint/suspicious/noConfusingVoidType: test
+                .then((instance: dintero.DinteroCheckoutInstance | void) => {
+                    if (!instance) return;
                     checkout = instance;
                     // Wait for button to be created.
                     sleep(50).then(() => {
@@ -1085,7 +1091,7 @@ describe("dintero.embed", () => {
         });
 
         expect(result).to.not.be.undefined;
-        expect(checkout.session.id).toBe("session in ShowPopOutButton");
+        expect(checkout.session?.id).toBe("session in ShowPopOutButton");
         result.remove();
         checkout.destroy();
     });
@@ -1118,26 +1124,28 @@ describe("dintero.embed", () => {
         });
 
         const onSessionHandler = vi.fn();
-        const result: HTMLElement = await new Promise((resolve, reject) => {
-            dintero
-                .embed({
-                    sid,
-                    container,
-                    endpoint,
-                    onSession: onSessionHandler,
-                    popOut: true,
-                })
-                .catch(reject)
-                .then(() => {
-                    // Wait for button to be created and removed
-                    sleep(100).then(() => {
-                        const button = document.getElementById(
-                            "dintero-checkout-sdk-launch-pop-out",
-                        );
-                        resolve(button);
+        const result: HTMLElement | null = await new Promise(
+            (resolve, reject) => {
+                dintero
+                    .embed({
+                        sid,
+                        container,
+                        endpoint,
+                        onSession: onSessionHandler,
+                        popOut: true,
+                    })
+                    .catch(reject)
+                    .then(() => {
+                        // Wait for button to be created and removed
+                        sleep(100).then(() => {
+                            const button = document.getElementById(
+                                "dintero-checkout-sdk-launch-pop-out",
+                            );
+                            resolve(button);
+                        });
                     });
-                });
-        });
+            },
+        );
         expect(result).to.be.null;
     });
 
@@ -1671,7 +1679,9 @@ describe("dintero.embed", () => {
                     popOut: true,
                 })
                 .catch(reject)
-                .then((instance: dintero.DinteroCheckoutInstance) => {
+                // biome-ignore lint/suspicious/noConfusingVoidType: test
+                .then((instance: dintero.DinteroCheckoutInstance | void) => {
+                    if (!instance) return;
                     // Wait for button to be created.
                     checkout = instance;
                     sleep(50).then(() => {
@@ -1682,7 +1692,7 @@ describe("dintero.embed", () => {
                             button.click();
                             // Wait for focus button to be created.
                             sleep(50).then(() => {
-                                checkout.setActivePaymentProductType(
+                                checkout?.setActivePaymentProductType(
                                     "generic.creditcard",
                                 );
                                 sleep(50).then(() => {

@@ -41,7 +41,7 @@
         "@vitest/browser": "4.1.2",
         "@vitest/browser-webdriverio": "^4.0.4",
         "semantic-release": "25.0.3",
-        "typescript": "5.9.3",
+        "typescript": "6.0.2",
         "vitest": "4.1.2",
         "webdriverio": "9.27.0"
     },

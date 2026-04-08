@@ -12,7 +12,7 @@ const getBackdropZIndex = () => {
     const highest = Array.from(elements).reduce((acc, element) => {
         try {
             const zIndexStr = document.defaultView
-                .getComputedStyle(element, null)
+                ?.getComputedStyle(element, null)
                 .getPropertyValue("z-index");
             const zIndex = Number.parseInt(zIndexStr || "0", 10);
             if (!Number.isNaN(zIndex) && zIndex > acc) {
@@ -241,11 +241,11 @@ const focusTrap = (e: KeyboardEvent) => {
     const closeButton = document.getElementById(CLOSE_BACKDROP_BUTTON_ID);
     if (e.key === "Tab" || e.code === "Tab") {
         if (document.activeElement === focusButton) {
-            closeButton.focus();
+            closeButton?.focus();
             e.preventDefault();
         } else {
             // Tab
-            focusButton.focus();
+            focusButton?.focus();
             e.preventDefault();
         }
     }

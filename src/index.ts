@@ -70,7 +70,7 @@ export interface DinteroCheckoutInstance {
               eventTypes: InternalCheckoutEvents[];
           }
         | {
-              handler: SubscriptionHandler;
+              handler: SubscriptionHandler | undefined;
               eventTypes: CheckoutEvents[];
           }
     )[];
@@ -149,6 +149,7 @@ interface InternalDinteroEmbedCheckoutOptions
  * An event handler that navigates to the href in the event.
  */
 const followHref: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: href is not present on all SessionEvent subtypes
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -162,6 +163,7 @@ const followHref: SubscriptionHandler = (
  * An event handler that sets height of the iframe.
  */
 const setIframeHeight: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal HeightChanged event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -178,7 +180,7 @@ const setIframeHeight: SubscriptionHandler = (
  * is navigated to another page.
  */
 const scrollToIframeTop: SubscriptionHandler = (
-    _event: any,
+    _event: SessionEvent,
     checkout: DinteroCheckoutInstance,
 ): void => {
     try {
@@ -196,6 +198,7 @@ const scrollToIframeTop: SubscriptionHandler = (
  * An event handler that sets language in the iframe.
  */
 const setLanguage: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal LanguageChanged event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -226,6 +229,7 @@ const createPopOutMessageHandler = (
     const popOutChangedLanguageHandler = {
         internalPopOutHandler: true,
         eventTypes: [InternalCheckoutEvents.LanguageChanged],
+        // biome-ignore lint/suspicious/noExplicitAny: internal LanguageChanged event, not part of SessionEvent
         handler: (eventData: any, checkout: DinteroCheckoutInstance) => {
             // Tell the embedded checkout to change language.
             postSetLanguage(
@@ -246,6 +250,7 @@ const createPopOutMessageHandler = (
     const popOutCompletedHandler = {
         internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
+        // biome-ignore lint/suspicious/noExplicitAny: href is not present on all SessionEvent subtypes
         handler: (eventData: any, _checkout: DinteroCheckoutInstance) => {
             if (eventData.href) {
                 // Remove open pop out button rendered by SDK
@@ -287,8 +292,9 @@ const createPopOutMessageHandler = (
                     handlerObject.handler
                 ) {
                     // Invoking the handler function if the event type matches the handler.
+                    const { handler } = handlerObject;
                     safelyInvoke(() => {
-                        handlerObject.handler(event.data, checkout);
+                        handler(event.data, checkout);
                     });
                 }
             }
@@ -310,9 +316,9 @@ const showPopOut = async (
     event: ShowPopOutButton,
     checkout: DinteroCheckoutInstance,
 ) => {
-    const { close, focus, popOutWindow } = await popOutModule.openPopOut({
+    const openPopOutResult = await popOutModule.openPopOut({
         sid: checkout.options.sid,
-        endpoint: checkout.options.endpoint,
+        endpoint: checkout.options.endpoint ?? "https://checkout.dintero.com",
         shouldCallValidateSession: Boolean(checkout.options.onValidateSession),
         shouldCallAddressCallback: false, // handled by embedded checkout not the pop out window
         language: event.language,
@@ -325,6 +331,7 @@ const showPopOut = async (
             checkout.popOutWindow = undefined;
         },
     });
+    const { close, focus, popOutWindow } = openPopOutResult;
     if (popOutWindow) {
         postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
         // Add pop out window to checkout instance
@@ -354,7 +361,8 @@ const createPopOutValidationCallback = (
             // Redirect user to session in pop out window
             checkout.popOutWindow.location.href = url.getPopOutUrl({
                 sid: checkout.options.sid,
-                endpoint: checkout.options.endpoint,
+                endpoint:
+                    checkout.options.endpoint ?? "https://checkout.dintero.com",
                 shouldCallValidateSession: false,
                 shouldCallAddressCallback: false,
                 language: event.language,
@@ -394,7 +402,9 @@ const handlePopOutButtonClick = async (
             checkout.options.onValidateSession(
                 {
                     type: CheckoutEvents.ValidateSession,
-                    session: checkout.session,
+                    // TODO: session may be undefined before SessionLoaded fires;
+                    // ValidateSession.session is typed as Session (non-optional).
+                    session: checkout.session as Session,
                     callback,
                 },
                 checkout,
@@ -413,14 +423,20 @@ const handlePopOutButtonClick = async (
 /**
  * Type guard for ShowPopOutButton
  */
-const isShowPopOutButton = (event: any): event is ShowPopOutButton => {
-    return event && event.type === InternalCheckoutEvents.ShowPopOutButton;
+const isShowPopOutButton = (event: unknown): event is ShowPopOutButton => {
+    return (
+        typeof event === "object" &&
+        event !== null &&
+        (event as { type?: unknown }).type ===
+            InternalCheckoutEvents.ShowPopOutButton
+    );
 };
 
 /**
  * Display the SDK rendered pop out button on top of the embedded iframe
  */
 const handleShowButton: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal ShowPopOutButton event, not part of SessionEvent
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
@@ -449,6 +465,7 @@ const handleShowButton: SubscriptionHandler = (
  * Remove the pop out button above the embedded iframe
  */
 const handleRemoveButton: SubscriptionHandler = (
+    // biome-ignore lint/suspicious/noExplicitAny: internal HidePopOutButton event, not part of SessionEvent
     event: any,
     _checkout: DinteroCheckoutInstance,
 ): void => {
@@ -486,7 +503,7 @@ export const embed = async (
     // Create inner container to offset any styling on the container.
     const innerContainer = document.createElement("div");
     innerContainer.style.position = "relative";
-    innerContainer.style["box-sizing"] = "border-box";
+    innerContainer.style.boxSizing = "border-box";
 
     const internalOptions = {
         endpoint: "https://checkout.dintero.com",
@@ -541,7 +558,9 @@ export const embed = async (
      * Function that removes the iframe, pop out and all event listeners.
      */
     const destroy = () => {
-        cleanUpPopOut(checkout);
+        if (checkout) {
+            cleanUpPopOut(checkout);
+        }
         if (iframe) {
             if (internalOptions.popOut) {
                 // Try to remove backdrop if it exists
@@ -573,6 +592,7 @@ export const embed = async (
                 "Unable to create action promise: checkout is undefined",
             );
         }
+        const checkoutInstance = checkout;
         return new Promise<SessionEvent>((resolve, reject) => {
             const eventSubscriptions: Subscription[] = [];
             eventSubscriptions.push(
@@ -586,8 +606,8 @@ export const embed = async (
                         resolve(sessionEvent);
                     },
                     eventTypes: [resolveEvent],
-                    checkout,
-                    source: checkout.iframe.contentWindow,
+                    checkout: checkoutInstance,
+                    source: checkoutInstance.iframe.contentWindow,
                 }),
             );
             eventSubscriptions.push(
@@ -601,8 +621,8 @@ export const embed = async (
                         reject(`Received unexpected event: ${rejectEvent}`);
                     },
                     eventTypes: [rejectEvent],
-                    checkout,
-                    source: checkout.iframe.contentWindow,
+                    checkout: checkoutInstance,
+                    source: checkoutInstance.iframe.contentWindow,
                 }),
             );
             action();
@@ -667,6 +687,7 @@ export const embed = async (
         endpoint: string,
         handler: SubscriptionHandler,
     ): SubscriptionHandler => {
+        // biome-ignore lint/suspicious/noExplicitAny: requires dynamic key access on event payload
         return (event: any, checkout: DinteroCheckoutInstance) => {
             if (!has_delivered_final_event) {
                 has_delivered_final_event = true;
@@ -797,21 +818,30 @@ export const embed = async (
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentOnHold],
-            handler: handleWithResult(sid, endpoint, onPayment || followHref),
+            // TODO: user callbacks have narrower event param types than SubscriptionHandler;
+            // casts are safe because handleWithResult only invokes them with the matching event type.
+            handler: handleWithResult(
+                sid,
+                endpoint,
+                (onPayment as SubscriptionHandler | undefined) ?? followHref,
+            ),
         },
         {
             eventTypes: [CheckoutEvents.SessionPaymentAuthorized],
             handler: handleWithResult(
                 sid,
                 endpoint,
-                onPaymentAuthorized || onPayment || followHref,
+                (onPaymentAuthorized as SubscriptionHandler | undefined) ??
+                    (onPayment as SubscriptionHandler | undefined) ??
+                    followHref,
             ),
         },
         {
             handler: handleWithResult(
                 sid,
                 endpoint,
-                onSessionCancel || followHref,
+                (onSessionCancel as SubscriptionHandler | undefined) ??
+                    followHref,
             ),
             eventTypes: [CheckoutEvents.SessionCancel],
         },
@@ -819,7 +849,8 @@ export const embed = async (
             handler: handleWithResult(
                 sid,
                 endpoint,
-                onPaymentError || followHref,
+                (onPaymentError as SubscriptionHandler | undefined) ??
+                    followHref,
             ),
             eventTypes: [CheckoutEvents.SessionPaymentError],
         },
@@ -864,7 +895,7 @@ export const embed = async (
     checkout = {
         destroy,
         iframe,
-        language,
+        language: language ?? "",
         lockSession,
         refreshSession,
         setActivePaymentProductType,
@@ -875,6 +906,7 @@ export const embed = async (
         session: undefined,
         popOutWindow: undefined,
     };
+    const checkoutInstance = checkout;
 
     for (const { handler, eventTypes } of handlers) {
         if (handler) {
@@ -884,8 +916,8 @@ export const embed = async (
                     endpoint,
                     handler,
                     eventTypes,
-                    checkout,
-                    source: checkout.iframe.contentWindow,
+                    checkout: checkoutInstance,
+                    source: checkoutInstance.iframe.contentWindow,
                 }),
             );
         }
@@ -894,7 +926,7 @@ export const embed = async (
     // Add iframe to DOM
     await initiate();
     // Return object with function to destroy the checkout.
-    return checkout;
+    return checkoutInstance;
 };
 
 /**

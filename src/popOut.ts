@@ -36,7 +36,8 @@ const createPopOutWindow = (
             };
             window.addEventListener("message", handleAppLoaded);
             // Open pop out
-            popOut = window.open(url, "dintero-checkout", features);
+            popOut =
+                window.open(url, "dintero-checkout", features) ?? undefined;
             // Check that pop out was opened
             if (!popOut) {
                 console.log("createPopOutWindow no popOut");
@@ -68,7 +69,7 @@ const openPopOut = async (options: PopOutOptions) => {
 
     if (popOutWindow && !popOutWindow.closed) {
         // Skip if already open.
-        return;
+        return { close: () => {}, focus: () => {}, popOutWindow: undefined };
     }
 
     // Open popup window
@@ -117,7 +118,9 @@ const openPopOut = async (options: PopOutOptions) => {
     intervalId = window.setInterval(checkIfPopupClosed, 200);
 
     // Set up pub/sub of messages from pop out to SDK
-    unsubscribe = options.onOpen(popOutWindow);
+    if (popOutWindow) {
+        unsubscribe = options.onOpen(popOutWindow);
+    }
 
     return {
         close: closePopOut,
@@ -155,7 +158,7 @@ const postPopOutSessionRefresh = (
 const postPopOutActivePaymentProductType = (
     popOutWindow: undefined | Window,
     sid: string,
-    paymentProductType: string,
+    paymentProductType?: string,
 ) => {
     try {
         if (popOutWindow) {
