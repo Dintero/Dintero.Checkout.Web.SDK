@@ -1307,14 +1307,14 @@
     convert-source-map "^2.0.0"
     tinyrainbow "^3.1.0"
 
-"@wdio/config@9.27.0":
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-9.27.0.tgz#5b33def1a21346872165285a0df11410b6f05c78"
-  integrity sha512-9y8z7ugIbU6ycKrA2SqCpKh1/hobut2rDq9CLt/BNVzSlebBBVOTMiAt1XroZzcPnA7/ZqpbkpOsbpPUaAQuNQ==
+"@wdio/config@9.27.1":
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-9.27.1.tgz#dc0aa97e62fcf3f78d0985326b7e2aacc87d9e19"
+  integrity sha512-QVfSCqcpMfVum9KlpxgjaLlSLXkc53UQ2CPJU+IUVBp8LkbSyeX972HQS8V9Hnn6vSPE1dYScItg7wblnJ8RQg==
   dependencies:
     "@wdio/logger" "9.18.0"
-    "@wdio/types" "9.27.0"
-    "@wdio/utils" "9.27.0"
+    "@wdio/types" "9.27.1"
+    "@wdio/utils" "9.27.1"
     deepmerge-ts "^7.0.3"
     glob "^10.2.2"
     import-meta-resolve "^4.0.0"
@@ -1331,10 +1331,10 @@
     safe-regex2 "^5.0.0"
     strip-ansi "^7.1.0"
 
-"@wdio/protocols@9.27.0":
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-9.27.0.tgz#c7c6a39093bfe5e185254c27938580e28a4ec224"
-  integrity sha512-rIk69BsY1+6uU2PEN5FiRpI6K7HJ86YHzZRFBe4iRzKXQgGNk1zWzbdVJIuNFoOWsnmYUkK42KSSOT4Le6EmiQ==
+"@wdio/protocols@9.27.1":
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-9.27.1.tgz#78ea5abc4e2c75c2893714acd84dacc1902f51cc"
+  integrity sha512-Ril46AmySoiYX9nuKqFr3SNJqquU3VmF9FzSndQlDib0G3oA4pYx9wcBXvdvkFxRjjmFwQDzmvztKrssAHymgw==
 
 "@wdio/repl@9.16.2":
   version "9.16.2"
@@ -1343,21 +1343,21 @@
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/types@9.27.0":
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/types/-/types-9.27.0.tgz#9bc5efc962c193ea388aa5afb4971a667d527c56"
-  integrity sha512-DQJ+OdRBqUBcQ30DN2Z651hEVh3OoxnlDUSRqlWy9An2AY6v9rYWTj825B6zsj5pLLEToYO1tfwWq0ab183pXg==
+"@wdio/types@9.27.1":
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/types/-/types-9.27.1.tgz#099ac76e58bff86ce58230ca8269898d2361479a"
+  integrity sha512-EHBNCvLmvpYerln4mb/OBxzKtnavL2wdenjhwuYjzkZMOWHgm/uLXH6sLThM0y6DIbCU72Asth16fo1eDcsofA==
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/utils@9.27.0":
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-9.27.0.tgz#72262af74127d138076a6ea2c97038483dc83e7d"
-  integrity sha512-fUasd5OKJTy2seJfWnYZ9xlxTtY0p/Kyeuh7Tbb8kcofBqmBi2fTvM3sfZlo1tGQX9yCh+IS2N7hlfyFMmuZ+w==
+"@wdio/utils@9.27.1":
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-9.27.1.tgz#4a03bb0fc4825cd684ad693a883f0e744806f2a4"
+  integrity sha512-s2w1tFrvmpdkZ33LYsIw4ONRdWIIm4MxkyIuibbcG1ILV5fFMS9rU59csHuWIM0KhJoEoLU+fzE3ze9O7TpWhw==
   dependencies:
     "@puppeteer/browsers" "^2.2.0"
     "@wdio/logger" "9.18.0"
-    "@wdio/types" "9.27.0"
+    "@wdio/types" "9.27.1"
     decamelize "^6.0.0"
     deepmerge-ts "^7.0.3"
     edgedriver "^6.1.2"
@@ -5520,36 +5520,36 @@ web-worker@^1.5.0:
   resolved "https://registry.yarnpkg.com/web-worker/-/web-worker-1.5.0.tgz#71b2b0fbcc4293e8f0aa4f6b8a3ffebff733dcc5"
   integrity sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==
 
-webdriver@9.27.0:
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-9.27.0.tgz#3e31ca6c1164a8a272464cd1f1a1d70ddbaea474"
-  integrity sha512-w07ThZND48SIr0b4S7eFougYUyclmoUwdmju8yXvEJiXYjDjeYUpl8wZrYPEYRBylxpSx+sBHfEUBrPQkcTTRQ==
+webdriver@9.27.1:
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-9.27.1.tgz#eac72e76c0c800975280a4b76ae37decaa791a20"
+  integrity sha512-vr6h+RNQ75O2cofgVrdupGxtKjPEBaBYx/lHCHe0giJfAK01oL0U/yrOksJi7kmpev/daN93ldFPhlIlmWtv8Q==
   dependencies:
     "@types/node" "^20.1.0"
     "@types/ws" "^8.5.3"
-    "@wdio/config" "9.27.0"
+    "@wdio/config" "9.27.1"
     "@wdio/logger" "9.18.0"
-    "@wdio/protocols" "9.27.0"
-    "@wdio/types" "9.27.0"
-    "@wdio/utils" "9.27.0"
+    "@wdio/protocols" "9.27.1"
+    "@wdio/types" "9.27.1"
+    "@wdio/utils" "9.27.1"
     deepmerge-ts "^7.0.3"
     https-proxy-agent "^7.0.6"
     undici "^6.21.3"
     ws "^8.8.0"
 
-webdriverio@9.27.0:
-  version "9.27.0"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-9.27.0.tgz#14404f95f4a9e7d7b67854191b9faaf985968b39"
-  integrity sha512-Y4FbMf4bKBXpPB0lYpglzQ2GfDDe6uojmMZl85uPyrDx18NW7mqN84ZawGoIg/FRvcLaVhcOzc98WOPo725Rag==
+webdriverio@9.27.1:
+  version "9.27.1"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-9.27.1.tgz#46878e9d999064190d47eb73cefd554ff9492be1"
+  integrity sha512-iPaIU/DluYY7zfLiwXDdoLU/6ZW8eup4PNwQikrCzTfvH/ITllRhFUe6NRDTEEePSxxRTeXAn9nehCs98xWGVA==
   dependencies:
     "@types/node" "^20.11.30"
     "@types/sinonjs__fake-timers" "^8.1.5"
-    "@wdio/config" "9.27.0"
+    "@wdio/config" "9.27.1"
     "@wdio/logger" "9.18.0"
-    "@wdio/protocols" "9.27.0"
+    "@wdio/protocols" "9.27.1"
     "@wdio/repl" "9.16.2"
-    "@wdio/types" "9.27.0"
-    "@wdio/utils" "9.27.0"
+    "@wdio/types" "9.27.1"
+    "@wdio/utils" "9.27.1"
     archiver "^7.0.1"
     aria-query "^5.3.0"
     cheerio "^1.0.0-rc.12"
@@ -5566,7 +5566,7 @@ webdriverio@9.27.0:
     rgb2hex "0.2.5"
     serialize-error "^12.0.0"
     urlpattern-polyfill "^10.0.0"
-    webdriver "9.27.0"
+    webdriver "9.27.1"
 
 whatwg-encoding@^3.1.1:
   version "3.1.1"
