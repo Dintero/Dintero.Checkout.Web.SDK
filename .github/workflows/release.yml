@@ -32,8 +32,18 @@ jobs:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org/"
           scope: "@dintero"
-
+      - name: Install pinned Chrome (workaround for actions/runner-images#14169)
+        # see https://github.com/actions/runner-images/issues/14169
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: '148.0.7778.167'
+          install-dependencies: true
+          install-chromedriver: true
       - name: Install dependencies, test and lint
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROMEWEBDRIVER: ${{ steps.setup-chrome.outputs.chromedriver-path }}
         run: |
           yarn install --immutable
           yarn run lint

@@ -8,7 +8,12 @@ export default defineConfig({
                 capabilities: {
                     browserName: "chrome",
                     "goog:chromeOptions": {
-                        args: ["--no-sandbox", "--disable-dev-shm-usage"],
+                        binary: process.env.CHROME_BIN,
+                        args: [
+                            "--headless=new",
+                            "--no-sandbox",
+                            "--disable-dev-shm-usage",
+                        ],
                     },
                 },
             }),
