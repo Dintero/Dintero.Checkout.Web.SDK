@@ -31,7 +31,7 @@ jobs:
       - name: yarn install, build, test and lint
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
-          CHROMEWEBDRIVER: ${{ steps.setup-chrome.outputs.chromedriver-path }}
+          CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
         run: |
           yarn install --immutable
           yarn run lint
