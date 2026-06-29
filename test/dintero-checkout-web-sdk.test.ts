@@ -1541,6 +1541,7 @@ describe("dintero.embed", () => {
         expect(popOutModule.postPopOutSessionLock).toBeCalledWith(
             popOutWindow,
             sid,
+            new URL(endpoint).origin,
         );
     });
 
@@ -1624,6 +1625,7 @@ describe("dintero.embed", () => {
         expect(popOutModule.postPopOutSessionRefresh).toBeCalledWith(
             popOutWindow,
             sid,
+            new URL(endpoint).origin,
         );
     });
 
@@ -1709,6 +1711,7 @@ describe("dintero.embed", () => {
         expect(popOutModule.postPopOutActivePaymentProductType).toBeCalledWith(
             popOutWindow,
             sid,
+            new URL(endpoint).origin,
             "generic.creditcard",
         );
     });

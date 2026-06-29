@@ -34,18 +34,29 @@ export type Subscription = {
 /**
  * Post a message acknowledgement to the checkout iframe.
  */
-const postAck = (source: Window | null, event: MessageEvent) => {
+const postAck = (
+    source: Window | null,
+    event: MessageEvent,
+    targetOrigin: string,
+) => {
     if (event.data.mid && source) {
-        source.postMessage({ ack: event.data.mid }, event.origin || "*");
+        source.postMessage({ ack: event.data.mid }, targetOrigin);
     }
 };
 
 /**
  * Post a SessionLock-event to the checkout iframe.
  */
-export const postSessionLock = (iframe: HTMLIFrameElement, sid: string) => {
+export const postSessionLock = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    targetOrigin: string,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "LockSession", sid }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "LockSession", sid },
+            targetOrigin,
+        );
     }
 };
 
@@ -56,11 +67,12 @@ export const postValidationResult = (
     iframe: HTMLIFrameElement,
     sid: string,
     result: SessionValidationCallback,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "ValidationResult", sid, ...result },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -72,11 +84,12 @@ export const postAddressCallbackResult = (
     iframe: HTMLIFrameElement,
     sid: string,
     result: AddressCallbackResult,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "AddressCallbackResult", sid, ...result },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -84,9 +97,16 @@ export const postAddressCallbackResult = (
 /**
  * Post RefreshSession-event to the checkout iframe.
  */
-export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
+export const postSessionRefresh = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    targetOrigin: string,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "RefreshSession", sid }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "RefreshSession", sid },
+            targetOrigin,
+        );
     }
 };
 
@@ -96,6 +116,7 @@ export const postSessionRefresh = (iframe: HTMLIFrameElement, sid: string) => {
 export const postActivePaymentProductType = (
     iframe: HTMLIFrameElement,
     sid: string,
+    targetOrigin: string,
     paymentProductType?: string,
 ) => {
     if (iframe.contentWindow) {
@@ -105,7 +126,7 @@ export const postActivePaymentProductType = (
                 sid,
                 payment_product_type: paymentProductType,
             },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -116,11 +137,12 @@ export const postActivePaymentProductType = (
 export const postValidatePopOutEvent = (
     iframe: HTMLIFrameElement,
     sid: string,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "ValidatingPopOut", sid },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -131,11 +153,12 @@ export const postValidatePopOutEvent = (
 export const postOpenPopOutFailedEvent = (
     iframe: HTMLIFrameElement,
     sid: string,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "OpenPopOutFailed", sid },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -143,9 +166,16 @@ export const postOpenPopOutFailedEvent = (
 /**
  * Post OpenedPopOut-event to the checkout iframe.
  */
-export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
+export const postOpenPopOutEvent = (
+    iframe: HTMLIFrameElement,
+    sid: string,
+    targetOrigin: string,
+) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "OpenedPopOut", sid }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "OpenedPopOut", sid },
+            targetOrigin,
+        );
     }
 };
 
@@ -155,9 +185,13 @@ export const postOpenPopOutEvent = (iframe: HTMLIFrameElement, sid: string) => {
 export const postClosePopOutEvent = (
     iframe: HTMLIFrameElement,
     sid: string,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "ClosedPopOut", sid }, "*");
+        iframe.contentWindow.postMessage(
+            { type: "ClosedPopOut", sid },
+            targetOrigin,
+        );
     }
 };
 
@@ -168,11 +202,12 @@ export const postSetLanguage = (
     iframe: HTMLIFrameElement,
     sid: string,
     language: string,
+    targetOrigin: string,
 ) => {
     if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
             { type: "SetLanguage", sid, language },
-            "*",
+            targetOrigin,
         );
     }
 };
@@ -200,7 +235,7 @@ export const subscribe = (options: SubscriptionOptions): Subscription => {
             correctSid &&
             correctMessageType
         ) {
-            postAck(checkout.iframe.contentWindow, event);
+            postAck(checkout.iframe.contentWindow, event, endpointUrl.origin);
             handler(event.data, checkout);
         }
     };
