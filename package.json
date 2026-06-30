@@ -38,12 +38,12 @@
         "@preconstruct/cli": "2.8.13",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "10.0.1",
-        "@vitest/browser": "4.1.8",
+        "@vitest/browser": "4.1.9",
         "@vitest/browser-webdriverio": "^4.0.4",
         "semantic-release": "25.0.3",
         "typescript": "6.0.3",
-        "vitest": "4.1.7",
-        "webdriverio": "9.27.2"
+        "vitest": "4.1.9",
+        "webdriverio": "9.29.0"
     },
     "dependencies": {
         "native-promise-only": "0.8.1"
