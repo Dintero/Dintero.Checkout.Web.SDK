@@ -132,10 +132,14 @@ const openPopOut = async (options: PopOutOptions) => {
 const postPopOutSessionLock = (
     popOutWindow: undefined | Window,
     sid: string,
+    targetOrigin: string,
 ) => {
     try {
         if (popOutWindow) {
-            popOutWindow.postMessage({ type: "LockSession", sid }, "*");
+            popOutWindow.postMessage(
+                { type: "LockSession", sid },
+                targetOrigin,
+            );
         }
     } catch (e) {
         console.error(e);
@@ -145,10 +149,14 @@ const postPopOutSessionLock = (
 const postPopOutSessionRefresh = (
     popOutWindow: undefined | Window,
     sid: string,
+    targetOrigin: string,
 ) => {
     try {
         if (popOutWindow) {
-            popOutWindow.postMessage({ type: "RefreshSession", sid }, "*");
+            popOutWindow.postMessage(
+                { type: "RefreshSession", sid },
+                targetOrigin,
+            );
         }
     } catch (e) {
         console.error(e);
@@ -158,6 +166,7 @@ const postPopOutSessionRefresh = (
 const postPopOutActivePaymentProductType = (
     popOutWindow: undefined | Window,
     sid: string,
+    targetOrigin: string,
     paymentProductType?: string,
 ) => {
     try {
@@ -168,7 +177,7 @@ const postPopOutActivePaymentProductType = (
                     sid,
                     payment_product_type: paymentProductType,
                 },
-                "*",
+                targetOrigin,
             );
         }
     } catch (e) {

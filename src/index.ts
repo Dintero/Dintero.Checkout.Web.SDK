@@ -236,6 +236,7 @@ const createPopOutMessageHandler = (
                 checkout.iframe,
                 checkout.options.sid,
                 eventData.language,
+                url.getTargetOrigin(checkout.options.endpoint),
             );
         },
     };
@@ -326,20 +327,32 @@ const showPopOut = async (
             createPopOutMessageHandler(popOutWindow, checkout),
         onClose: () => {
             removeBackdrop();
-            postClosePopOutEvent(checkout.iframe, checkout.options.sid);
+            postClosePopOutEvent(
+                checkout.iframe,
+                checkout.options.sid,
+                url.getTargetOrigin(checkout.options.endpoint),
+            );
             setPopOutButtonDisabled(false);
             checkout.popOutWindow = undefined;
         },
     });
     const { close, focus, popOutWindow } = openPopOutResult;
     if (popOutWindow) {
-        postOpenPopOutEvent(checkout.iframe, checkout.options.sid);
+        postOpenPopOutEvent(
+            checkout.iframe,
+            checkout.options.sid,
+            url.getTargetOrigin(checkout.options.endpoint),
+        );
         // Add pop out window to checkout instance
         checkout.popOutWindow = popOutWindow;
         createBackdrop({ focus, close, event });
         return true;
     } else {
-        postOpenPopOutFailedEvent(checkout.iframe, checkout.options.sid);
+        postOpenPopOutFailedEvent(
+            checkout.iframe,
+            checkout.options.sid,
+            url.getTargetOrigin(checkout.options.endpoint),
+        );
         return false;
     }
 };
@@ -356,7 +369,12 @@ const createPopOutValidationCallback = (
     return (result: SessionValidationCallback) => {
         // Tell the embedded iframe about the validation result so it can show an error message if
         // the validation failed.
-        postValidationResult(checkout.iframe, checkout.options.sid, result);
+        postValidationResult(
+            checkout.iframe,
+            checkout.options.sid,
+            result,
+            url.getTargetOrigin(checkout.options.endpoint),
+        );
         if (result.success && checkout.popOutWindow) {
             // Redirect user to session in pop out window
             checkout.popOutWindow.location.href = url.getPopOutUrl({
@@ -392,7 +410,11 @@ const handlePopOutButtonClick = async (
         // Let the host application validate the payment session before opening checkout.
 
         // Tell the embedded iframe that we are validating the session
-        postValidatePopOutEvent(checkout.iframe, checkout.options.sid);
+        postValidatePopOutEvent(
+            checkout.iframe,
+            checkout.options.sid,
+            url.getTargetOrigin(checkout.options.endpoint),
+        );
 
         // Create callback function added to the SDK event and onValidateSession attributes
         const callback = createPopOutValidationCallback(event, checkout);
@@ -412,10 +434,15 @@ const handlePopOutButtonClick = async (
             );
         } catch (e) {
             console.error(e);
-            postValidationResult(checkout.iframe, checkout.options.sid, {
-                success: false,
-                clientValidationError: "Validation runtime error",
-            });
+            postValidationResult(
+                checkout.iframe,
+                checkout.options.sid,
+                {
+                    success: false,
+                    clientValidationError: "Validation runtime error",
+                },
+                url.getTargetOrigin(checkout.options.endpoint),
+            );
         }
     }
 };
@@ -529,6 +556,10 @@ export const embed = async (
         popOut,
     } = internalOptions;
 
+    // Origin of the checkout endpoint, used as the target origin for all
+    // postMessage calls so messages are only ever delivered to the trusted origin.
+    const targetOrigin = url.getTargetOrigin(endpoint);
+
     let checkout: DinteroCheckoutInstance | undefined;
     const subscriptions: Subscription[] = [];
     let has_delivered_final_event = false;
@@ -632,8 +663,12 @@ export const embed = async (
     const lockSession = () => {
         return promisifyAction(
             () => {
-                postSessionLock(iframe, sid);
-                popOutModule.postPopOutSessionLock(checkout?.popOutWindow, sid);
+                postSessionLock(iframe, sid, targetOrigin);
+                popOutModule.postPopOutSessionLock(
+                    checkout?.popOutWindow,
+                    sid,
+                    targetOrigin,
+                );
             },
             CheckoutEvents.SessionLocked,
             CheckoutEvents.SessionLockFailed,
@@ -643,10 +678,11 @@ export const embed = async (
     const refreshSession = () => {
         return promisifyAction(
             () => {
-                postSessionRefresh(iframe, sid);
+                postSessionRefresh(iframe, sid, targetOrigin);
                 popOutModule.postPopOutSessionRefresh(
                     checkout?.popOutWindow,
                     sid,
+                    targetOrigin,
                 );
             },
             CheckoutEvents.SessionUpdated,
@@ -660,20 +696,26 @@ export const embed = async (
             popOutModule.postPopOutActivePaymentProductType(
                 checkout?.popOutWindow,
                 sid,
+                targetOrigin,
                 paymentProductType,
             );
         } else {
-            postActivePaymentProductType(iframe, sid, paymentProductType);
+            postActivePaymentProductType(
+                iframe,
+                sid,
+                targetOrigin,
+                paymentProductType,
+            );
         }
     };
 
     const submitValidationResult = (result: SessionValidationCallback) => {
-        postValidationResult(iframe, sid, result);
+        postValidationResult(iframe, sid, result, targetOrigin);
         // For pop out we do validation when opening the pop out
     };
 
     const submitAddressCallbackResult = (result: AddressCallbackResult) => {
-        postAddressCallbackResult(iframe, sid, result);
+        postAddressCallbackResult(iframe, sid, result, targetOrigin);
         // For pop out we do validation when opening the pop out
     };
 

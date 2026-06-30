@@ -107,6 +107,19 @@ const getPopOutUrl = ({
     return `${padTrailingSlash(endpoint)}?${params.toString()}`;
 };
 
+/**
+ * Get the target origin for postMessage calls derived from the endpoint.
+ * Falls back to the default checkout endpoint when none is configured.
+ */
+const getTargetOrigin = (endpoint?: string): string => {
+    const resolvedEndpoint = endpoint || "https://checkout.dintero.com";
+    try {
+        return new URL(resolvedEndpoint).origin;
+    } catch {
+        throw new Error("Invalid endpoint");
+    }
+};
+
 const getHostname = (): string | undefined => {
     try {
         const { hostname } = window.location;
@@ -132,5 +145,6 @@ const hostnameIsTop = (): boolean => {
 export const url = {
     getPopOutUrl,
     getSessionUrl,
+    getTargetOrigin,
     windowLocationAssign,
 };
