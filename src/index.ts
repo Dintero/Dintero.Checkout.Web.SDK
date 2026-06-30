@@ -76,6 +76,7 @@ export interface DinteroCheckoutInstance {
     )[];
     session: Session | undefined;
     popOutWindow: Window | undefined;
+    paymentCompleted: boolean;
 }
 
 export interface DinteroCheckoutOptions {
@@ -207,6 +208,13 @@ const setLanguage: SubscriptionHandler = (
     }
 };
 
+const paymentCompletedEvents = [
+    CheckoutEvents.SessionCancel,
+    CheckoutEvents.SessionPaymentOnHold,
+    CheckoutEvents.SessionPaymentAuthorized,
+    CheckoutEvents.SessionPaymentError,
+];
+
 /**
  * Wrap function with try catch so an error in a single function won't short circuit other code in the current context.
  */
@@ -242,12 +250,6 @@ const createPopOutMessageHandler = (
     };
 
     // Close pop out, and remove SDK rendered button when payment is completed.
-    const paymentCompletedEvents = [
-        CheckoutEvents.SessionCancel,
-        CheckoutEvents.SessionPaymentOnHold,
-        CheckoutEvents.SessionPaymentAuthorized,
-        CheckoutEvents.SessionPaymentError,
-    ];
     const popOutCompletedHandler = {
         internalPopOutHandler: true,
         eventTypes: paymentCompletedEvents,
@@ -467,6 +469,9 @@ const handleShowButton: SubscriptionHandler = (
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
+    if (checkout.paymentCompleted) {
+        return;
+    }
     if (isShowPopOutButton(event)) {
         if (event.session) {
             // Update checkout instance session
@@ -499,6 +504,18 @@ const handleRemoveButton: SubscriptionHandler = (
     if (event.type === InternalCheckoutEvents.HidePopOutButton) {
         removePopOutButton();
     }
+};
+
+/**
+ * Mark the payment as completed and remove the pop out button. Once completed,
+ * handleShowButton ignores any further ShowPopOutButton messages.
+ */
+const handlePaymentCompleted: SubscriptionHandler = (
+    _event,
+    checkout: DinteroCheckoutInstance,
+): void => {
+    checkout.paymentCompleted = true;
+    removePopOutButton();
 };
 
 const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
@@ -925,6 +942,10 @@ export const embed = async (
             eventTypes: [CheckoutEvents.AddressCallback],
         },
         {
+            handler: handlePaymentCompleted,
+            eventTypes: paymentCompletedEvents,
+        },
+        {
             handler: handleShowButton as SubscriptionHandler,
             eventTypes: [InternalCheckoutEvents.ShowPopOutButton],
         },
@@ -947,6 +968,7 @@ export const embed = async (
         handlers,
         session: undefined,
         popOutWindow: undefined,
+        paymentCompleted: false,
     };
     const checkoutInstance = checkout;
 

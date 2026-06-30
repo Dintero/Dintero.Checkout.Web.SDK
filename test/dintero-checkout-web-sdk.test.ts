@@ -1149,6 +1149,121 @@ describe("dintero.embed", () => {
         expect(result).to.be.null;
     });
 
+    it("Removes button from DOM when payment is completed", async () => {
+        const script = `
+            // Tell the SDK to create the payment button
+            emit({
+                type: "ShowPopOutButton",
+                top: "0",
+                left: "0",
+                right: "0",
+                styles: {},
+                openLabel: "Pay with Dintero",
+                focusLabel: "Open payment window",
+                closeLabel: "Close payment window",
+                descriptionLabel: "Can't see the payment window?",
+                language: "en",
+                disabled: "false"
+            });
+            window.setTimeout(()=>{
+                emit({
+                    type: "SessionPaymentAuthorized",
+                    href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                    transaction_id: "txn-id",
+                    merchant_reference: "test-1",
+                });
+            }, 50);
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const result: HTMLElement | null = await new Promise(
+            (resolve, reject) => {
+                dintero
+                    .embed({
+                        sid,
+                        container,
+                        endpoint,
+                        popOut: true,
+                        // Define a payment handler to avoid the followHref fallback.
+                        onPayment: () => {},
+                    })
+                    .catch(reject)
+                    .then(() => {
+                        // Wait for button to be created and removed.
+                        sleep(100).then(() => {
+                            const button = document.getElementById(
+                                "dintero-checkout-sdk-launch-pop-out",
+                            );
+                            resolve(button);
+                        });
+                    });
+            },
+        );
+        expect(result).to.be.null;
+    });
+
+    it("Ignores ShowPopOutButton messages after payment is completed", async () => {
+        // All three messages are posted synchronously, so they are queued on the
+        // parent before the payment event navigates the embedded iframe. Without
+        // the "payment completed" guard, the trailing ShowPopOutButton re-adds the
+        // button; with the guard it is ignored.
+        const showButton = `{
+            type: "ShowPopOutButton",
+            top: "0",
+            left: "0",
+            right: "0",
+            styles: {},
+            openLabel: "Pay with Dintero",
+            focusLabel: "Open payment window",
+            closeLabel: "Close payment window",
+            descriptionLabel: "Can't see the payment window?",
+            language: "en",
+            disabled: "false"
+        }`;
+        const script = `
+            emit(${showButton});
+            emit({
+                type: "SessionPaymentAuthorized",
+                href: "http://redirct_url.test.com?merchant_reference=test-1&transaction_id=<transaction_id>",
+                transaction_id: "txn-id",
+                merchant_reference: "test-1",
+            });
+            emit(${showButton});
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const result: HTMLElement | null = await new Promise(
+            (resolve, reject) => {
+                dintero
+                    .embed({
+                        sid,
+                        container,
+                        endpoint,
+                        popOut: true,
+                        // Define a payment handler to avoid the followHref fallback.
+                        onPayment: () => {},
+                    })
+                    .catch(reject)
+                    .then(() => {
+                        // Wait until after the second ShowPopOutButton message.
+                        sleep(200).then(() => {
+                            const button = document.getElementById(
+                                "dintero-checkout-sdk-launch-pop-out",
+                            );
+                            resolve(button);
+                        });
+                    });
+            },
+        );
+        expect(result).to.be.null;
+    });
+
     it("Adds backdrop to DOM and opens modal when open button is clicked", async () => {
         const script = `
             // Tell the SDK to create the payment button
