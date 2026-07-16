@@ -38,11 +38,11 @@
         "@preconstruct/cli": "2.8.13",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "10.0.1",
-        "@vitest/browser": "4.1.9",
+        "@vitest/browser": "4.1.10",
         "@vitest/browser-webdriverio": "^4.0.4",
         "semantic-release": "25.0.5",
         "typescript": "6.0.3",
-        "vitest": "4.1.9",
+        "vitest": "4.1.10",
         "webdriverio": "9.29.1"
     },
     "dependencies": {
