@@ -4,6 +4,9 @@ import * as dintero from "../src";
 import {
     type ActivePaymentProductType,
     type AddressCallback,
+    type AgeVerificationEnded,
+    type AgeVerificationFailed,
+    type AgeVerificationStarted,
     CheckoutEvents,
     type SessionCancel,
     type SessionLoaded,
@@ -429,6 +432,238 @@ describe("dintero.embed", () => {
         expect(onSessionResult.event.type).to.equal(
             CheckoutEvents.SessionLockFailed,
         );
+    });
+
+    it("listens to onSession messages for AgeVerificationStarted", async () => {
+        const script = `
+            emit({
+                type: "AgeVerificationStarted"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onAgeVerificationStartedResult: {
+            event: AgeVerificationStarted;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve) => {
+            dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onAgeVerificationStarted: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onAgeVerificationStartedResult.event.type).to.equal(
+            CheckoutEvents.AgeVerificationStarted,
+        );
+    });
+
+    it("listens to onSession messages for AgeVerificationFailed", async () => {
+        const script = `
+            emit({
+                type: "AgeVerificationFailed",
+                error: "age-requirement-not-met"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onAgeVerificationFailedResult: {
+            event: AgeVerificationFailed;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve) => {
+            dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onAgeVerificationFailed: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onAgeVerificationFailedResult.event.type).to.equal(
+            CheckoutEvents.AgeVerificationFailed,
+        );
+        expect(onAgeVerificationFailedResult.event.error).to.equal(
+            "age-requirement-not-met",
+        );
+    });
+
+    it("listens to onSession messages for AgeVerificationEnded", async () => {
+        const script = `
+            emit({
+                type: "AgeVerificationEnded",
+                result: "passed"
+            });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const onAgeVerificationEndedResult: {
+            event: AgeVerificationEnded;
+            checkout: dintero.DinteroCheckoutInstance;
+        } = await new Promise((resolve) => {
+            dintero.embed({
+                sid,
+                container,
+                endpoint,
+                onAgeVerificationEnded: (event, checkout) => {
+                    resolve({ event, checkout });
+                },
+            });
+        });
+
+        expect(onAgeVerificationEndedResult.event.type).to.equal(
+            CheckoutEvents.AgeVerificationEnded,
+        );
+        expect(onAgeVerificationEndedResult.event.result).to.equal("passed");
+    });
+
+    it("throws when calling lockSession while age verification is pending", async () => {
+        const script = `
+            emit({ type: "AgeVerificationStarted" });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const pendingCheckout =
+            await new Promise<dintero.DinteroCheckoutInstance>((resolve) => {
+                dintero.embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onAgeVerificationStarted: (_event, checkout) => {
+                        resolve(checkout);
+                    },
+                });
+            });
+
+        expect(() => pendingCheckout.lockSession()).toThrow(
+            "Cannot call lockSession while age verification is pending",
+        );
+    });
+
+    it("throws when calling refreshSession while age verification is pending", async () => {
+        const script = `
+            emit({ type: "AgeVerificationStarted" });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const pendingCheckout =
+            await new Promise<dintero.DinteroCheckoutInstance>((resolve) => {
+                dintero.embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onAgeVerificationStarted: (_event, checkout) => {
+                        resolve(checkout);
+                    },
+                });
+            });
+
+        expect(() => pendingCheckout.refreshSession()).toThrow(
+            "Cannot call refreshSession while age verification is pending",
+        );
+    });
+
+    it("throws when calling setActivePaymentProductType while age verification is pending", async () => {
+        const script = `
+            emit({ type: "AgeVerificationStarted" });
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const pendingCheckout =
+            await new Promise<dintero.DinteroCheckoutInstance>((resolve) => {
+                dintero.embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onAgeVerificationStarted: (_event, checkout) => {
+                        resolve(checkout);
+                    },
+                });
+            });
+
+        expect(() =>
+            pendingCheckout.setActivePaymentProductType("dintero_psp.vipps"),
+        ).toThrow(
+            "Cannot call setActivePaymentProductType while age verification is pending",
+        );
+    });
+
+    it("keeps the guard armed after AgeVerificationFailed", async () => {
+        const script = `
+            emit({ type: "AgeVerificationStarted" });
+            window.setTimeout(function(){
+                emit({ type: "AgeVerificationFailed", error: "age-requirement-not-met" });
+            }, 10);
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const failedCheckout =
+            await new Promise<dintero.DinteroCheckoutInstance>((resolve) => {
+                dintero.embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onAgeVerificationFailed: (_event, checkout) => {
+                        resolve(checkout);
+                    },
+                });
+            });
+
+        expect(() => failedCheckout.lockSession()).toThrow(
+            "Cannot call lockSession while age verification is pending",
+        );
+    });
+
+    it("disarms the guard after AgeVerificationEnded", async () => {
+        const script = `
+            emit({ type: "AgeVerificationStarted" });
+            window.setTimeout(function(){
+                emit({ type: "AgeVerificationEnded", result: "passed" });
+            }, 10);
+        `;
+
+        vi.spyOn(url, "getSessionUrl").mockImplementation((options) => {
+            return getHtmlBlobUrl(options, script);
+        });
+
+        const endedCheckout =
+            await new Promise<dintero.DinteroCheckoutInstance>((resolve) => {
+                dintero.embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onAgeVerificationEnded: (_event, checkout) => {
+                        resolve(checkout);
+                    },
+                });
+            });
+
+        expect(() => endedCheckout.lockSession()).not.toThrow();
     });
 
     it("listens to onSession messages for ActivePaymentProductType", async () => {
