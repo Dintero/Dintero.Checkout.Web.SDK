@@ -530,7 +530,7 @@ describe("dintero.embed", () => {
         expect(onAgeVerificationEndedResult.event.result).to.equal("passed");
     });
 
-    it("throws when calling lockSession while age verification is pending", async () => {
+    it("throws when calling lockSession while age verification is in progress", async () => {
         const script = `
             emit({ type: "AgeVerificationStarted" });
         `;
@@ -552,11 +552,11 @@ describe("dintero.embed", () => {
             });
 
         expect(() => pendingCheckout.lockSession()).toThrow(
-            "Cannot call lockSession while age verification is pending",
+            "Cannot call lockSession while age verification is in progress",
         );
     });
 
-    it("throws when calling refreshSession while age verification is pending", async () => {
+    it("throws when calling refreshSession while age verification is in progress", async () => {
         const script = `
             emit({ type: "AgeVerificationStarted" });
         `;
@@ -578,11 +578,11 @@ describe("dintero.embed", () => {
             });
 
         expect(() => pendingCheckout.refreshSession()).toThrow(
-            "Cannot call refreshSession while age verification is pending",
+            "Cannot call refreshSession while age verification is in progress",
         );
     });
 
-    it("throws when calling setActivePaymentProductType while age verification is pending", async () => {
+    it("throws when calling setActivePaymentProductType while age verification is in progress", async () => {
         const script = `
             emit({ type: "AgeVerificationStarted" });
         `;
@@ -606,11 +606,11 @@ describe("dintero.embed", () => {
         expect(() =>
             pendingCheckout.setActivePaymentProductType("dintero_psp.vipps"),
         ).toThrow(
-            "Cannot call setActivePaymentProductType while age verification is pending",
+            "Cannot call setActivePaymentProductType while age verification is in progress",
         );
     });
 
-    it("keeps the guard armed after AgeVerificationFailed", async () => {
+    it("disarms the guard after AgeVerificationFailed", async () => {
         const script = `
             emit({ type: "AgeVerificationStarted" });
             window.setTimeout(function(){
@@ -634,9 +634,7 @@ describe("dintero.embed", () => {
                 });
             });
 
-        expect(() => failedCheckout.lockSession()).toThrow(
-            "Cannot call lockSession while age verification is pending",
-        );
+        expect(() => failedCheckout.lockSession()).not.toThrow();
     });
 
     it("disarms the guard after AgeVerificationEnded", async () => {

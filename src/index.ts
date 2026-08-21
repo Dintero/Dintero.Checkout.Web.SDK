@@ -740,13 +740,13 @@ export const embed = async (
         });
     };
 
-    let ageVerificationPending = false;
+    let ageVerificationInProgress = false;
 
     const lockSession = () => {
         log("checkout.lockSession()");
-        if (ageVerificationPending) {
+        if (ageVerificationInProgress) {
             throw new Error(
-                "Cannot call lockSession while age verification is pending",
+                "Cannot call lockSession while age verification is in progress",
             );
         }
         return promisifyAction(
@@ -770,9 +770,9 @@ export const embed = async (
      */
     const runRefreshSession = (source: string) => {
         log(`${source}()`);
-        if (ageVerificationPending) {
+        if (ageVerificationInProgress) {
             throw new Error(
-                "Cannot call refreshSession while age verification is pending",
+                "Cannot call refreshSession while age verification is in progress",
             );
         }
         return promisifyAction(
@@ -800,9 +800,9 @@ export const embed = async (
             "checkout.setActivePaymentProductType(paymentProductType)",
             paymentProductType,
         );
-                if (ageVerificationPending) {
+        if (ageVerificationInProgress) {
             throw new Error(
-                "Cannot call setActivePaymentProductType while age verification is pending",
+                "Cannot call setActivePaymentProductType while age verification is in progress",
             );
         }
         // Send to either embed or pop out
@@ -971,7 +971,7 @@ export const embed = async (
         event: AgeVerificationStarted,
         checkout: DinteroCheckoutInstance,
     ) => {
-        ageVerificationPending = true;
+        ageVerificationInProgress = true;
         if (onAgeVerificationStarted) {
             onAgeVerificationStarted(event, checkout);
         }
@@ -981,6 +981,7 @@ export const embed = async (
         event: AgeVerificationFailed,
         checkout: DinteroCheckoutInstance,
     ) => {
+        ageVerificationInProgress = false;
         if (onAgeVerificationFailed) {
             onAgeVerificationFailed(event, checkout);
         }
@@ -990,7 +991,7 @@ export const embed = async (
         event: AgeVerificationEnded,
         checkout: DinteroCheckoutInstance,
     ) => {
-        ageVerificationPending = false;
+        ageVerificationInProgress = false;
         if (onAgeVerificationEnded) {
             onAgeVerificationEnded(event, checkout);
         }

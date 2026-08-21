@@ -106,6 +106,15 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
                     clientValidationError: undefined,
                 });
             },
+            onAgeVerificationStarted: function (event, checkout) {
+                console.log("age verification started");
+            },
+            onAgeVerificationFailed: function (event, checkout) {
+                console.log("age verification failed", event.error);
+            },
+            onAgeVerificationEnded: function (event, checkout) {
+                console.log("age verification ended", event.result);
+            },
         })
         .then(function (checkout) {
             console.log("checkout", checkout);
@@ -124,6 +133,9 @@ import {
     SessionPaymentError,
     SessionCancel,
     SessionNotFound,
+    AgeVerificationStarted,
+    AgeVerificationFailed,
+    AgeVerificationEnded,
 } from "@dintero/checkout-web-sdk";
 
 const container = document.getElementById("checkout-container");
@@ -183,6 +195,15 @@ const checkout = await embed({
             success: true,
             clientValidationError: undefined,
         });
+    },
+    onAgeVerificationStarted: (event: AgeVerificationStarted, checkout) => {
+        console.log("age verification started");
+    },
+    onAgeVerificationFailed: (event: AgeVerificationFailed, checkout) => {
+        console.log("age verification failed", event.error);
+    },
+    onAgeVerificationEnded: (event: AgeVerificationEnded, checkout) => {
+        console.log("age verification ended", event.result);
     },
 });
 ```
@@ -386,6 +407,26 @@ Example output for a session that is loaded, locked and refreshed:
 Nothing is logged when `debug` is left out or set to `false`. The wording of the log
 entries is a debugging aid and may change between releases.
 
+### Age verification events
+
+If the payment session has age verification enabled, the checkout will show a gate that the end user must pass through an identity provider (eg. BankID) before the rest of the checkout is available. Use `onAgeVerificationStarted`, `onAgeVerificationFailed` and `onAgeVerificationEnded` to react to this flow from the embedding page.
+
+- `onAgeVerificationStarted` is called when the end user clicks through to start the identity provider flow.
+- `onAgeVerificationFailed` is called when verification could not be completed, eg. because the end user did not meet the minimum age requirement or authorization with the identity provider failed. The `error` field holds a reason, eg. `"age-requirement-not-met"`. Note that the end user cancelling out of the identity provider is not treated as a failure - the gate is simply shown again so they can retry.
+- `onAgeVerificationEnded` is called once verification has passed and the gate is lifted. The `result` field is currently always `"passed"`.
+
+```js
+onAgeVerificationStarted: function (event, checkout) {
+    console.log("age verification started");
+},
+onAgeVerificationFailed: function (event, checkout) {
+    console.log("age verification failed", event.error);
+},
+onAgeVerificationEnded: function (event, checkout) {
+    console.log("age verification ended", event.result);
+},
+```
+
 ## Using the SDK for a redirect checkout
 
 The user is redirected to the Dintero Checkout to complete payment.
@@ -400,7 +441,7 @@ const checkout = redirect({
 
 ## Bugs
 
-Bugs can be reported to https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues
+Bugs can be reported to <https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues>
 
 ## Security
 
