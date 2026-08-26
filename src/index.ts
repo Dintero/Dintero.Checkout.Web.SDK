@@ -22,6 +22,11 @@ import {
     type ValidateSession,
 } from "./checkout";
 import { createIframeAsync } from "./createIframeAsync";
+import {
+    createLogger,
+    type DebugLogger,
+    wrapCallbacksWithDebug,
+} from "./debug";
 import { popOutModule } from "./popOut";
 import {
     createBackdrop,
@@ -58,6 +63,11 @@ export interface DinteroCheckoutInstance {
     destroy: () => void;
     iframe: HTMLIFrameElement;
     language: string;
+    /**
+     * Log SDK activity to the console when the debug option is enabled,
+     * otherwise a function that does nothing.
+     */
+    log: DebugLogger;
     lockSession: () => Promise<SessionEvent>;
     refreshSession: () => Promise<SessionEvent>;
     setActivePaymentProductType: (paymentProductType: string) => void;
@@ -83,6 +93,16 @@ export interface DinteroCheckoutOptions {
     sid: string;
     endpoint?: string;
     language?: string;
+    /**
+     * Log SDK activity to the console: the options the SDK was created with,
+     * the parameters of every event handler that is invoked, the results
+     * submitted back to the SDK and the functions called on the checkout
+     * instance.
+     *
+     * Must not be enabled in production, the log entries include the full
+     * payment session with the customer details of the end user.
+     */
+    debug?: boolean;
 }
 
 export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
@@ -154,6 +174,7 @@ const followHref: SubscriptionHandler = (
     event: any,
     checkout: DinteroCheckoutInstance,
 ): void => {
+    checkout.log("followHref(event)", event);
     cleanUpPopOut(checkout);
     if (event.href) {
         url.windowLocationAssign(event.href);
@@ -191,6 +212,7 @@ const scrollToIframeTop: SubscriptionHandler = (
         });
     } catch (e) {
         // Ignore error silently bug log it to the console.
+        checkout.log("iframe.scrollIntoView() threw", e);
         console.error(e);
     }
 };
@@ -218,10 +240,13 @@ const paymentCompletedEvents = [
 /**
  * Wrap function with try catch so an error in a single function won't short circuit other code in the current context.
  */
-const safelyInvoke = (fn: () => void) => {
+const safelyInvoke = (fn: () => void, log?: DebugLogger, label?: string) => {
     try {
         fn();
     } catch (e) {
+        if (log) {
+            log(`${label ?? "handler"} threw`, e);
+        }
         console.error(e);
     }
 };
@@ -296,9 +321,13 @@ const createPopOutMessageHandler = (
                 ) {
                     // Invoking the handler function if the event type matches the handler.
                     const { handler } = handlerObject;
-                    safelyInvoke(() => {
-                        handler(event.data, checkout);
-                    });
+                    safelyInvoke(
+                        () => {
+                            handler(event.data, checkout);
+                        },
+                        checkout.log,
+                        `pop out handler for ${event.data.type}`,
+                    );
                 }
             }
         }
@@ -369,6 +398,7 @@ const createPopOutValidationCallback = (
     checkout: DinteroCheckoutInstance,
 ) => {
     return (result: SessionValidationCallback) => {
+        checkout.log("onValidateSession callback(result) [pop out]", result);
         // Tell the embedded iframe about the validation result so it can show an error message if
         // the validation failed.
         postValidationResult(
@@ -422,19 +452,27 @@ const handlePopOutButtonClick = async (
         const callback = createPopOutValidationCallback(event, checkout);
 
         // Invoke onValidateSession function defined in checkout options
+        const validateSessionEvent: ValidateSession = {
+            type: CheckoutEvents.ValidateSession,
+            // TODO: session may be undefined before SessionLoaded fires;
+            // ValidateSession.session is typed as Session (non-optional).
+            session: checkout.session as Session,
+            callback,
+        };
+        checkout.log(
+            "options.onValidateSession() [pop out]",
+            validateSessionEvent,
+            checkout,
+            callback,
+        );
         try {
             checkout.options.onValidateSession(
-                {
-                    type: CheckoutEvents.ValidateSession,
-                    // TODO: session may be undefined before SessionLoaded fires;
-                    // ValidateSession.session is typed as Session (non-optional).
-                    session: checkout.session as Session,
-                    callback,
-                },
+                validateSessionEvent,
                 checkout,
                 callback,
             );
         } catch (e) {
+            checkout.log("options.onValidateSession() [pop out] threw", e);
             console.error(e);
             postValidationResult(
                 checkout.iframe,
@@ -528,6 +566,7 @@ const cleanUpPopOut = (checkout: DinteroCheckoutInstance) => {
             // Pop out message handlers will be removed when the pop out window is closed
             // via the interval created by openPopOut.
         } catch (e) {
+            checkout.log("popOutWindow.close() threw", e);
             console.error(e);
         }
     }
@@ -548,6 +587,9 @@ export const embed = async (
     const innerContainer = document.createElement("div");
     innerContainer.style.position = "relative";
     innerContainer.style.boxSizing = "border-box";
+
+    const log = createLogger(options.debug);
+    log("embed(options)", options);
 
     const internalOptions = {
         endpoint: "https://checkout.dintero.com",
@@ -571,7 +613,7 @@ export const embed = async (
         onValidateSession,
         onAddressCallback,
         popOut,
-    } = internalOptions;
+    } = wrapCallbacksWithDebug(internalOptions, options.debug, log);
 
     // Origin of the checkout endpoint, used as the target origin for all
     // postMessage calls so messages are only ever delivered to the trusted origin.
@@ -583,29 +625,28 @@ export const embed = async (
 
     // Create iframe
     container.appendChild(innerContainer);
-    const { iframe, initiate } = createIframeAsync(
-        innerContainer,
-        url.getSessionUrl({
-            sid,
-            endpoint,
-            language,
-            ui: options.ui || "inline",
-            shouldCallValidateSession: onValidateSession !== undefined,
-            shouldCallAddressCallback: onAddressCallback !== undefined,
-            popOut,
-            // biome-ignore lint/suspicious/noPrototypeBuiltins: test
-            ...(options.hasOwnProperty("hideTestMessage") && {
-                hideTestMessage: (
-                    options as unknown as { hideTestMessage: string }
-                ).hideTestMessage,
-            }),
+    const sessionUrl = url.getSessionUrl({
+        sid,
+        endpoint,
+        language,
+        ui: options.ui || "inline",
+        shouldCallValidateSession: onValidateSession !== undefined,
+        shouldCallAddressCallback: onAddressCallback !== undefined,
+        popOut,
+        // biome-ignore lint/suspicious/noPrototypeBuiltins: test
+        ...(options.hasOwnProperty("hideTestMessage") && {
+            hideTestMessage: (options as unknown as { hideTestMessage: string })
+                .hideTestMessage,
         }),
-    );
+    });
+    log("embed session url", sessionUrl);
+    const { iframe, initiate } = createIframeAsync(innerContainer, sessionUrl);
 
     /**
      * Function that removes the iframe, pop out and all event listeners.
      */
     const destroy = () => {
+        log("checkout.destroy()");
         if (checkout) {
             cleanUpPopOut(checkout);
         }
@@ -631,6 +672,7 @@ export const embed = async (
      * reject events.
      */
     const promisifyAction = (
+        label: string,
         action: () => void,
         resolveEvent: CheckoutEvents,
         rejectEvent: CheckoutEvents,
@@ -641,6 +683,7 @@ export const embed = async (
             );
         }
         const checkoutInstance = checkout;
+        const rejectReason = `Received unexpected event: ${rejectEvent}`;
         return new Promise<SessionEvent>((resolve, reject) => {
             const eventSubscriptions: Subscription[] = [];
             eventSubscriptions.push(
@@ -651,6 +694,7 @@ export const embed = async (
                         for (const sub of eventSubscriptions) {
                             sub.unsubscribe();
                         }
+                        log(`${label} resolved`, sessionEvent);
                         resolve(sessionEvent);
                     },
                     eventTypes: [resolveEvent],
@@ -666,7 +710,8 @@ export const embed = async (
                         for (const sub of eventSubscriptions) {
                             sub.unsubscribe();
                         }
-                        reject(`Received unexpected event: ${rejectEvent}`);
+                        log(`${label} rejected`, rejectReason);
+                        reject(rejectReason);
                     },
                     eventTypes: [rejectEvent],
                     checkout: checkoutInstance,
@@ -678,7 +723,9 @@ export const embed = async (
     };
 
     const lockSession = () => {
+        log("checkout.lockSession()");
         return promisifyAction(
+            "checkout.lockSession()",
             () => {
                 postSessionLock(iframe, sid, targetOrigin);
                 popOutModule.postPopOutSessionLock(
@@ -692,8 +739,14 @@ export const embed = async (
         );
     };
 
-    const refreshSession = () => {
+    /**
+     * Refresh the session. The source is the name of the function the host
+     * application used, so the debug log tells them apart.
+     */
+    const runRefreshSession = (source: string) => {
+        log(`${source}()`);
         return promisifyAction(
+            `${source}()`,
             () => {
                 postSessionRefresh(iframe, sid, targetOrigin);
                 popOutModule.postPopOutSessionRefresh(
@@ -707,7 +760,16 @@ export const embed = async (
         );
     };
 
+    const refreshSession = () => runRefreshSession("checkout.refreshSession");
+
+    const sessionLockedCallback = () =>
+        runRefreshSession("onSessionLocked callback");
+
     const setActivePaymentProductType = (paymentProductType?: string) => {
+        log(
+            "checkout.setActivePaymentProductType(paymentProductType)",
+            paymentProductType,
+        );
         // Send to either embed or pop out
         if (options.popOut) {
             popOutModule.postPopOutActivePaymentProductType(
@@ -726,15 +788,46 @@ export const embed = async (
         }
     };
 
-    const submitValidationResult = (result: SessionValidationCallback) => {
+    /**
+     * Submit a validation result. The source is the name of the function the
+     * host application used, so the debug log tells them apart.
+     */
+    const sendValidationResult = (
+        source: string,
+        result: SessionValidationCallback,
+    ) => {
+        log(`${source}(result)`, result);
         postValidationResult(iframe, sid, result, targetOrigin);
         // For pop out we do validation when opening the pop out
     };
 
-    const submitAddressCallbackResult = (result: AddressCallbackResult) => {
+    const submitValidationResult = (result: SessionValidationCallback) =>
+        sendValidationResult("checkout.submitValidationResult", result);
+
+    const validateSessionCallback = (result: SessionValidationCallback) =>
+        sendValidationResult("onValidateSession callback", result);
+
+    /**
+     * Submit an address callback result. The source is the name of the function
+     * the host application used, so the debug log tells them apart.
+     */
+    const sendAddressCallbackResult = (
+        source: string,
+        result: AddressCallbackResult,
+    ) => {
+        log(`${source}(result)`, result);
         postAddressCallbackResult(iframe, sid, result, targetOrigin);
         // For pop out we do validation when opening the pop out
     };
+
+    const submitAddressCallbackResult = (result: AddressCallbackResult) =>
+        sendAddressCallbackResult(
+            "checkout.submitAddressCallbackResult",
+            result,
+        );
+
+    const addressCallbackResultCallback = (result: AddressCallbackResult) =>
+        sendAddressCallbackResult("onAddressCallback callback", result);
 
     /**
      *  Internal result event message handler wrapper, to replace the content of the iframe with a success/or
@@ -789,14 +882,15 @@ export const embed = async (
                 onValidateSession(
                     {
                         ...event,
-                        callback: submitValidationResult,
+                        callback: validateSessionCallback,
                     },
                     checkout,
-                    submitValidationResult,
+                    validateSessionCallback,
                 );
             } catch (e) {
+                log("options.onValidateSession() threw", e);
                 console.error(e);
-                submitValidationResult({
+                sendValidationResult("onValidateSession error fallback", {
                     success: false,
                     clientValidationError: "Validation runtime error",
                 });
@@ -813,14 +907,15 @@ export const embed = async (
                 onAddressCallback(
                     {
                         ...event,
-                        callback: submitAddressCallbackResult,
+                        callback: addressCallbackResultCallback,
                     },
                     checkout,
-                    submitAddressCallbackResult,
+                    addressCallbackResultCallback,
                 );
             } catch (e) {
+                log("options.onAddressCallback() threw", e);
                 console.error(e);
-                submitAddressCallbackResult({
+                sendAddressCallbackResult("onAddressCallback error fallback", {
                     success: false,
                     error: "Address callback runtime error",
                 });
@@ -833,7 +928,7 @@ export const embed = async (
         checkout: DinteroCheckoutInstance,
     ) => {
         if (onSessionLocked) {
-            onSessionLocked(event, checkout, refreshSession);
+            onSessionLocked(event, checkout, sessionLockedCallback);
         }
     };
 
@@ -959,6 +1054,7 @@ export const embed = async (
         destroy,
         iframe,
         language: language ?? "",
+        log,
         lockSession,
         refreshSession,
         setActivePaymentProductType,
@@ -1002,17 +1098,19 @@ export const redirect = (options: DinteroCheckoutOptions) => {
         language,
         endpoint = "https://checkout.dintero.com",
     } = options;
+    const log = createLogger(options.debug);
+    log("redirect(options)", options);
+    const sessionUrl = url.getSessionUrl({
+        sid,
+        endpoint,
+        language,
+        shouldCallValidateSession: false,
+        shouldCallAddressCallback: false,
+        redirect: true,
+    });
+    log("redirect session url", sessionUrl);
     // Redirect the current browser window to the checkout session url.
-    url.windowLocationAssign(
-        url.getSessionUrl({
-            sid,
-            endpoint,
-            language,
-            shouldCallValidateSession: false,
-            shouldCallAddressCallback: false,
-            redirect: true,
-        }),
-    );
+    url.windowLocationAssign(sessionUrl);
 };
 export type {
     ActivePaymentProductType,

@@ -15,6 +15,7 @@ import {
     type SessionValidationCallback,
     type ValidateSession,
 } from "../src/checkout";
+import { DEBUG_LOG_PREFIX } from "../src/debug";
 import { popOutModule } from "../src/popOut";
 import { type SessionUrlOptions, url } from "../src/url";
 
@@ -45,6 +46,22 @@ const getHtmlBlobUrl = (options: SessionUrlOptions, script: string): string => {
     return URL.createObjectURL(blob);
 };
 
+/**
+ * Spy on console.log and read back the entries the SDK logged when the debug
+ * option is enabled. Filtering on the prefix keeps the assertions immune to
+ * unrelated console output from the browser runner.
+ */
+const spyOnDebugLog = () => {
+    const spy = vi.spyOn(console, "log");
+    return {
+        spy,
+        messages: () =>
+            spy.mock.calls
+                .map((call) => String(call[0]))
+                .filter((message) => message.startsWith(DEBUG_LOG_PREFIX)),
+    };
+};
+
 describe("dintero.redirect", () => {
     afterEach(() => {
         vi.restoreAllMocks();
@@ -68,6 +85,35 @@ describe("dintero.redirect", () => {
         expect(url.windowLocationAssign).toBeCalledWith(
             `https://checkout.dintero.com/v1/view/<session_id>?sdk=${pkg.version}&language=no&sdk_hostname=127.0.0.1`,
         );
+    });
+
+    it("logs the options and the session url when debug is enabled", () => {
+        vi.spyOn(url, "windowLocationAssign").mockImplementationOnce(() => {
+            // do nothing
+        });
+        const debug = spyOnDebugLog();
+
+        dintero.redirect({ sid: "<session_id>", debug: true });
+
+        expect(debug.messages()).toEqual([
+            `${DEBUG_LOG_PREFIX} redirect(options)`,
+            `${DEBUG_LOG_PREFIX} redirect session url`,
+        ]);
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} redirect(options)`,
+            { sid: "<session_id>", debug: true },
+        );
+    });
+
+    it("logs nothing when debug is not enabled", () => {
+        vi.spyOn(url, "windowLocationAssign").mockImplementationOnce(() => {
+            // do nothing
+        });
+        const debug = spyOnDebugLog();
+
+        dintero.redirect({ sid: "<session_id>" });
+
+        expect(debug.messages()).toEqual([]);
     });
 });
 
@@ -1835,3 +1881,371 @@ describe("dintero.embed", () => {
 const sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+describe("dintero.embed debug", () => {
+    let checkout: dintero.DinteroCheckoutInstance | undefined;
+    let container!: HTMLDivElement;
+    let endpoint = "http://localhost:5173";
+    const sid = "session-id";
+
+    const mockSessionUrl = (script: string) =>
+        vi
+            .spyOn(url, "getSessionUrl")
+            .mockImplementation((options) => getHtmlBlobUrl(options, script));
+
+    beforeEach(() => {
+        container = document.createElement("p");
+        document.body.appendChild(container);
+        endpoint = document.location.href;
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        checkout?.destroy();
+
+        if (container) {
+            container.remove();
+        }
+    });
+
+    it("logs nothing when debug is not enabled", async () => {
+        mockSessionUrl(`emit({type: "SessionLoaded", session: {}});`);
+        const debug = spyOnDebugLog();
+
+        checkout = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    onSession: (_event, instance) => resolve(instance),
+                })
+                .catch(reject);
+        });
+        checkout?.setActivePaymentProductType("vipps");
+        checkout?.submitValidationResult({ success: true });
+        checkout?.destroy();
+
+        expect(debug.messages()).toEqual([]);
+    });
+
+    it("logs the options and the session url when debug is enabled", async () => {
+        mockSessionUrl(``);
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+
+        expect(debug.messages()).toContain(
+            `${DEBUG_LOG_PREFIX} embed(options)`,
+        );
+        expect(debug.messages()).toContain(
+            `${DEBUG_LOG_PREFIX} embed session url`,
+        );
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} embed(options)`,
+            expect.objectContaining({ sid, debug: true }),
+        );
+    });
+
+    it("logs the parameters of a handler before it is invoked", async () => {
+        mockSessionUrl(`emit({type: "SessionLoaded", session: {id: "T1"}});`);
+        const debug = spyOnDebugLog();
+        let messagesWhenInvoked: string[] = [];
+
+        checkout = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    debug: true,
+                    onSession: (_event, instance) => {
+                        messagesWhenInvoked = debug.messages();
+                        resolve(instance);
+                    },
+                })
+                .catch(reject);
+        });
+
+        expect(messagesWhenInvoked).toContain(
+            `${DEBUG_LOG_PREFIX} options.onSession()`,
+        );
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} options.onSession()`,
+            expect.objectContaining({
+                type: CheckoutEvents.SessionLoaded,
+                session: { id: "T1" },
+            }),
+            expect.anything(),
+        );
+    });
+
+    it("logs handlers that have no internal wrapper", async () => {
+        mockSessionUrl(
+            `emit({type: "ActivePaymentProductType", payment_product_type: "vipps"});`,
+        );
+        const debug = spyOnDebugLog();
+
+        checkout = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    debug: true,
+                    onActivePaymentType: (_event, instance) =>
+                        resolve(instance),
+                })
+                .catch(reject);
+        });
+
+        expect(debug.messages()).toContain(
+            `${DEBUG_LOG_PREFIX} options.onActivePaymentType()`,
+        );
+    });
+
+    it("tells the onValidateSession callback and submitValidationResult apart", async () => {
+        mockSessionUrl(`emit({type: "ValidateSession", session: {}});`);
+        const debug = spyOnDebugLog();
+
+        checkout = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    debug: true,
+                    onValidateSession: (_event, instance, callback) => {
+                        callback({ success: true });
+                        resolve(instance);
+                    },
+                })
+                .catch(reject);
+        });
+        checkout?.submitValidationResult({ success: true });
+
+        const messages = debug.messages();
+        expect(
+            messages.filter(
+                (message) =>
+                    message ===
+                    `${DEBUG_LOG_PREFIX} onValidateSession callback(result)`,
+            ),
+        ).toHaveLength(1);
+        expect(
+            messages.filter(
+                (message) =>
+                    message ===
+                    `${DEBUG_LOG_PREFIX} checkout.submitValidationResult(result)`,
+            ),
+        ).toHaveLength(1);
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} onValidateSession callback(result)`,
+            { success: true },
+        );
+    });
+
+    it("logs lockSession and the event it resolves with", async () => {
+        mockSessionUrl(`
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionLocked",
+                    pay_lock_id: "plid",
+                });
+            }, 10);
+        `);
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+        await checkout.lockSession();
+
+        expect(debug.messages()).toContain(
+            `${DEBUG_LOG_PREFIX} checkout.lockSession()`,
+        );
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} checkout.lockSession() resolved`,
+            expect.objectContaining({ type: CheckoutEvents.SessionLocked }),
+        );
+    });
+
+    it("logs the reason lockSession is rejected with", async () => {
+        mockSessionUrl(`
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionLockFailed",
+                });
+            }, 10);
+        `);
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+        await checkout.lockSession().catch(() => {
+            // the rejection is asserted through the log entry
+        });
+
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} checkout.lockSession() rejected`,
+            "Received unexpected event: SessionLockFailed",
+        );
+    });
+
+    it("labels refreshSession invoked from the onSessionLocked callback", async () => {
+        mockSessionUrl(`
+            window.setTimeout(function(){
+                emit({
+                    type: "SessionLocked",
+                    pay_lock_id: "plid",
+                });
+            }, 10);
+            window.addEventListener("message", function (event) {
+                if (event.data && event.data.type === "RefreshSession") {
+                    emit({type: "SessionUpdated", session: {}});
+                }
+            });
+        `);
+        const debug = spyOnDebugLog();
+
+        checkout = await new Promise((resolve, reject) => {
+            dintero
+                .embed({
+                    sid,
+                    container,
+                    endpoint,
+                    debug: true,
+                    onSessionLocked: (_event, instance, callback) => {
+                        callback();
+                        resolve(instance);
+                    },
+                })
+                .catch(reject);
+        });
+        await sleep(100);
+
+        const messages = debug.messages();
+        expect(messages).toContain(
+            `${DEBUG_LOG_PREFIX} onSessionLocked callback()`,
+        );
+        expect(messages).toContain(
+            `${DEBUG_LOG_PREFIX} onSessionLocked callback() resolved`,
+        );
+        expect(messages).not.toContain(
+            `${DEBUG_LOG_PREFIX} checkout.refreshSession()`,
+        );
+    });
+
+    it("logs the functions invoked on the checkout instance", async () => {
+        mockSessionUrl(``);
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+        checkout.setActivePaymentProductType("vipps");
+        checkout.submitAddressCallbackResult({ success: true });
+        checkout.destroy();
+
+        const messages = debug.messages();
+        expect(messages).toContain(
+            `${DEBUG_LOG_PREFIX} checkout.setActivePaymentProductType(paymentProductType)`,
+        );
+        expect(messages).toContain(
+            `${DEBUG_LOG_PREFIX} checkout.submitAddressCallbackResult(result)`,
+        );
+        expect(messages).toContain(`${DEBUG_LOG_PREFIX} checkout.destroy()`);
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} checkout.setActivePaymentProductType(paymentProductType)`,
+            "vipps",
+        );
+    });
+
+    it("logs errors thrown by a handler and the fallback result", async () => {
+        mockSessionUrl(`emit({type: "AddressCallback", session: {}});`);
+        vi.spyOn(console, "error").mockImplementation(() => {
+            // keep the expected error out of the test output
+        });
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+            onAddressCallback: () => {
+                throw new Error("address callback failed");
+            },
+        });
+        await sleep(50);
+
+        const messages = debug.messages();
+        expect(messages).toContain(
+            `${DEBUG_LOG_PREFIX} options.onAddressCallback() threw`,
+        );
+        expect(debug.spy).toBeCalledWith(
+            `${DEBUG_LOG_PREFIX} onAddressCallback error fallback(result)`,
+            { success: false, error: "Address callback runtime error" },
+        );
+        expect(console.error).toBeCalled();
+    });
+
+    it("logs the fallback navigation when no handler is configured", async () => {
+        mockSessionUrl(
+            `emit({type: "SessionCancel", href: "https://example.com/cancel"});`,
+        );
+        vi.spyOn(url, "windowLocationAssign").mockImplementation(() => {
+            // do not navigate away from the test runner
+        });
+        const debug = spyOnDebugLog();
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+        await sleep(50);
+
+        expect(debug.messages()).toContain(
+            `${DEBUG_LOG_PREFIX} followHref(event)`,
+        );
+        expect(url.windowLocationAssign).toBeCalledWith(
+            "https://example.com/cancel",
+        );
+    });
+
+    it("does not turn handlers that are not set into functions", async () => {
+        const getSessionUrl = mockSessionUrl(``);
+
+        checkout = await dintero.embed({
+            sid,
+            container,
+            endpoint,
+            debug: true,
+        });
+
+        expect(getSessionUrl).toBeCalledWith({
+            endpoint,
+            shouldCallValidateSession: false,
+            shouldCallAddressCallback: false,
+            sid,
+            ui: "inline",
+        });
+    });
+});

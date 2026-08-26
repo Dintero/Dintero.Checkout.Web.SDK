@@ -58,6 +58,7 @@ _The checkout sdk will add a polyfill for promises if the browser does not suppo
             sid: "T11223344.<short-uuid>",
             popOut: false, // optional parameter to enable pop out mode
             language: "no", // optional parameter, an ISO 639-1 two-letter language code
+            debug: false, // optional parameter, log SDK activity to the console, do not use for production
             onSession: function (event, checkout) {
                 console.log("session", event.session);
             },
@@ -132,6 +133,7 @@ const checkout = await embed({
     sid: "T11223344.<short-uuid>",
     popOut: false, // optional parameter to enable pop out mode
     language: "no", // optional parameter, an ISO 639-1 two-letter language code
+    debug: false, // optional parameter, log SDK activity to the console, never in production
     onSession: (event: SessionLoaded | SessionUpdated) => {
         console.log("session", event.session);
     },
@@ -340,6 +342,49 @@ onValidateSession: function(event, checkout, callback) {
      });
 },
 ```
+
+### Debug logging
+
+Set `debug: true` in the options passed to `embed()` or `redirect()` to make the SDK
+log what it is doing to the browser console. Every entry is written with `console.log`
+and prefixed with `[dintero-checkout-web-sdk]`.
+
+> :warning: **Never enable `debug` in production.** The log entries contain the full,
+> unredacted payloads the SDK receives, including the payment session with the name,
+> e-mail, phone number, addresses and order lines of the end user.
+
+The SDK logs:
+
+- the options `embed()` or `redirect()` was called with, and the checkout url it
+  resolved them to
+- the parameters of every `on<Event>` handler, logged right before the handler is
+  invoked
+- the results submitted back to the SDK, both through the `callback` given to
+  `onValidateSession`/`onAddressCallback` and through
+  `checkout.submitValidationResult()`/`checkout.submitAddressCallbackResult()`, which
+  are logged with the name of the function that was used
+- the functions called on the checkout instance: `lockSession()`, `refreshSession()`,
+  `setActivePaymentProductType()`, `submitValidationResult()`,
+  `submitAddressCallbackResult()` and `destroy()`, including the event `lockSession()`
+  and `refreshSession()` resolve with, or the reason they are rejected
+- errors thrown by the handlers in the host application, which the SDK otherwise only
+  reports with `console.error`
+
+Example output for a session that is loaded, locked and refreshed:
+
+```
+[dintero-checkout-web-sdk] embed(options) {sid: "T11223344.<short-uuid>", debug: true, …}
+[dintero-checkout-web-sdk] embed session url https://checkout.dintero.com/v1/view/…
+[dintero-checkout-web-sdk] options.onSession() {type: "SessionLoaded", session: {…}} {…}
+[dintero-checkout-web-sdk] checkout.lockSession()
+[dintero-checkout-web-sdk] checkout.lockSession() resolved {type: "SessionLocked", …}
+[dintero-checkout-web-sdk] options.onSessionLocked() {type: "SessionLocked", …} {…} f
+[dintero-checkout-web-sdk] onSessionLocked callback()
+[dintero-checkout-web-sdk] onSessionLocked callback() resolved {type: "SessionUpdated", …}
+```
+
+Nothing is logged when `debug` is left out or set to `false`. The wording of the log
+entries is a debugging aid and may change between releases.
 
 ## Using the SDK for a redirect checkout
 
