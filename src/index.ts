@@ -1197,6 +1197,9 @@ export const redirect = (options: DinteroCheckoutOptions) => {
 };
 export type {
     ActivePaymentProductType,
+    AgeVerificationEnded,
+    AgeVerificationFailed,
+    AgeVerificationStarted,
     SessionCancel,
     SessionLoaded,
     SessionLocked,
