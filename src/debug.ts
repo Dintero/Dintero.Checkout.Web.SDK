@@ -40,6 +40,9 @@ const callbackNames = [
     "onActivePaymentType",
     "onValidateSession",
     "onAddressCallback",
+    "onAgeVerificationStarted",
+    "onAgeVerificationFailed",
+    "onAgeVerificationEnded",
 ] as const;
 
 /**

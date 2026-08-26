@@ -13,6 +13,9 @@ export enum CheckoutEvents {
     ActivePaymentProductType = "ActivePaymentProductType",
     ValidateSession = "ValidateSession",
     AddressCallback = "AddressCallback",
+    AgeVerificationStarted = "AgeVerificationStarted",
+    AgeVerificationFailed = "AgeVerificationFailed",
+    AgeVerificationEnded = "AgeVerificationEnded",
 }
 export enum InternalCheckoutEvents {
     HeightChanged = "HeightChanged",
@@ -97,6 +100,20 @@ export type ShowPopOutButton = {
 export type SessionLockFailed = {
     type: CheckoutEvents.SessionLockFailed;
 };
+
+export type AgeVerificationStarted = {
+    type: CheckoutEvents.AgeVerificationStarted;
+};
+
+export type AgeVerificationFailed = {
+    type: CheckoutEvents.AgeVerificationFailed;
+    error?: string;
+};
+
+export type AgeVerificationEnded = {
+    type: CheckoutEvents.AgeVerificationEnded;
+    result: "passed";
+};
 export type ActivePaymentProductType = {
     type: CheckoutEvents.ActivePaymentProductType;
     payment_product_type: string | undefined;
@@ -148,4 +165,7 @@ export type SessionEvent =
     | SessionLockFailed
     | ActivePaymentProductType
     | WrappedValidateSession
-    | WrappedAddressCallback;
+    | WrappedAddressCallback
+    | AgeVerificationStarted
+    | AgeVerificationFailed
+    | AgeVerificationEnded;

@@ -5,6 +5,9 @@ import {
     type ActivePaymentProductType,
     type AddressCallback,
     type AddressCallbackResult,
+    type AgeVerificationEnded,
+    type AgeVerificationFailed,
+    type AgeVerificationStarted,
     CheckoutEvents,
     InternalCheckoutEvents,
     type SessionCancel,
@@ -158,6 +161,18 @@ export interface DinteroEmbedCheckoutOptions extends DinteroCheckoutOptions {
         event: AddressCallback,
         checkout: DinteroCheckoutInstance,
         callback: (result: AddressCallbackResult) => void,
+    ) => void;
+    onAgeVerificationStarted?: (
+        event: AgeVerificationStarted,
+        checkout: DinteroCheckoutInstance,
+    ) => void;
+    onAgeVerificationFailed?: (
+        event: AgeVerificationFailed,
+        checkout: DinteroCheckoutInstance,
+    ) => void;
+    onAgeVerificationEnded?: (
+        event: AgeVerificationEnded,
+        checkout: DinteroCheckoutInstance,
     ) => void;
 }
 
@@ -612,6 +627,9 @@ export const embed = async (
         onActivePaymentType,
         onValidateSession,
         onAddressCallback,
+        onAgeVerificationStarted,
+        onAgeVerificationFailed,
+        onAgeVerificationEnded,
         popOut,
     } = wrapCallbacksWithDebug(internalOptions, options.debug, log);
 
@@ -722,8 +740,15 @@ export const embed = async (
         });
     };
 
+    let ageVerificationInProgress = false;
+
     const lockSession = () => {
         log("checkout.lockSession()");
+        if (ageVerificationInProgress) {
+            throw new Error(
+                "Cannot call lockSession while age verification is in progress",
+            );
+        }
         return promisifyAction(
             "checkout.lockSession()",
             () => {
@@ -745,6 +770,11 @@ export const embed = async (
      */
     const runRefreshSession = (source: string) => {
         log(`${source}()`);
+        if (ageVerificationInProgress) {
+            throw new Error(
+                "Cannot call refreshSession while age verification is in progress",
+            );
+        }
         return promisifyAction(
             `${source}()`,
             () => {
@@ -770,6 +800,11 @@ export const embed = async (
             "checkout.setActivePaymentProductType(paymentProductType)",
             paymentProductType,
         );
+        if (ageVerificationInProgress) {
+            throw new Error(
+                "Cannot call setActivePaymentProductType while age verification is in progress",
+            );
+        }
         // Send to either embed or pop out
         if (options.popOut) {
             popOutModule.postPopOutActivePaymentProductType(
@@ -932,6 +967,36 @@ export const embed = async (
         }
     };
 
+    const wrappedOnAgeVerificationStarted = (
+        event: AgeVerificationStarted,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        ageVerificationInProgress = true;
+        if (onAgeVerificationStarted) {
+            onAgeVerificationStarted(event, checkout);
+        }
+    };
+
+    const wrappedOnAgeVerificationFailed = (
+        event: AgeVerificationFailed,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        ageVerificationInProgress = false;
+        if (onAgeVerificationFailed) {
+            onAgeVerificationFailed(event, checkout);
+        }
+    };
+
+    const wrappedOnAgeVerificationEnded = (
+        event: AgeVerificationEnded,
+        checkout: DinteroCheckoutInstance,
+    ) => {
+        ageVerificationInProgress = false;
+        if (onAgeVerificationEnded) {
+            onAgeVerificationEnded(event, checkout);
+        }
+    };
+
     const wrappedOnLoadedOrUpdated = (
         event: SessionLoaded | SessionUpdated,
         checkout: DinteroCheckoutInstance,
@@ -1019,6 +1084,24 @@ export const embed = async (
         {
             handler: onSessionLockFailed as SubscriptionHandler | undefined,
             eventTypes: [CheckoutEvents.SessionLockFailed],
+        },
+        {
+            handler: wrappedOnAgeVerificationStarted as
+                | SubscriptionHandler
+                | undefined,
+            eventTypes: [CheckoutEvents.AgeVerificationStarted],
+        },
+        {
+            handler: wrappedOnAgeVerificationFailed as
+                | SubscriptionHandler
+                | undefined,
+            eventTypes: [CheckoutEvents.AgeVerificationFailed],
+        },
+        {
+            handler: wrappedOnAgeVerificationEnded as
+                | SubscriptionHandler
+                | undefined,
+            eventTypes: [CheckoutEvents.AgeVerificationEnded],
         },
         {
             handler: onActivePaymentType as SubscriptionHandler | undefined,
@@ -1114,6 +1197,9 @@ export const redirect = (options: DinteroCheckoutOptions) => {
 };
 export type {
     ActivePaymentProductType,
+    AgeVerificationEnded,
+    AgeVerificationFailed,
+    AgeVerificationStarted,
     SessionCancel,
     SessionLoaded,
     SessionLocked,
