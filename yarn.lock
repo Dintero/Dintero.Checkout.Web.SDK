@@ -1296,14 +1296,14 @@
     convert-source-map "^2.0.0"
     tinyrainbow "^3.1.0"
 
-"@wdio/config@9.31.2":
-  version "9.31.2"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-9.31.2.tgz#d09fd2e34aa3291ad1459fa7b75ac1a64dde90ae"
-  integrity sha512-k+9jLYSh/4yBjNxaURNq5S0f9HOxcaEefS9GA+TscPchLzqbgSsFyGu1DFHP4i1IdOeDqIk7Ny4e1D4yxHTUhQ==
+"@wdio/config@9.31.5":
+  version "9.31.5"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-9.31.5.tgz#f37b2f76acb905b1eb1e02fbd237855370f2ba96"
+  integrity sha512-Xdjo6+Qxg31kMflG2uBp7oCOlr0/BGxjsNJXdz9gT6J3pkNwiQf2O5wSUuJYqOYnuYLAimAklC47/0L//+3H4w==
   dependencies:
     "@wdio/logger" "9.29.1"
     "@wdio/types" "9.31.2"
-    "@wdio/utils" "9.31.2"
+    "@wdio/utils" "9.31.5"
     deepmerge-ts "^7.0.3"
     glob "^10.2.2"
     import-meta-resolve "^4.0.0"
@@ -1320,10 +1320,10 @@
     safe-regex2 "^5.0.0"
     strip-ansi "^7.1.0"
 
-"@wdio/protocols@9.31.1":
-  version "9.31.1"
-  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-9.31.1.tgz#c762d32c03e65e93480297ff1b8ad5c7716d3b5a"
-  integrity sha512-/AEGY6hmEXaggUG9XJ5by6a1BLLpwbDfc6YN2NQ/66X1EZ+nPQKuYLNM/Z0BTOVClQvp+p7Uq3tc2oaNaePSDw==
+"@wdio/protocols@9.31.5":
+  version "9.31.5"
+  resolved "https://registry.yarnpkg.com/@wdio/protocols/-/protocols-9.31.5.tgz#507925ddffbfbadb98fc592ec7c8cbd0aa5ef494"
+  integrity sha512-e4H5exl5xCcITF0y/3zd6pf9kX4TmV8/0nnWDGt4X0KbgDi/+tGqlquZ+YS4YBEPbv95yTqVhnazEsaBiH85Tw==
 
 "@wdio/repl@9.16.2":
   version "9.16.2"
@@ -1339,10 +1339,10 @@
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/utils@9.31.2":
-  version "9.31.2"
-  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-9.31.2.tgz#2e254fb44708c919b357584f2f445db99e6518f3"
-  integrity sha512-3JqQfr6yEphrlxkQO9eWvURaL2LGdoMxTChvayGOIDhF1H3d+7E7QOc2i3rnhJIHolFisGsgMuP2uefa/UZKYQ==
+"@wdio/utils@9.31.5":
+  version "9.31.5"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-9.31.5.tgz#1b1c9964e010b988ba3fc75af29158b87df42d48"
+  integrity sha512-wufYrRdz0Dr8Oa9OiaFsitQJsD8HWG5J4FQi/r3nZv/W3S+1h1lpBCAmDisH1Q6wN7Ed9v20E56ZU0UOaP5v3g==
   dependencies:
     "@puppeteer/browsers" "^2.2.0"
     "@wdio/logger" "9.29.1"
@@ -5504,36 +5504,36 @@ web-worker@^1.5.0:
   resolved "https://registry.yarnpkg.com/web-worker/-/web-worker-1.5.0.tgz#71b2b0fbcc4293e8f0aa4f6b8a3ffebff733dcc5"
   integrity sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==
 
-webdriver@9.31.2:
-  version "9.31.2"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-9.31.2.tgz#5ac0ac6171b027ba56e55fbbc32f8a7a29672453"
-  integrity sha512-ivGDN0NvuLu27hKM02QWnXqVJfxAc4HpnP4GvXrrlURX3thN2DHZFRZ22B9lbvWDsSRjBc7XryUdvfuvYNfZtA==
+webdriver@9.31.5:
+  version "9.31.5"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-9.31.5.tgz#913ed12ef54915be213a3df03a52fd6eb97b2b42"
+  integrity sha512-ppQ3sKydQ59CVDsODri/pIdVfVp5nSP78qfwbK9LrrICbLkXktCd0pK/Nbc3EclbJ2hOfhfHpU8vuodJ73e4uA==
   dependencies:
     "@types/node" "^20.1.0"
     "@types/ws" "^8.5.3"
-    "@wdio/config" "9.31.2"
+    "@wdio/config" "9.31.5"
     "@wdio/logger" "9.29.1"
-    "@wdio/protocols" "9.31.1"
+    "@wdio/protocols" "9.31.5"
     "@wdio/types" "9.31.2"
-    "@wdio/utils" "9.31.2"
+    "@wdio/utils" "9.31.5"
     deepmerge-ts "^7.0.3"
     https-proxy-agent "^7.0.6"
     undici "^6.27.0"
     ws "^8.21.0"
 
-webdriverio@9.31.2:
-  version "9.31.2"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-9.31.2.tgz#e3f0e0d7cafc8adb4a75d08ecac4cb7b06062a44"
-  integrity sha512-uVrh+ChODUwG01/Rp2nSb9tlTI46b3IFQe6P7CShMPKAJRJ6ONXn5qr2ZCp+gisp4vU3UXITcc5F9j6VDTgWpw==
+webdriverio@9.31.5:
+  version "9.31.5"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-9.31.5.tgz#bf25f7d0d65ed4a5eeeb9badd65f876a8e9e18f0"
+  integrity sha512-XfbzuhqNcpdZeX70bEEmYCvpQ9fgfXVVOkQWF+rCZBkmqW4W61Ol4bqUnKLIhXI4vysSATi2S19vxPK+WTAeWA==
   dependencies:
     "@types/node" "^20.11.30"
     "@types/sinonjs__fake-timers" "^8.1.5"
-    "@wdio/config" "9.31.2"
+    "@wdio/config" "9.31.5"
     "@wdio/logger" "9.29.1"
-    "@wdio/protocols" "9.31.1"
+    "@wdio/protocols" "9.31.5"
     "@wdio/repl" "9.16.2"
     "@wdio/types" "9.31.2"
-    "@wdio/utils" "9.31.2"
+    "@wdio/utils" "9.31.5"
     archiver "^7.0.1"
     aria-query "^5.3.0"
     cheerio "^1.0.0-rc.12"
@@ -5550,7 +5550,7 @@ webdriverio@9.31.2:
     rgb2hex "0.2.5"
     serialize-error "^12.0.0"
     urlpattern-polyfill "^10.0.0"
-    webdriver "9.31.2"
+    webdriver "9.31.5"
 
 whatwg-encoding@^3.1.1:
   version "3.1.1"
