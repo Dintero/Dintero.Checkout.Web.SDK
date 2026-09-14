@@ -742,10 +742,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.29.tgz#5a40109a1ab5f84d6fd8fc928b19f367cbe7e7b1"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
 
-"@preconstruct/cli@2.8.13":
-  version "2.8.13"
-  resolved "https://registry.yarnpkg.com/@preconstruct/cli/-/cli-2.8.13.tgz#10ff2bd6514ee7c88b3d268ae70c9c48df87bf1b"
-  integrity sha512-+1I98YKqXy3nNQQBTvwzgjFujcDndX4Q7G0QHBCCRCxGRA5LIyUvK9XN92pyWPbbmUPPg2amlTGxWThGgn1DRQ==
+"@preconstruct/cli@2.9.0":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@preconstruct/cli/-/cli-2.9.0.tgz#2892eb28ca309e177f76f4f1c2a833f0b182e424"
+  integrity sha512-5ZrgornfysCOQat0iZx6i5TZfkNAXJl/DLvUxSA5woqVhy3E0drAGhM5/RzZ9nx8luV/2aFS0IqIpuYICNAZLA==
   dependencies:
     "@babel/code-frame" "^7.5.5"
     "@babel/core" "^7.7.7"
