@@ -16,27 +16,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          cache: npm
-      - name: Install pinned Chrome (workaround for actions/runner-images#14169)
-        # see https://github.com/actions/runner-images/issues/14169
-        id: setup-chrome
+          cache: pnpm
+      - id: setup-chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: '148.0.7778.167'
           install-dependencies: true
           install-chromedriver: true
-      - name: yarn install, build, test and lint
-        env:
+      - run: make dependencies
+      - run: make lint
+      - env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
-        run: |
-          yarn install --immutable
-          yarn run lint
-          yarn run test
-          yarn run build
+        run: make test
+      - run: make build
 
       - name: Configure AWS credentials
         if: github.actor != 'dependabot[bot]'

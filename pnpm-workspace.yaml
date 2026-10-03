@@ -1,0 +1,6 @@
+allowBuilds:
+  edgedriver: false
+  geckodriver: false
+minimumReleaseAge: 10080
+overrides:
+  basic-ftp@<=6.2.0: ^6.2.1

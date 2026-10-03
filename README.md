@@ -458,8 +458,7 @@ The SDK includes a [polyfill for promises](https://github.com/getify/native-prom
 ## Building from source
 
 ```bash
-yarn install
-yarn run build
+make build
 ```
 
 The Dintero Checkout SDK is built with [tsdown](https://tsdown.dev).
