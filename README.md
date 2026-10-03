@@ -451,7 +451,7 @@ Contact us at [security@dintero.com](mailto:security@dintero.com)
 
 ## Browser support
 
-All major browsers above version `N - 1`, where `N` is the most recent version. For Internet Explorer, only version 11 is supported.
+All major browsers above version `N - 1`, where `N` is the most recent version.
 
 The SDK includes a [polyfill for promises](https://github.com/getify/native-promise-only) that is added to the global scope if promises are not supported by the browser.
 
@@ -462,7 +462,7 @@ yarn install
 yarn run build
 ```
 
-The Dintero Checkout SDK is built with [microbundle](https://github.com/developit/microbundle).
+The Dintero Checkout SDK is built with [tsdown](https://tsdown.dev).
 
 ## Creating a new release
 
