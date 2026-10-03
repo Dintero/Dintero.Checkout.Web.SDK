@@ -3,10 +3,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     test: {
+        silent: "passed-only",
         browser: {
             provider: webdriverio({
                 capabilities: {
                     browserName: "chrome",
+                    "wdio:enforceWebDriverClassic": true,
                     "goog:chromeOptions": {
                         binary: process.env.CHROME_BIN,
                         args: [

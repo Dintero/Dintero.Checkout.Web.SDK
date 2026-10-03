@@ -11,11 +11,11 @@
         "dist"
     ],
     "scripts": {
-        "build": "yarn tsc --noEmit && yarn tsdown",
+        "build": "tsc --noEmit && tsdown",
         "lint": "biome check",
         "test": "vitest --config .vitest.config.mts",
         "semantic-release": "semantic-release",
-        "prepublishOnly": "yarn run build"
+        "prepublishOnly": "pnpm run build"
     },
     "private": false,
     "repository": {
@@ -25,6 +25,7 @@
     "homepage": "https://github.com/Dintero/Dintero.Checkout.Web.SDK#readme",
     "author": "Sven Nicolai Viig <sven@dintero.com> (http://dintero.com)",
     "license": "MIT",
+    "packageManager": "pnpm@11.23.0+sha512.f00082e5b283a199b74e079da28d155c008fe232f44c8a06ea7ddfa014ecf719fc362f790ecc67b28106ddac2afb24c49a9a079159da560b2ce7d1e98efd11af",
     "bugs": {
         "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
     },
@@ -33,7 +34,7 @@
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "11.0.1",
         "@vitest/browser": "4.1.11",
-        "@vitest/browser-webdriverio": "^4.0.4",
+        "@vitest/browser-webdriverio": "4.1.11",
         "semantic-release": "25.0.9",
         "tsdown": "0.23.0",
         "typescript": "7.0.2",
