@@ -1,0 +1,15 @@
+allowBuilds:
+  edgedriver: false
+  geckodriver: false
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@wdio/config@10.0.0'
+  - '@wdio/logger@10.0.0'
+  - '@wdio/protocols@10.0.0'
+  - '@wdio/repl@10.0.0'
+  - '@wdio/types@10.0.0'
+  - '@wdio/utils@10.0.0'
+  - webdriver@10.0.0
+  - webdriverio@10.0.0
+overrides:
+  basic-ftp@<=6.2.0: ^6.2.1
