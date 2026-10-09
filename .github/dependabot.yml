@@ -14,9 +14,6 @@ updates:
       semver-minor-days: 7
       semver-patch-days: 7
     groups:
-      babel:
-        patterns:
-          - "@babel/*"
       semantic-release:
         patterns:
           - "@semantic-release/*"

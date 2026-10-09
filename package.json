@@ -10,11 +10,8 @@
     "files": [
         "dist"
     ],
-    "preconstruct": {
-        "umdName": "dintero"
-    },
     "scripts": {
-        "build": "yarn tsc --noEmit && preconstruct build",
+        "build": "yarn tsc --noEmit && yarn tsdown",
         "lint": "biome check",
         "test": "vitest --config .vitest.config.mts",
         "semantic-release": "semantic-release",
@@ -32,21 +29,76 @@
         "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
     },
     "devDependencies": {
-        "@babel/core": "7.29.7",
-        "@babel/preset-typescript": "7.29.7",
         "@biomejs/biome": "2.5.14",
-        "@preconstruct/cli": "2.9.0",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "11.0.1",
         "@vitest/browser": "5.0.3",
         "@vitest/browser-webdriverio": "5.0.0",
         "semantic-release": "25.0.9",
-        "typescript": "6.0.3",
+        "tsdown": "0.23.0",
+        "typescript": "7.0.2",
         "vite": "8.3.2",
         "vitest": "5.0.3",
         "webdriverio": "10.0.0"
     },
     "dependencies": {
         "native-promise-only": "0.8.1"
-    }
+    },
+    "tsdown": [
+        {
+            "entry": {
+                "dintero-checkout-web-sdk.cjs": "src/index.ts"
+            },
+            "format": "cjs",
+            "platform": "neutral",
+            "target": "es2020",
+            "dts": true,
+            "outputOptions": {
+                "esModule": true,
+                "strict": true
+            },
+            "suppressWarnings": [
+                "TypeScript 7.0 does not yet have a stable API"
+            ]
+        },
+        {
+            "entry": {
+                "dintero-checkout-web-sdk": "src/index.ts"
+            },
+            "format": "esm",
+            "platform": "neutral",
+            "target": "es2020",
+            "dts": false,
+            "outputOptions": {
+                "esModule": true,
+                "strict": true,
+                "entryFileNames": "[name].esm.js"
+            }
+        },
+        {
+            "entry": {
+                "dintero-checkout-web-sdk": "src/index.ts"
+            },
+            "format": "umd",
+            "platform": "browser",
+            "target": "es2020",
+            "globalName": "dintero",
+            "define": {
+                "global": "globalThis"
+            },
+            "minify": true,
+            "sourcemap": true,
+            "deps": {
+                "alwaysBundle": [
+                    "native-promise-only"
+                ],
+                "onlyBundle": false
+            },
+            "outputOptions": {
+                "esModule": true,
+                "strict": true,
+                "entryFileNames": "[name].umd.min.js"
+            }
+        }
+    ]
 }
