@@ -28,36 +28,32 @@ jobs:
         with:
           fetch-depth: 5
 
+      - uses: pnpm/action-setup@v6
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe50206 # v7.0.0
         with:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org/"
           scope: "@dintero"
 
-      - name: Install pinned Chrome (workaround for actions/runner-images#14169)
-        # see https://github.com/actions/runner-images/issues/14169
-        id: setup-chrome
+      - id: setup-chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: '148.0.7778.167'
           install-dependencies: true
           install-chromedriver: true
-      - name: Install dependencies, test and lint
-        env:
+      - run: make dependencies
+      - run: make lint
+      - env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
-        run: |
-          yarn install --immutable
-          yarn run lint
-          yarn run test
-          yarn run build
-      - name: Release
-        env:
+        run: make test
+      - run: make build
+      - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn run semantic-release
+        run: pnpm run semantic-release
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_S3_ASSETS_DEPLOY_ROLE }}
           aws-region: eu-west-1
