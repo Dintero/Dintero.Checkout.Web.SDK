@@ -30,7 +30,7 @@
         "url": "https://github.com/Dintero/Dintero.Checkout.Web.SDK/issues"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.5.14",
+        "@biomejs/biome": "2.5.15",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "11.0.1",
         "@vitest/browser": "5.0.3",
