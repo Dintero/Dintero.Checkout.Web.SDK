@@ -33,14 +33,14 @@
         "@biomejs/biome": "2.5.15",
         "@semantic-release/exec": "7.1.0",
         "@semantic-release/git": "11.0.1",
-        "@vitest/browser": "5.0.3",
+        "@vitest/browser": "5.0.4",
         "@vitest/browser-webdriverio": "5.0.0",
         "semantic-release": "25.0.9",
         "tsdown": "0.23.1",
         "typescript": "7.0.2",
         "vite": "8.3.4",
-        "vitest": "5.0.3",
-        "webdriverio": "10.0.0"
+        "vitest": "5.0.4",
+        "webdriverio": "10.0.2"
     },
     "dependencies": {
         "native-promise-only": "0.8.1"
