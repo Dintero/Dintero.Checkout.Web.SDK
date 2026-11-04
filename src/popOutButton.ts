@@ -58,7 +58,7 @@ const configureButton = (
     };
 
     // Label
-    button.innerText = label;
+    button.textContent = label;
 
     // Position
     button.style.position = "absolute";

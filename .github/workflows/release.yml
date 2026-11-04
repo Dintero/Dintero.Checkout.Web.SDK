@@ -39,7 +39,7 @@ jobs:
       - id: setup-chrome
         uses: browser-actions/setup-chrome@v2
         with:
-          chrome-version: '148.0.7778.167'
+          chrome-version: "148.0.7778.167"
           install-dependencies: true
           install-chromedriver: true
       - run: make dependencies

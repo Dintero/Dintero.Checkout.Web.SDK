@@ -1,7 +1,12 @@
 {
     "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "files": {
-        "includes": ["**", "!**/dist"]
+        "includes": [
+            "**",
+            "!**/dist",
+            "!**/pnpm-lock.yaml",
+            "!**/pnpm-workspace.yaml"
+        ]
     },
     "formatter": {
         "enabled": true,
@@ -29,6 +34,11 @@
         "formatter": {
             "indentWidth": 4,
             "trailingCommas": "none"
+        }
+    },
+    "yaml": {
+        "formatter": {
+            "indentWidth": 2
         }
     }
 }
