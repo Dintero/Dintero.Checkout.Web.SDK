@@ -183,7 +183,10 @@ const checkout = await embed({
         );
     },
     onAddressCallback: function (event: AddressCallback, checkout, callback) {
-        console.log("address callback to handle express session address updates", event.session);
+        console.log(
+            "address callback to handle express session address updates",
+            event.session,
+        );
         callback({
             success: true,
             error: undefined,
@@ -415,7 +418,7 @@ If the payment session has age verification enabled, the checkout will show a ga
 - `onAgeVerificationFailed` is called when verification could not be completed, eg. because the end user did not meet the minimum age requirement or authorization with the identity provider failed. The `error` field holds a reason, eg. `"age-requirement-not-met"`. Note that the end user cancelling out of the identity provider is not treated as a failure - the gate is simply shown again so they can retry.
 - `onAgeVerificationEnded` is called once verification has passed and the gate is lifted. The `result` field is currently always `"passed"`.
 
- While age verification is in progress, `lockSession()`, `refreshSession()`, and `setActivePaymentProductType()` throw synchronously. Avoid these calls until verification finishes, or handle the error with `try`/`catch`; promise rejection handlers do not catch it.
+While age verification is in progress, `lockSession()`, `refreshSession()`, and `setActivePaymentProductType()` throw synchronously. Avoid these calls until verification finishes, or handle the error with `try`/`catch`; promise rejection handlers do not catch it.
 
 ```js
 onAgeVerificationStarted: function (event, checkout) {

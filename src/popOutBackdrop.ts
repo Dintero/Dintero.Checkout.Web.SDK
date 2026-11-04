@@ -220,7 +220,7 @@ const createLabelDOM = (text: string) => {
     // Text about the pop out
     const p = document.createElement("p");
     p.setAttribute("id", BACKDROP_DESCRIPTION);
-    p.innerText = text;
+    p.textContent = text;
     return p;
 };
 
@@ -231,7 +231,7 @@ const createFocusButtonDOM = (text: string) => {
     const button = document.createElement("button");
     button.setAttribute("id", FOCUS_CHECKOUT_BUTTON_ID);
     button.setAttribute("type", "button");
-    button.innerText = text;
+    button.textContent = text;
     return button;
 };
 
@@ -282,11 +282,11 @@ const createBackdropView = (options: BackdropOptions) => {
 export const setBackdropLabels = (event: ShowPopOutButton) => {
     const focusButton = document.getElementById(FOCUS_CHECKOUT_BUTTON_ID);
     if (focusButton) {
-        focusButton.innerText = event.focusLabel;
+        focusButton.textContent = event.focusLabel;
     }
     const description = document.getElementById(BACKDROP_DESCRIPTION);
     if (description) {
-        description.innerText = event.descriptionLabel;
+        description.textContent = event.descriptionLabel;
     }
     const closeButton = document.getElementById(CLOSE_BACKDROP_BUTTON_ID);
     if (closeButton) {
