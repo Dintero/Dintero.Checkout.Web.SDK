@@ -13,3 +13,5 @@ minimumReleaseAgeExclude:
   - webdriverio@10.0.0
 overrides:
   basic-ftp@<=6.2.0: ^6.2.1
+  glob@>=9.0.0 <=14.0.1: ^14.0.2
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1
