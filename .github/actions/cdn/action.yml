@@ -23,7 +23,7 @@ inputs:
     required: false
 
   update-github-release:
-    description: "Whether to update the latest release with the new version"
+    description: "Whether to add the CDN script snippet to the GitHub release v<version>"
     required: false
 
 runs:
@@ -63,7 +63,7 @@ runs:
     - name: Update latest Github release with script import
       run: |
         if [ "${{ inputs.update-github-release }}" = "true" ]; then
-          update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}"
+          update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}" "v${{ env.VERSION }}"
         else
           echo "Skipping GitHub release update"
         fi

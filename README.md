@@ -460,13 +460,28 @@ The SDK includes a [polyfill for promises](https://github.com/getify/native-prom
 
 ## Building from source
 
+Requires the latest Node.js LTS (26) and [corepack](https://github.com/nodejs/corepack), which is no longer
+bundled with Node.js: `npm install --global corepack`. The Makefile enables corepack and installs the
+pinned pnpm version from `package.json`.
+
 ```bash
-make build
+make build   # type check and build to dist/
+make test    # run tests in headless Chrome (set CHROME_BIN if Chrome is not on the default path)
+make lint    # run biome checks
+make watch   # rebuild on changes
 ```
 
-The Dintero Checkout SDK is built with [tsdown](https://tsdown.dev).
+The Dintero Checkout SDK is built with [tsdown](https://tsdown.dev). Run `make help` to list all targets.
 
-## Creating a new release
+## Release
 
-1. Enforce all commits to the master branch to be formatted according to the [Angular Commit Message Format](https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-format)
-2. When merged to master, it will automatically be released with [semantic-release](https://github.com/semantic-release/semantic-release)
+Releases are explicit: bump `version` in `package.json` on your branch and include it in the PR:
+
+```bash
+make bump-version              # patch, or BUMP=minor / BUMP=major
+```
+
+When merged to master, the release workflow (`make release`) publishes the package to npm,
+creates the GitHub release/tag `v<version>` with generated release notes, uploads
+`dintero-checkout-web-sdk.umd.min.js` to the CDN and adds a "Use from CDN" snippet to the release notes.
+If the tag already exists, nothing is released.
