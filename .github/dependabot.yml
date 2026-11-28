@@ -14,10 +14,6 @@ updates:
       semver-minor-days: 7
       semver-patch-days: 7
     groups:
-      semantic-release:
-        patterns:
-          - "@semantic-release/*"
-          - "semantic-release"
       vitest-webdriverio:
         patterns:
           - "@vitest/*"

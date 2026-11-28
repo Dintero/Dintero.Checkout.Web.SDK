@@ -2,16 +2,8 @@ allowBuilds:
   edgedriver: false
   geckodriver: false
 minimumReleaseAge: 10080
-minimumReleaseAgeExclude:
-  - '@wdio/config@10.0.0'
-  - '@wdio/logger@10.0.0'
-  - '@wdio/protocols@10.0.0'
-  - '@wdio/repl@10.0.0'
-  - '@wdio/types@10.0.0'
-  - '@wdio/utils@10.0.0'
-  - webdriver@10.0.0
-  - webdriverio@10.0.0
+permissions:
+  tsdown:
+    skills: false
 overrides:
-  basic-ftp@<=6.2.0: ^6.2.1
-  glob@>=9.0.0 <=14.0.1: ^14.0.2
   minimatch@>=7.0.0 <11.0.1: ^11.0.1
