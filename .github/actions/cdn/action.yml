@@ -14,6 +14,11 @@ inputs:
     description: "S3 bucket"
     required: true
 
+  version:
+    description: "Version path to upload to. Defaults to the version in package.json"
+    required: false
+    default: ""
+
   s3-prefix:
     description: "The prefix in the bucket for where to place the files. Should contain version number"
     required: true
@@ -30,7 +35,9 @@ runs:
   using: "composite"
   steps:
     - name: Set version number
-      run: echo "VERSION=$(npm pkg get version --workspaces=false | tr -d '"')" >> $GITHUB_ENV
+      run: echo "VERSION=${INPUT_VERSION:-$(npm pkg get version --workspaces=false | tr -d '"')}" >> $GITHUB_ENV
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
       shell: bash
 
     - name: Get hash of the file
@@ -41,30 +48,26 @@ runs:
     - name: Upload to version path
       run: |
         aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }} --acl public-read
-        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}.map --acl public-read
+        aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }}.map s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}.map --acl public-read
       shell: bash
 
     - name: Upload to latest path
       run: |
         if [ "${{ inputs.set-as-latest }}" = "true" ]; then
           aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }} --acl public-read
-          aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }} s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
+          aws s3 cp ./${{ inputs.source-dir }}/${{ inputs.file }}.map s3://${{ inputs.s3-bucket }}/${{ inputs.s3-prefix }}/latest/${{ inputs.file }}.map --acl public-read
         else
           echo "Skipping upload to latest path"
         fi
       shell: bash
 
-    - name: Set GitHub Path
-      run: echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-      shell: bash
-      env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
-
-    - name: Update latest Github release with script import
+    - name: Update GitHub release with script import
       run: |
         if [ "${{ inputs.update-github-release }}" = "true" ]; then
-          update_github_release.sh "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}" "v${{ env.VERSION }}"
+          bash "$GITHUB_ACTION_PATH/update_github_release.sh" "https://assets.dintero.com/${{ inputs.s3-prefix }}/${{ env.VERSION }}/${{ inputs.file }}" "${{ env.HASH }}" "v${{ env.VERSION }}"
         else
           echo "Skipping GitHub release update"
         fi
       shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
